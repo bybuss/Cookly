@@ -1,4 +1,4 @@
-package bob.colbaskin.ufood.ui.theme
+package bob.colbaskin.ufood.common.design_system.theme
 
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
