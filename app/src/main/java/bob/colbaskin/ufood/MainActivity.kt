@@ -1,47 +1,49 @@
 package bob.colbaskin.ufood
 
+import android.content.res.Configuration
 import android.os.Bundle
+import android.view.Window
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.tooling.preview.Preview
-import bob.colbaskin.ufood.ui.theme.UfoodTheme
+import androidx.core.view.WindowCompat
+import bob.colbaskin.ufood.common.design_system.theme.CustomTheme
+import bob.colbaskin.ufood.common.design_system.theme.UfoodTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        val isDakTheme = resources.configuration.uiMode and
+                Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+        setupSystemBar(window, isDakTheme)
+
         setContent {
             UfoodTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                Box(modifier = Modifier.fillMaxSize().background(CustomTheme.colors.background)) {}
             }
         }
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    UfoodTheme {
-        Greeting("Android")
-    }
+private fun setupSystemBar(window: Window, isDarkTheme: Boolean) {
+    WindowCompat.setDecorFitsSystemWindows(window, false)
+
+    val controller =  WindowCompat.getInsetsController(window, window.decorView)
+    controller.isAppearanceLightStatusBars = !isDarkTheme
 }
