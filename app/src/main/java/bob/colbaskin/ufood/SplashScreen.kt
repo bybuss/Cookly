@@ -49,7 +49,6 @@ import kotlinx.coroutines.launch
 import bob.colbaskin.ufood.common.design_system.theme.CustomTheme
 import bob.colbaskin.ufood.utils.calculateImageScaleToFullscreen
 
-
 @Composable
 fun SplashScreen() {
 
@@ -86,9 +85,15 @@ fun SplashScreen() {
     }
     val burgerSize = remember { Animatable(1f) }
 
-    val avocadoOffset = remember { Animatable(Offset(0f, 0f), Offset.VectorConverter) }
-    val smallCarrotOffset = remember { Animatable(Offset(0f, 0f), Offset.VectorConverter) }
-    val blurredCarrotOffset = remember { Animatable(Offset(0f, 0f), Offset.VectorConverter) }
+    val avocadoOffset = remember {
+        Animatable(Offset(0f, 0f), Offset.VectorConverter)
+    }
+    val smallCarrotOffset = remember {
+        Animatable(Offset(0f, 0f), Offset.VectorConverter)
+    }
+    val blurredCarrotOffset = remember {
+        Animatable(Offset(0f, 0f), Offset.VectorConverter)
+    }
 
     val imageScale = calculateImageScaleToFullscreen(
         R.drawable.splash_main_logo,
@@ -106,7 +111,9 @@ fun SplashScreen() {
     LaunchedEffect(true) {
         launch {
             avocadoOffset.animateTo(
-                targetValue = Offset((5..9).random().toFloat(), (3..7).random().toFloat()),
+                targetValue = Offset(
+                    x = (5..9).random().toFloat(),
+                    y = (3..7).random().toFloat()),
                 animationSpec = infiniteRepeatable(
                     animation = tween(3000, easing = LinearEasing),
                     repeatMode = RepeatMode.Reverse
@@ -115,7 +122,10 @@ fun SplashScreen() {
         }
         launch {
             smallCarrotOffset.animateTo(
-                targetValue = Offset((-13..-8).random().toFloat(), (9..14).random().toFloat()),
+                targetValue = Offset(
+                    x = (-13..-8).random().toFloat(),
+                    y = (9..14).random().toFloat()
+                ),
                 animationSpec = infiniteRepeatable(
                     animation = tween(3000, easing = LinearEasing, delayMillis = 75),
                     repeatMode = RepeatMode.Reverse
@@ -124,7 +134,10 @@ fun SplashScreen() {
         }
         launch {
             blurredCarrotOffset.animateTo(
-                targetValue = Offset((8..12).random().toFloat(), (-6..-2).random().toFloat()),
+                targetValue = Offset(
+                    x = (8..12).random().toFloat(),
+                    y = (-6..-2).random().toFloat()
+                ),
                 animationSpec = infiniteRepeatable(
                     animation = tween(3000, easing = LinearEasing, delayMillis = 250),
                     repeatMode = RepeatMode.Reverse
