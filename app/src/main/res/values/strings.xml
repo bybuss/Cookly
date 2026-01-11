@@ -4,4 +4,5 @@
     <string name="breakfast_card_text">Завтрак</string>
     <string name="lunch_card_text">Обед</string>
     <string name="dinner_card_text">Ужин</string>
+    <string name="dish_of_the_day">Блюдо дня</string>
 </resources>

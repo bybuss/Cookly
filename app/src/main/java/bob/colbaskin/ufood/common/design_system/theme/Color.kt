@@ -10,6 +10,7 @@ data class AppColors(
     val buyButton: Color,
     val sendButton: Color,
     val cardSurface: Color,
+    val dishOfDayCardBackground: Color,
     val errorContainer: Color,
     val onErrorContainer: Color,
     val text: Color,
@@ -24,6 +25,7 @@ val darkColorsScheme = AppColors(
     buyButton = Color(0xFFB1FF9C),
     sendButton = Color(0xFFFFFFFF),
     cardSurface = Color(0xFF292C34),
+    dishOfDayCardBackground = Color(0xFFB9480D),
     errorContainer = Color.Red,
     onErrorContainer = Color.White,
     text = Color(0xFFFFFFFF)
@@ -36,6 +38,7 @@ val lightColorsScheme = AppColors(
     buyButton = Color(0xFFB1FF9C),
     sendButton = Color(0xFFFFFFFF),
     cardSurface = Color(0xFF292C34),
+    dishOfDayCardBackground = Color(0xFFB9480D),
     errorContainer = Color.Red,
     onErrorContainer = Color.White,
     text = Color(0xFF000000)

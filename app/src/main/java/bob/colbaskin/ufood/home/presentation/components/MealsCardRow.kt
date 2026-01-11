@@ -27,7 +27,7 @@ fun MealsCardRow(modifier: Modifier = Modifier, mealsList: List<MealType>) {
 
 @Preview
 @Composable
-fun MealsCardRowPreview() {
+private fun MealsCardRowPreview() {
     val mealsList = listOf(
         MealType.BREAKFAST,
         MealType.LUNCH,
