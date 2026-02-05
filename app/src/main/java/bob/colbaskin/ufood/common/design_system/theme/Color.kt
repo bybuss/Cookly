@@ -14,6 +14,9 @@ data class AppColors(
     val errorContainer: Color,
     val onErrorContainer: Color,
     val text: Color,
+    val filledStatsSurface: Color,
+    val outlinedStatsSurface: Color,
+    val flameIconColor: Color
 )
 
 val localColors = staticCompositionLocalOf { darkColorsScheme }
@@ -28,7 +31,10 @@ val darkColorsScheme = AppColors(
     dishOfDayCardBackground = Color(0xFFB9480D),
     errorContainer = Color.Red,
     onErrorContainer = Color.White,
-    text = Color(0xFFFFFFFF)
+    text = Color(0xFFFFFFFF),
+    filledStatsSurface = Color(0xFFFFFFFF),
+    outlinedStatsSurface = Color(0xFFF3F3F3),
+    flameIconColor = Color(0xFFFF0000)
 )
 
 val lightColorsScheme = AppColors(
@@ -41,5 +47,8 @@ val lightColorsScheme = AppColors(
     dishOfDayCardBackground = Color(0xFFB9480D),
     errorContainer = Color.Red,
     onErrorContainer = Color.White,
-    text = Color(0xFF000000)
+    text = Color(0xFF000000),
+    filledStatsSurface = Color(0xFFFFFFFF),
+    outlinedStatsSurface = Color(0xFFF3F3F3),
+    flameIconColor = Color(0xFFFF0000)
 )

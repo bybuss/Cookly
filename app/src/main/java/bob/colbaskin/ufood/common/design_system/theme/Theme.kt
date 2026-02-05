@@ -35,5 +35,6 @@ private fun createMultiTypography() = MultiTypography(
     gilroy = createMaterial3Typography(GilroyFontFamily),
     inter = createMaterial3Typography(InterFontFamily),
     adigianaUltra = createMaterial3Typography(AdigianaUltraFontFamily),
-    airfool = createMaterial3Typography(AirfoolFontFamily)
+    airfool = createMaterial3Typography(AirfoolFontFamily),
+    helvetica = createMaterial3Typography(HelveticaFontFamily)
 )

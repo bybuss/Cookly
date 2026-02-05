@@ -34,7 +34,8 @@ data class MultiTypography(
     val gilroy: AppTypography,
     val inter: AppTypography,
     val adigianaUltra: AppTypography,
-    val airfool: AppTypography
+    val airfool: AppTypography,
+    val helvetica: AppTypography
 )
 
 data class TypographyWeights(
@@ -190,6 +191,9 @@ val AdigianaUltraFontFamily = FontFamily(
 
 val AirfoolFontFamily = FontFamily(
     Font(R.font.airfool_regular, FontWeight.Normal),
+)
+val HelveticaFontFamily = FontFamily(
+    Font(R.font.helvetica_regular, FontWeight.Normal)
 )
 
 val localMultiTypography = staticCompositionLocalOf<MultiTypography> {

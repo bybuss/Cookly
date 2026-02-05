@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">UFOOD</string>
+    <string name="app_name">Coockly</string>
 
     <string name="breakfast_card_text">Завтрак</string>
     <string name="lunch_card_text">Обед</string>
