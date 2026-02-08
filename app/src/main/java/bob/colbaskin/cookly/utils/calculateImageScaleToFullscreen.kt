@@ -1,4 +1,4 @@
-package bob.colbaskin.ufood.utils
+package bob.colbaskin.cookly.utils
 
 import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Composable

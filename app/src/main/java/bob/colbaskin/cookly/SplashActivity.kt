@@ -1,10 +1,10 @@
-package bob.colbaskin.ufood
+package bob.colbaskin.cookly
 
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import bob.colbaskin.ufood.common.design_system.theme.UfoodTheme
+import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
 
 @SuppressLint("CustomSplashScreen")
 class SplashActivity: ComponentActivity() {

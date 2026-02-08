@@ -1,4 +1,4 @@
-package bob.colbaskin.ufood
+package bob.colbaskin.cookly
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

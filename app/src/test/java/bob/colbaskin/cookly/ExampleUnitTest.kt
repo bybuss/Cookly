@@ -1,4 +1,4 @@
-package bob.colbaskin.ufood
+package bob.colbaskin.cookly
 
 import org.junit.Test
 

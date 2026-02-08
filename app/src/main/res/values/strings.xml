@@ -3,6 +3,8 @@
 
     <string name="breakfast_card_text">Завтрак</string>
     <string name="lunch_card_text">Обед</string>
+    <string name="afternoon_snack_card_text">Полдник</string>
     <string name="dinner_card_text">Ужин</string>
+    <string name="snack_card_text">Перекус</string>
     <string name="dish_of_the_day">Блюдо дня</string>
 </resources>

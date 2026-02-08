@@ -1,4 +1,4 @@
-package bob.colbaskin.ufood.home.presentation.components
+package bob.colbaskin.cookly.home.presentation.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,7 +8,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import bob.colbaskin.ufood.common.design_system.theme.UfoodTheme
+import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
 
 @Composable
 fun MealsCardRow(modifier: Modifier = Modifier, mealsList: List<MealType>) {

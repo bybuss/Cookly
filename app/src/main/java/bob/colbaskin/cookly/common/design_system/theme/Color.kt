@@ -1,4 +1,4 @@
-package bob.colbaskin.ufood.common.design_system.theme
+package bob.colbaskin.cookly.common.design_system.theme
 
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
@@ -16,7 +16,8 @@ data class AppColors(
     val text: Color,
     val filledStatsSurface: Color,
     val outlinedStatsSurface: Color,
-    val flameIconColor: Color
+    val flameIconColor: Color,
+    val mealCardBorder: Color
 )
 
 val localColors = staticCompositionLocalOf { darkColorsScheme }
@@ -34,7 +35,8 @@ val darkColorsScheme = AppColors(
     text = Color(0xFFFFFFFF),
     filledStatsSurface = Color(0xFFFFFFFF),
     outlinedStatsSurface = Color(0xFFF3F3F3),
-    flameIconColor = Color(0xFFFF0000)
+    flameIconColor = Color(0xFFFF0000),
+    mealCardBorder = Color(0xFF818181)
 )
 
 val lightColorsScheme = AppColors(
@@ -50,5 +52,6 @@ val lightColorsScheme = AppColors(
     text = Color(0xFF000000),
     filledStatsSurface = Color(0xFFFFFFFF),
     outlinedStatsSurface = Color(0xFFF3F3F3),
-    flameIconColor = Color(0xFFFF0000)
+    flameIconColor = Color(0xFFFF0000),
+    mealCardBorder = Color(0xFF818181)
 )

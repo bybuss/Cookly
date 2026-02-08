@@ -1,4 +1,4 @@
-package bob.colbaskin.ufood
+package bob.colbaskin.cookly
 
 import android.app.Activity
 import android.content.Intent
@@ -46,8 +46,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import bob.colbaskin.ufood.common.design_system.theme.CustomTheme
-import bob.colbaskin.ufood.utils.calculateImageScaleToFullscreen
+import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
+import bob.colbaskin.cookly.utils.calculateImageScaleToFullscreen
 
 @Composable
 fun SplashScreen() {

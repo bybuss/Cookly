@@ -1,4 +1,4 @@
-package bob.colbaskin.ufood.common.design_system.theme
+package bob.colbaskin.cookly.common.design_system.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable

@@ -1,4 +1,4 @@
-package bob.colbaskin.ufood.home.presentation.components.recommended_dish
+package bob.colbaskin.cookly.home.presentation.components.recommended_dish
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
@@ -19,7 +19,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import bob.colbaskin.ufood.common.design_system.theme.CustomTheme
+import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 
 @Composable
 fun DishDataIcon(

@@ -1,4 +1,4 @@
-package bob.colbaskin.ufood.home.presentation.components.recommended_dish
+package bob.colbaskin.cookly.home.presentation.components.recommended_dish
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
@@ -22,9 +22,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import bob.colbaskin.ufood.R
-import bob.colbaskin.ufood.common.design_system.theme.CustomTheme
-import bob.colbaskin.ufood.common.design_system.theme.UfoodTheme
+import bob.colbaskin.cookly.R
+import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
+import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
 
 @Composable
 fun RecommendedDish(

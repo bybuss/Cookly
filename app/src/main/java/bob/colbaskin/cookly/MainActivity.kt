@@ -1,4 +1,4 @@
-package bob.colbaskin.ufood
+package bob.colbaskin.cookly
 
 import android.content.res.Configuration
 import android.os.Bundle
@@ -12,8 +12,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
-import bob.colbaskin.ufood.common.design_system.theme.CustomTheme
-import bob.colbaskin.ufood.common.design_system.theme.UfoodTheme
+import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
+import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

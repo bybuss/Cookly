@@ -1,4 +1,4 @@
-package bob.colbaskin.ufood.home.presentation.components
+package bob.colbaskin.cookly.home.presentation.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -15,9 +15,9 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import bob.colbaskin.ufood.R
-import bob.colbaskin.ufood.common.design_system.theme.CustomTheme
-import bob.colbaskin.ufood.common.design_system.theme.UfoodTheme
+import bob.colbaskin.cookly.R
+import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
+import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
 
 @Composable
 fun TopBarWithSearch(modifier: Modifier = Modifier) {
