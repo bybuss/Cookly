@@ -77,4 +77,5 @@ dependencies {
     implementation(libs.androidx.datastore)
     implementation(libs.protobuf.kotlin.lite)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.protobuf.protoc)
 }
