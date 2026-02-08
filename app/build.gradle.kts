@@ -2,14 +2,16 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+
+    alias(libs.plugins.protobuf)
 }
 
 android {
-    namespace = "bob.colbaskin.ufood"
+    namespace = "bob.colbaskin.cookly"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "bob.colbaskin.ufood"
+        applicationId = "bob.colbaskin.cookly"
         minSdk = 26
         targetSdk = 36
         versionCode = 1
@@ -39,6 +41,20 @@ android {
     }
 }
 
+protobuf {
+    protoc {
+        artifact = libs.protobuf.protoc.get().toString()
+    }
+    generateProtoTasks {
+        all().forEach { task ->
+            task.builtins {
+                val java by registering { option("lite") }
+                val kotlin by registering { option("lite") }
+            }
+        }
+    }
+}
+
 dependencies {
 
     implementation(libs.androidx.core.ktx)
@@ -56,4 +72,9 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    // Datastore
+    implementation(libs.androidx.datastore)
+    implementation(libs.protobuf.kotlin.lite)
+    implementation(libs.androidx.datastore.preferences)
 }
