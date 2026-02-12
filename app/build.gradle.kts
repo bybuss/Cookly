@@ -4,6 +4,10 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 
     alias(libs.plugins.protobuf)
+
+    alias(libs.plugins.ksp)
+
+    alias(libs.plugins.hilt)
 }
 
 android {
@@ -78,4 +82,14 @@ dependencies {
     implementation(libs.protobuf.kotlin.lite)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.protobuf.protoc)
-}
+
+    // Hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
+    ksp(libs.androidx.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.hilt.work)
+
+    // WorkRuntime
+    implementation(libs.androidx.work.runtime)
+}   
