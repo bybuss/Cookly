@@ -17,7 +17,8 @@ data class AppColors(
     val filledStatsSurface: Color,
     val outlinedStatsSurface: Color,
     val flameIconColor: Color,
-    val mealCardBorder: Color
+    val mealCardBorder: Color,
+    val bottomBarIcon: Color
 )
 
 val localColors = staticCompositionLocalOf { darkColorsScheme }
@@ -36,7 +37,8 @@ val darkColorsScheme = AppColors(
     filledStatsSurface = Color(0xFFFFFFFF),
     outlinedStatsSurface = Color(0xFFF3F3F3),
     flameIconColor = Color(0xFFFF0000),
-    mealCardBorder = Color(0xFF818181)
+    mealCardBorder = Color(0xFF818181),
+    bottomBarIcon = Color(0xFF9DB2CE)
 )
 
 val lightColorsScheme = AppColors(
@@ -53,5 +55,6 @@ val lightColorsScheme = AppColors(
     filledStatsSurface = Color(0xFFFFFFFF),
     outlinedStatsSurface = Color(0xFFF3F3F3),
     flameIconColor = Color(0xFFFF0000),
-    mealCardBorder = Color(0xFF818181)
+    mealCardBorder = Color(0xFF818181),
+    bottomBarIcon = Color(0xFF9DB2CE)
 )
