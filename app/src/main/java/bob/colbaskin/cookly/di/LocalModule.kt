@@ -2,7 +2,6 @@ package bob.colbaskin.cookly.di
 
 import android.content.Context
 import bob.colbaskin.cookly.common.user_prefs.data.dataStore.UserDataStore
-import bob.colbaskin.cookly.common.user_prefs.data.dataStore.UserPreferencesSerializer
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
