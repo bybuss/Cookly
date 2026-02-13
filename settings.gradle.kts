@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "UFOOD"
+rootProject.name = "Cookly"
 include(":app")
  
