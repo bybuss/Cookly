@@ -1,9 +1,12 @@
 package bob.colbaskin.cookly.di
 
+import android.content.Context
+import bob.colbaskin.cookly.common.user_prefs.data.dataStore.UserDataStore
 import bob.colbaskin.cookly.common.user_prefs.data.dataStore.UserPreferencesSerializer
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -13,7 +16,7 @@ object LocalModule {
 
     @Provides
     @Singleton
-    fun provideUserPreferencesSerializer(): UserPreferencesSerializer {
-        return UserPreferencesSerializer
+    fun provideUserDataStore(@ApplicationContext context: Context): UserDataStore {
+        return UserDataStore(context = context)
     }
 }
