@@ -4,7 +4,6 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import bob.colbaskin.cookly.R
 
-
 enum class Destinations (
     @param:DrawableRes val icon: Int,
     @param:StringRes val label: Int,
