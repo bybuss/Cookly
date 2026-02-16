@@ -6,8 +6,8 @@ import bob.colbaskin.cookly.R
 
 
 enum class Destinations (
-    @DrawableRes val icon: Int,
-    @StringRes val label: Int,
+    @param:DrawableRes val icon: Int,
+    @param:StringRes val label: Int,
     val screen: Screens
 ) {
     HOME(
