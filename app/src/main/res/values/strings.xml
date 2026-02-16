@@ -7,4 +7,10 @@
     <string name="dinner_card_text">Ужин</string>
     <string name="snack_card_text">Перекус</string>
     <string name="dish_of_the_day">Блюдо дня</string>
+
+    <string name="home_nav_label">Главная</string>
+    <string name="cart_nav_label">Корзина</string>
+    <string name="chat_nav_label">Чат</string>
+    <string name="favourites_nav_label">Любимые</string>
+    <string name="profile_nav_label">Профиль</string>
 </resources>
