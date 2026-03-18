@@ -2,7 +2,14 @@ package bob.colbaskin.cookly.navigation
 
 import kotlinx.serialization.Serializable
 
-interface Screens {
+sealed interface Screens {
+
+    @Serializable
+    data object WebViewAuth: Screens
+
+    @Serializable
+    data object Preferences
+
     @Serializable
     data object Home: Screens
 
@@ -17,4 +24,14 @@ interface Screens {
 
     @Serializable
     data object Profile: Screens
+
+    @Serializable
+    data object Agreement: Screens
+
+    @Serializable
+    data object Policy: Screens
+
+    @Serializable
+    data object TermsOfUse: Screens
+
 }

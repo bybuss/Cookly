@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 
+    alias(libs.plugins.kotlin.serialization)
+
     alias(libs.plugins.protobuf)
 
     alias(libs.plugins.ksp)
@@ -96,4 +98,10 @@ dependencies {
 
     // WorkRuntime
     implementation(libs.androidx.work.runtime)
+
+    // Navigation
+    implementation(libs.androidx.navigation.compose)
+
+    // Serialization
+    implementation(libs.kotlinx.serialization.json)
 }   
