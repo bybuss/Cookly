@@ -10,42 +10,28 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import bob.colbaskin.cookly.common.user_prefs.data.models.AgreementConfig
-import bob.colbaskin.cookly.common.user_prefs.data.models.AuthConfig
-import bob.colbaskin.cookly.common.user_prefs.data.models.OnboardingConfig
+import bob.colbaskin.cookly.agreement.presentation.AgreementScreenRoot
+import bob.colbaskin.cookly.agreement.presentation.policy.PolicyScreenRoot
+import bob.colbaskin.cookly.agreement.presentation.terms_of_use.TermsOfUseScreenRoot
 import bob.colbaskin.cookly.navigation.Screens
 
 fun NavGraphBuilder.agreementGraph(
-    navController: NavHostController,
-    agreementStatus: AgreementConfig
+    navController: NavHostController
 ) {
     navigation<Graphs.Agreement> (
-        startDestination = getAgreementStartDestination(status = agreementStatus)
+        startDestination = Screens.Agreement
     ) {
-        composable<Screens.Agreement> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = "Agreement Screen")
-            }
-        }
-        composable<Screens.Policy> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = "Policy Screen")
-            }
-        }
-        composable<Screens.TermsOfUse> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = "TermsOfUse Screen")
-            }
-        }
+        composable<Screens.Agreement> { AgreementScreenRoot(navController = navController) }
+        composable<Screens.Policy> { PolicyScreenRoot(navController = navController) }
+        composable<Screens.TermsOfUse> { TermsOfUseScreenRoot(navController = navController) }
     }
 }
 
 fun NavGraphBuilder.authGraph(
     navController: NavHostController,
-    authStatus: AuthConfig
 ) {
     navigation<Graphs.Auth>(
-        startDestination = getAuthStartDestination(status = authStatus)
+        startDestination = Screens.WebViewAuth
     ) {
         composable<Screens.WebViewAuth> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -56,11 +42,10 @@ fun NavGraphBuilder.authGraph(
 }
 
 fun NavGraphBuilder.onboardingGraph(
-    navController: NavHostController,
-    onboardingConfig: OnboardingConfig
+    navController: NavHostController
 ) {
     navigation<Graphs.Onboarding> (
-        startDestination = getOnboardingStartDestination(status = onboardingConfig)
+        startDestination = Screens.Preferences
     ) {
         composable<Screens.Preferences> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -121,19 +106,4 @@ fun NavGraphBuilder.detailedGraph(
             }
         }
     }
-}
-
-private fun getAgreementStartDestination(status: AgreementConfig) = when (status) {
-    AgreementConfig.NOT_ACCEPTED -> Screens.Agreement
-    AgreementConfig.ACCEPTED -> Screens.WebViewAuth
-}
-
-private fun getAuthStartDestination(status: AuthConfig) = when (status) {
-    AuthConfig.AUTHENTICATED -> Screens.Preferences
-    AuthConfig.NOT_AUTHENTICATED -> Screens.WebViewAuth
-}
-
-private fun getOnboardingStartDestination(status: OnboardingConfig) = when (status) {
-    OnboardingConfig.COMPLETED -> Screens.Home
-    else -> Screens.Preferences
 }

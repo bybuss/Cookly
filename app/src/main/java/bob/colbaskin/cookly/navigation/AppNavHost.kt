@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
-
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import bob.colbaskin.cookly.common.UiState
@@ -49,18 +48,9 @@ fun AppNavHost(uiState: UiState.Success<UserPreferences>) {
             navController = navController,
             modifier = Modifier.padding(innerPadding),
         ) {
-            agreementGraph(
-                navController = navController,
-                agreementStatus = uiState.data.agreementStatus
-            )
-            authGraph(
-                navController = navController,
-                authStatus = uiState.data.authStatus
-            )
-            onboardingGraph(
-                navController = navController,
-                onboardingConfig = uiState.data.onboardingStatus
-            )
+            agreementGraph(navController = navController)
+            authGraph(navController = navController)
+            onboardingGraph(navController = navController)
             mainGraph(navController = navController)
             detailedGraph(navController = navController)
         }
