@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -98,6 +99,25 @@ fun NavGraphBuilder.mainGraph(
         composable<Screens.Profile> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(text = "Profile Screen")
+            }
+        }
+    }
+}
+
+fun NavGraphBuilder.detailedGraph(
+    navController: NavController
+) {
+    navigation<Graphs.Detailed>(
+        startDestination = Screens.CategoryDetails(-1)
+    ) {
+        composable<Screens.CategoryDetails> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(text = "CategoryDetails Screen, id=$id")
+            }
+        }
+        composable<Screens.DishCategory> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(text = "DishCategory Screen, id=$id")
             }
         }
     }

@@ -19,6 +19,7 @@ import bob.colbaskin.cookly.navigation.bottom_bar.BottomNavBar
 import bob.colbaskin.cookly.navigation.graphs.Graphs
 import bob.colbaskin.cookly.navigation.graphs.agreementGraph
 import bob.colbaskin.cookly.navigation.graphs.authGraph
+import bob.colbaskin.cookly.navigation.graphs.detailedGraph
 import bob.colbaskin.cookly.navigation.graphs.mainGraph
 import bob.colbaskin.cookly.navigation.graphs.onboardingGraph
 
@@ -27,13 +28,9 @@ fun AppNavHost(uiState: UiState.Success<UserPreferences>) {
 
     val navController = rememberNavController()
     val currentBackStack by navController.currentBackStackEntryAsState()
-    val currentDestination = currentBackStack?.destination?.route
-    val isBottomBarVisible = Destinations.entries.any { destination ->
-        val screen = destination.screen
-        val screenClassName = screen::class.simpleName
-        val currentScreenName = currentDestination?.substringAfterLast(".") ?: ""
-        currentScreenName == screenClassName
-    }
+    val currentDestination = currentBackStack?.destination
+    val currentGraph = currentDestination?.parent?.route
+    val isBottomBarVisible = currentGraph == Graphs.Main::class.qualifiedName
 
     Scaffold(
         bottomBar = {
@@ -65,7 +62,7 @@ fun AppNavHost(uiState: UiState.Success<UserPreferences>) {
                 onboardingConfig = uiState.data.onboardingStatus
             )
             mainGraph(navController = navController)
-            //detailedGraph(navController = navController) TODO: удалить, как будет готов детальный граф
+            detailedGraph(navController = navController)
         }
     }
 }
