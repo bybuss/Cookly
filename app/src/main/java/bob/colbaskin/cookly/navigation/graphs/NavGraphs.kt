@@ -14,6 +14,7 @@ import bob.colbaskin.cookly.agreement.presentation.AgreementScreenRoot
 import bob.colbaskin.cookly.agreement.presentation.policy.PolicyScreenRoot
 import bob.colbaskin.cookly.agreement.presentation.terms_of_use.TermsOfUseScreenRoot
 import bob.colbaskin.cookly.navigation.Screens
+import bob.colbaskin.cookly.onboarding_preferences.presentation.OnboardingScreenRoot
 
 fun NavGraphBuilder.agreementGraph(
     navController: NavHostController
@@ -48,9 +49,7 @@ fun NavGraphBuilder.onboardingGraph(
         startDestination = Screens.Preferences
     ) {
         composable<Screens.Preferences> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = "Preferences Screen")
-            }
+            OnboardingScreenRoot(navController = navController)
         }
     }
 }

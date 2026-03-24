@@ -19,7 +19,10 @@ data class AppColors(
     val mealCardBorder: Color,
     val bottomBarIcon: Color,
     val onErrorContainer: Color,
-    val errorContainer: Color
+    val errorContainer: Color,
+    val secondAccentColor: Color,
+    val selectedPreferences: Color,
+    val secondaryText: Color
 )
 
 val localColors = staticCompositionLocalOf { darkColorsScheme }
@@ -40,7 +43,10 @@ val darkColorsScheme = AppColors(
     mealCardBorder = Color(0xFF818181),
     bottomBarIcon = Color(0xFF9DB2CE),
     onErrorContainer = Color.White,
-    errorContainer = Color.Red
+    errorContainer = Color.Red,
+    secondAccentColor = Color(0xFF6F9448),
+    selectedPreferences = Color(0xFFC7E5A6),
+    secondaryText = Color(0xFFB9B9B9),
 )
 
 val lightColorsScheme = AppColors(
@@ -59,5 +65,8 @@ val lightColorsScheme = AppColors(
     mealCardBorder = Color(0xFF818181),
     bottomBarIcon = Color(0xFF9DB2CE),
     onErrorContainer = Color.White,
-    errorContainer = Color.Red
+    errorContainer = Color.Red,
+    secondAccentColor = Color(0xFF6F9448),
+    selectedPreferences = Color(0xFFC7E5A6),
+    secondaryText = Color(0xFFB9B9B9),
 )
