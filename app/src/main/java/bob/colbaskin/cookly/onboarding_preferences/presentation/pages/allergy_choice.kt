@@ -53,7 +53,7 @@ fun AllergyChoicePage(
 }
 
 @Composable
-fun AllergyChip(
+private fun AllergyChip(
     allergy: AllergyOption,
     isSelected: Boolean,
     onClick: () -> Unit
