@@ -1,21 +1,21 @@
 package bob.colbaskin.cookly.di
 
-import android.content.Context
+import bob.colbaskin.cookly.common.user_prefs.data.UserPreferencesRepositoryImpl
 import bob.colbaskin.cookly.common.user_prefs.data.dataStore.UserDataStore
+import bob.colbaskin.cookly.common.user_prefs.domain.UserPreferencesRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object LocalModule {
+object RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideUserDataStore(@ApplicationContext context: Context): UserDataStore {
-        return UserDataStore(context = context)
+    fun provideUserPreferencesRepository(dataStore: UserDataStore): UserPreferencesRepository {
+        return UserPreferencesRepositoryImpl(dataStore)
     }
 }

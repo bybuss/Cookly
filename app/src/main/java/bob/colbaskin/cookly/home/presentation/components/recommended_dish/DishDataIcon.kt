@@ -30,7 +30,7 @@ fun DishDataIcon(
     @DrawableRes dishDataIcon: Int
 ) {
     val iConColor: Color =
-        if (isFlameIconRed) CustomTheme.colors.flameIconColor
+        if (isFlameIconRed) CustomTheme.colors.flameColor
         else Color.Black
 
     Row(
