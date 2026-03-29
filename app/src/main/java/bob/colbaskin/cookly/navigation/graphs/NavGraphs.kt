@@ -13,6 +13,7 @@ import androidx.navigation.navigation
 import bob.colbaskin.cookly.agreement.presentation.AgreementScreenRoot
 import bob.colbaskin.cookly.agreement.presentation.policy.PolicyScreenRoot
 import bob.colbaskin.cookly.agreement.presentation.terms_of_use.TermsOfUseScreenRoot
+import bob.colbaskin.cookly.auth.presentation.AuthScreenRoot
 import bob.colbaskin.cookly.navigation.Screens
 import bob.colbaskin.cookly.onboarding_preferences.presentation.OnboardingScreenRoot
 
@@ -34,11 +35,7 @@ fun NavGraphBuilder.authGraph(
     navigation<Graphs.Auth>(
         startDestination = Screens.WebViewAuth
     ) {
-        composable<Screens.WebViewAuth> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = "WebViewAuth Screen")
-            }
-        }
+        composable<Screens.WebViewAuth> { AuthScreenRoot(navController = navController) }
     }
 }
 
