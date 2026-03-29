@@ -10,6 +10,8 @@ plugins {
     alias(libs.plugins.ksp)
 
     alias(libs.plugins.hilt)
+
+    alias(libs.plugins.secretsPlugin)
 }
 
 android {
@@ -48,6 +50,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -83,6 +86,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    // Compose icons
+    implementation(libs.composeIcons.tablerIcons)
+
     // Datastore
     implementation(libs.androidx.datastore)
     implementation(libs.protobuf.kotlin.lite)
@@ -104,4 +110,11 @@ dependencies {
 
     // Serialization
     implementation(libs.kotlinx.serialization.json)
+
+    // Network (Retrofit)
+    implementation(libs.retrofit)
+    implementation(libs.okhttp)
+    implementation(libs.retrofit2.kotlinx.serialization.converter)
+    implementation(libs.logging.interceptor)
+    implementation(libs.persistentcookiejar)
 }   
