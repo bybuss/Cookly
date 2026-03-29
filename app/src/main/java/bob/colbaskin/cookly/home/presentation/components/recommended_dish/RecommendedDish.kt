@@ -9,9 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,8 +23,6 @@ import androidx.compose.ui.unit.dp
 import bob.colbaskin.cookly.R
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
-import compose.icons.TablerIcons
-import compose.icons.tablericons.ArrowDownRight
 
 @Composable
 fun RecommendedDish(
@@ -49,14 +45,6 @@ fun RecommendedDish(
                 color = CustomTheme.colors.text,
                 style = CustomTheme.typography.madeInfinity.headlineSmall,
                 textAlign = TextAlign.Start,
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Icon(
-                imageVector = TablerIcons.ArrowDownRight,
-                contentDescription = null,
-                modifier = Modifier
-                    .size(24.dp)
-                    .padding(bottom = 4.dp)
             )
             if (aiAvatar != null) {
                 Spacer(modifier = Modifier.weight(1f))
