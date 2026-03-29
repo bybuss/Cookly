@@ -25,14 +25,7 @@ import androidx.compose.ui.unit.dp
 import bob.colbaskin.cookly.R
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
-
-enum class MealType {
-    BREAKFAST,
-    LUNCH,
-    AFTERNOON_SNACK,
-    DINNER,
-    SNACK
-}
+import bob.colbaskin.cookly.home.domain.models.MealType
 
 @Composable
 fun MealsCard(
