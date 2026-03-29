@@ -25,6 +25,8 @@ import androidx.compose.ui.unit.dp
 import bob.colbaskin.cookly.R
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
+import compose.icons.TablerIcons
+import compose.icons.tablericons.ArrowDownRight
 
 @Composable
 fun RecommendedDish(
@@ -50,7 +52,7 @@ fun RecommendedDish(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Icon(
-                painter = painterResource(R.drawable.arrow_down_right),
+                imageVector = TablerIcons.ArrowDownRight,
                 contentDescription = null,
                 modifier = Modifier
                     .size(24.dp)
