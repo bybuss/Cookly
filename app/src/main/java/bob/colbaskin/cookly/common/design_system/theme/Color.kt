@@ -25,6 +25,7 @@ data class AppColors(
     val secondaryText: Color,
     val quickCategoryCardText: Color,
     val quickCategoryCardBackground: Color,
+    val dishCardBackground: Color,
 )
 
 val localColors = staticCompositionLocalOf { darkColorsScheme }
@@ -51,6 +52,7 @@ val darkColorsScheme = AppColors(
     secondaryText = Color(0xFFB9B9B9),
     quickCategoryCardText = Color(0xFFFFFFFF),
     quickCategoryCardBackground = Color(0xFF000000),
+    dishCardBackground = Color(0xFFFBFBFB),
 )
 
 val lightColorsScheme = AppColors(
@@ -75,4 +77,5 @@ val lightColorsScheme = AppColors(
     secondaryText = Color(0xFFB9B9B9),
     quickCategoryCardText = Color(0xFFFFFFFF),
     quickCategoryCardBackground = Color(0xFF000000),
+    dishCardBackground = Color(0xFFFBFBFB),
 )
