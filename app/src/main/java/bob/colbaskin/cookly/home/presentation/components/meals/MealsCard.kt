@@ -1,4 +1,4 @@
-package bob.colbaskin.cookly.home.presentation.components
+package bob.colbaskin.cookly.home.presentation.components.meals
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
