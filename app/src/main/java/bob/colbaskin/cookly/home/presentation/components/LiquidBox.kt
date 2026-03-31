@@ -91,7 +91,7 @@ fun LiquidBox(
 @Suppress("PreviewApiLevelMustBeValid")
 @Preview(name = "API 33", apiLevel = 33, showBackground = false)
 @Composable
-fun BreakfastLiquidBoxPreviewApi33() {
+private fun LiquidBoxPreviewApi33() {
     UfoodTheme {
         Box (
             contentAlignment = Alignment.Center
@@ -108,9 +108,9 @@ fun BreakfastLiquidBoxPreviewApi33() {
 }
 
 @Suppress("PreviewApiLevelMustBeValid")
-@Preview(name = "API 29", apiLevel = 29, showBackground = false)
+@Preview(name = "API 21", apiLevel = 21, showBackground = false)
 @Composable
-fun BreakfastLiquidBoxPreviewApi29() {
+private fun LiquidBoxPreviewApi21() {
     UfoodTheme {
         Box (
             contentAlignment = Alignment.Center
