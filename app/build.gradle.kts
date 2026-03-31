@@ -89,6 +89,9 @@ dependencies {
     // Compose icons
     implementation(libs.composeIcons.tablerIcons)
 
+    // Liquid glass
+    implementation(libs.liquid)
+
     // Datastore
     implementation(libs.androidx.datastore)
     implementation(libs.protobuf.kotlin.lite)
