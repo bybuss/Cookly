@@ -9,9 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -47,14 +45,6 @@ fun RecommendedDish(
                 color = CustomTheme.colors.text,
                 style = CustomTheme.typography.madeInfinity.headlineSmall,
                 textAlign = TextAlign.Start,
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Icon(
-                painter = painterResource(R.drawable.arrow_down_right),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(24.dp)
-                    .padding(bottom = 4.dp)
             )
             if (aiAvatar != null) {
                 Spacer(modifier = Modifier.weight(1f))

@@ -1,4 +1,4 @@
-package bob.colbaskin.cookly.home.presentation.components.recommended_dish
+package bob.colbaskin.cookly.home.presentation.components
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image

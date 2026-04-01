@@ -1,4 +1,4 @@
-package bob.colbaskin.cookly.home.presentation.components
+package bob.colbaskin.cookly.home.presentation.components.meals
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,12 +9,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
+import bob.colbaskin.cookly.home.domain.models.MealType
 
 @Composable
 fun MealsCardRow(modifier: Modifier = Modifier, mealsList: List<MealType>) {
     LazyRow (
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(25.dp),
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
         modifier = modifier.fillMaxWidth()
     ) {
         mealsList.forEach { mealType ->

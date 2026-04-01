@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Coockly</string>
+    <string name="app_name">Cookly</string>
 
     <string name="breakfast_card_text">Завтрак</string>
     <string name="lunch_card_text">Обед</string>
@@ -7,6 +7,11 @@
     <string name="dinner_card_text">Ужин</string>
     <string name="snack_card_text">Перекус</string>
     <string name="dish_of_the_day">Блюдо дня</string>
+
+    <string name="quick_category_quick_cook">Быстро готовится</string>
+    <string name="quick_category_dietary">Диетическое</string>
+    <string name="quick_category_high_calorie">Калорийное</string>
+    <string name="quick_category_on_trend">В тренде</string>
 
     <string name="home_nav_label">Главная</string>
     <string name="cart_nav_label">Корзина</string>
