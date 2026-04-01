@@ -91,19 +91,6 @@ private fun AuthScreen(
     onAction: (AuthAction) -> Unit
 ) {
     when {
-        state.isLoading -> {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(CustomTheme.colors.background),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(
-                    color = CustomTheme.colors.accentColor
-                )
-            }
-        }
-
         state.shouldShowWebView -> {
             Scaffold(
                 topBar = {
@@ -154,10 +141,8 @@ private fun AuthScreen(
                     .background(CustomTheme.colors.background),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "Ошибка",
-                    style = CustomTheme.typography.inter.headlineLarge,
-                    color = CustomTheme.colors.text
+                CircularProgressIndicator(
+                    color = CustomTheme.colors.accentColor
                 )
             }
         }
