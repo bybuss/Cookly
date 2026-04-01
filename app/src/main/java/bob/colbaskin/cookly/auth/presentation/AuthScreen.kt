@@ -22,6 +22,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,13 +41,15 @@ import compose.icons.tablericons.ArrowBack
 import compose.icons.tablericons.ArrowForward
 import compose.icons.tablericons.Refresh
 
+private const val TAG = "AuthWebView"
+
 @Composable
 fun AuthScreenRoot(
     navController: NavController,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
-    var webViewInstance: WebView? = null
+    var webViewInstance by remember { mutableStateOf<WebView?>(null) }
 
     LaunchedEffect(state.isAuthorized) {
         if (state.isAuthorized) {
@@ -97,9 +103,7 @@ private fun AuthScreen(
                     BrowserTopBar(
                         canGoBack = state.canGoBack,
                         canGoForward = state.canGoForward,
-                        onBack = { onAction(AuthAction.OnBackClick) },
-                        onForward = { onAction(AuthAction.OnForwardClick) },
-                        onRefresh = { onAction(AuthAction.OnRefreshClick) }
+                        onAction = onAction,
                     )
                 }
             ) { innerPadding ->
@@ -108,7 +112,9 @@ private fun AuthScreen(
                     onWebViewCreated = { onAction(AuthAction.OnWebViewCreated(it)) },
                     onPageFinished = { onAction(AuthAction.OnPageFinished(it)) },
                     onAuthCodeReceived = { onAction(AuthAction.OnAuthCodeReceived(it)) },
-                    modifier = Modifier.padding(innerPadding)
+                    modifier = Modifier
+                        .padding(innerPadding)
+                        .fillMaxSize()
                 )
             }
         }
@@ -144,9 +150,7 @@ private fun AuthScreen(
 private fun BrowserTopBar(
     canGoBack: Boolean,
     canGoForward: Boolean,
-    onBack: () -> Unit,
-    onForward: () -> Unit,
-    onRefresh: () -> Unit
+    onAction: (AuthAction) -> Unit
 ) {
     TopAppBar(
         title = {
@@ -156,7 +160,7 @@ private fun BrowserTopBar(
             ) {
                 Row {
                     IconButton(
-                        onClick = onBack,
+                        onClick = { onAction(AuthAction.OnBackClick) },
                         enabled = canGoBack
                     ) {
                         Icon(
@@ -166,7 +170,7 @@ private fun BrowserTopBar(
                     }
 
                     IconButton(
-                        onClick = onForward,
+                        onClick = { onAction(AuthAction.OnForwardClick) },
                         enabled = canGoForward
                     ) {
                         Icon(
@@ -176,7 +180,9 @@ private fun BrowserTopBar(
                     }
                 }
 
-                IconButton(onClick = onRefresh) {
+                IconButton(
+                    onClick = { onAction(AuthAction.OnRefreshClick) }
+                ) {
                     Icon(
                         imageVector = TablerIcons.Refresh,
                         contentDescription = "Обновить"
@@ -207,29 +213,24 @@ private fun AuthWebView(
                 settings.cacheMode = WebSettings.LOAD_DEFAULT
 
                 webViewClient = object : WebViewClient() {
-
                     override fun shouldOverrideUrlLoading(
                         view: WebView?,
                         request: WebResourceRequest?
                     ): Boolean {
                         val currentUrl = request?.url?.toString().orEmpty()
                         Log.d("AuthWebView", "Current WebView url: $currentUrl")
-
-                        if (currentUrl.startsWith("https://menoitami.ru/pages/hack_app://")) {
+                        if (currentUrl.startsWith("cookly://return_app/")) {
                             val uri = currentUrl.toUri()
                             val authCode = uri.getQueryParameter("auth_code")
-
                             Log.d(
-                                "AuthWebView",
+                                TAG,
                                 "Detected redirect url. Auth code: $authCode, uri: $uri"
                             )
-
                             authCode?.let { code ->
                                 onAuthCodeReceived(code.removeSuffix("/"))
                             }
                             return true
                         }
-
                         return super.shouldOverrideUrlLoading(view, request)
                     }
 
@@ -258,8 +259,6 @@ private fun BrowserTopBarPreview() {
     BrowserTopBar(
         canGoBack = true,
         canGoForward = true,
-        onBack = {},
-        onForward = {},
-        onRefresh = {}
+        onAction = {}
     )
 }

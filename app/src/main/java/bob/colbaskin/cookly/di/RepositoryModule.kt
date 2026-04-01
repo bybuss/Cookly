@@ -41,12 +41,14 @@ object RepositoryModule {
     fun provideAuthRepository(
         @ApplicationContext context: Context,
         authDataStoreRepository: AuthDataStoreRepository,
-        authApiService: AuthApiService
+        authApiService: AuthApiService,
+        userPreferencesRepository: UserPreferencesRepository
     ): AuthRepository {
         return AuthRepositoryImpl(
             context = context,
             authDataStoreRepository = authDataStoreRepository,
-            authApiService = authApiService
+            authApiService = authApiService,
+            userPreferencesRepository = userPreferencesRepository
         )
     }
 }

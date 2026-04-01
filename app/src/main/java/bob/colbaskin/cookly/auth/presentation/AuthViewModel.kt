@@ -27,7 +27,7 @@ private const val TAG = "AuthViewModel"
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-    private val authDataStoreRepository: AuthDataStoreRepository
+    private val authDataStoreRepository: AuthDataStoreRepository,
 ) : ViewModel() {
 
     var state by mutableStateOf(AuthState())
@@ -36,18 +36,16 @@ class AuthViewModel @Inject constructor(
     private var codeVerifier: String? = null
     private var codeChallenge: String? = null
 
-    private val redirectUrl = "hack_app://return_app/?auth_code={auth_code}"
+    private val redirectUrl = "cookly://return_app/"
     private val codeChallengeMethod = "S256"
-    private val clientId = "10"
-    private val roleId = "2"
+    private val refId = "4"
 
     init {
-        onAction(AuthAction.Initialize)
+        initialize()
     }
 
     fun onAction(action: AuthAction) {
         when (action) {
-            AuthAction.Initialize -> initialize()
             is AuthAction.OnPageFinished -> updatePageState(action.webView)
             is AuthAction.OnAuthCodeReceived -> codeToToken(action.code)
             else -> Unit
@@ -71,7 +69,7 @@ class AuthViewModel @Inject constructor(
                     isAuthorized = isAuthorized
                 )
 
-                Log.d(TAG, "Initialized auth screen. isAuthorized=$isAuthorized")
+                Log.e(TAG, "Initialized auth screen. isAuthorized=$isAuthorized")
                 Log.d(TAG, "Auth url: $authUrl")
             } catch (e: Exception) {
                 Log.e(TAG, "Initialize error: ${e.message}", e)
@@ -139,11 +137,10 @@ class AuthViewModel @Inject constructor(
     private fun buildAuthUrl(): String {
         return "${BuildConfig.BASE_API_URL}/pages/login.html".toUri()
             .buildUpon()
+            .appendQueryParameter("ref_id", refId)
+            .appendQueryParameter("redirect_url", redirectUrl)
             .appendQueryParameter("code_verifier", codeVerifier)
             .appendQueryParameter("code_challenge_method", codeChallengeMethod)
-            .appendQueryParameter("client_id", clientId)
-            .appendQueryParameter("redirect_url", redirectUrl)
-            .appendQueryParameter("role_id", roleId)
             .build()
             .toString()
     }
@@ -153,17 +150,13 @@ class AuthViewModel @Inject constructor(
 
         Log.d(TAG, "Try codeToToken with code: $code")
 
-        state = state.copy(
-            isExchangingCode = true
-        )
+        state = state.copy(isExchangingCode = true)
 
         viewModelScope.launch {
             val response = authRepository.codeToToken(
                 request = CodeToTokenDTO(
                     authCode = code,
-                    codeChallenger = codeChallenge ?: "",
-                    redirectUrl = redirectUrl,
-                    scopes = listOf("string")
+                    codeChallenger = codeChallenge ?: ""
                 )
             ).toUiState()
 
@@ -174,7 +167,6 @@ class AuthViewModel @Inject constructor(
             )
         }
     }
-
 
     private fun updatePageState(webView: WebView) {
         state = state.copy(
