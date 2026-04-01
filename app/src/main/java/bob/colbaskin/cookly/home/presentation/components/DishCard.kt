@@ -101,7 +101,7 @@ fun DishCard(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = false)
 @Composable
 fun DishCardPreview() {
     UfoodTheme {
