@@ -7,6 +7,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -20,6 +21,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -34,6 +36,7 @@ import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import bob.colbaskin.cookly.common.UiState
+import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.navigation.Screens
 import bob.colbaskin.cookly.navigation.graphs.Graphs
 import compose.icons.TablerIcons
@@ -90,10 +93,14 @@ private fun AuthScreen(
     when {
         state.isLoading -> {
             Box(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(CustomTheme.colors.background),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator()
+                CircularProgressIndicator(
+                    color = CustomTheme.colors.accentColor
+                )
             }
         }
 
@@ -105,7 +112,9 @@ private fun AuthScreen(
                         canGoForward = state.canGoForward,
                         onAction = onAction,
                     )
-                }
+                },
+                contentColor = CustomTheme.colors.text,
+                containerColor = CustomTheme.colors.background
             ) { innerPadding ->
                 AuthWebView(
                     url = state.authUrl!!.toUri(),
@@ -123,23 +132,33 @@ private fun AuthScreen(
             val errorState = state.codeToTokenState
 
             Box(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(CustomTheme.colors.background),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = errorState.text.ifBlank {
                         errorState.title
-                    }
+                    },
+                    style = CustomTheme.typography.inter.headlineLarge,
+                    color = CustomTheme.colors.text
                 )
             }
         }
 
         else -> {
             Box(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(CustomTheme.colors.background),
                 contentAlignment = Alignment.Center
             ) {
-                Text("Ошибка")
+                Text(
+                    text = "Ошибка",
+                    style = CustomTheme.typography.inter.headlineLarge,
+                    color = CustomTheme.colors.text
+                )
             }
         }
     }
@@ -189,7 +208,15 @@ private fun BrowserTopBar(
                     )
                 }
             }
-        }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = CustomTheme.colors.background,
+            scrolledContainerColor = CustomTheme.colors.background,
+            navigationIconContentColor = CustomTheme.colors.text,
+            titleContentColor = CustomTheme.colors.text,
+            actionIconContentColor = CustomTheme.colors.text,
+            subtitleContentColor = CustomTheme.colors.text,
+        )
     )
 }
 
