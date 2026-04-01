@@ -1,5 +1,19 @@
 package bob.colbaskin.cookly.home.presentation
 
+import bob.colbaskin.cookly.home.domain.models.MealType
+import bob.colbaskin.cookly.home.domain.models.QuickCategoryType
+
 data class HomeState(
-    val test: Int = 1
+    val quickCardsList: List<QuickCategoryType> = listOf(
+        QuickCategoryType.QUICK_COOK,
+        QuickCategoryType.DIETARY,
+        QuickCategoryType.HIGH_CALORIE,
+        QuickCategoryType.ON_TREND,
+    ),
+    val mealsList: List<MealType> = listOf(
+        MealType.BREAKFAST,
+        MealType.LUNCH,
+        MealType.DINNER,
+        MealType.DINNER,
+    )
 )

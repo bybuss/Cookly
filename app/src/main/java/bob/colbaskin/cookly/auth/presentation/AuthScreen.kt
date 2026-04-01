@@ -3,7 +3,12 @@ package bob.colbaskin.cookly.auth.presentation
 import android.annotation.SuppressLint
 import android.net.Uri
 import android.util.Log
+import android.webkit.ConsoleMessage
+import android.webkit.CookieManager
+import android.webkit.WebChromeClient
+import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -23,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.net.toUri
@@ -104,7 +111,7 @@ private fun AuthScreen(
                 containerColor = CustomTheme.colors.background
             ) { innerPadding ->
                 AuthWebView(
-                    url = state.authUrl!!.toUri(),
+                    startUrl = state.authUrl!!.toUri(),
                     onWebViewCreated = { onAction(AuthAction.OnWebViewCreated(it)) },
                     onPageFinished = { onAction(AuthAction.OnPageFinished(it)) },
                     onAuthCodeReceived = { onAction(AuthAction.OnAuthCodeReceived(it)) },
@@ -207,61 +214,106 @@ private fun BrowserTopBar(
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
-private fun AuthWebView(
-    url: Uri,
+fun AuthWebView(
+    startUrl: Uri,
     onWebViewCreated: (WebView) -> Unit,
     onPageFinished: (WebView) -> Unit,
     onAuthCodeReceived: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    AndroidView(
-        factory = { context ->
-            WebView(context).apply {
-                settings.javaScriptEnabled = true
-                settings.domStorageEnabled = true
-                settings.databaseEnabled = true
-                settings.useWideViewPort = true
-                settings.loadWithOverviewMode = true
-                settings.cacheMode = WebSettings.LOAD_DEFAULT
+    val context = LocalContext.current
 
-                webViewClient = object : WebViewClient() {
-                    override fun shouldOverrideUrlLoading(
-                        view: WebView?,
-                        request: WebResourceRequest?
-                    ): Boolean {
-                        val currentUrl = request?.url?.toString().orEmpty()
-                        Log.d("AuthWebView", "Current WebView url: $currentUrl")
-                        if (currentUrl.startsWith("cookly://return_app/")) {
-                            val uri = currentUrl.toUri()
-                            val authCode = uri.getQueryParameter("auth_code")
-                            Log.d(
-                                TAG,
-                                "Detected redirect url. Auth code: $authCode, uri: $uri"
-                            )
-                            authCode?.let { code ->
-                                onAuthCodeReceived(code.removeSuffix("/"))
-                            }
-                            return true
-                        }
-                        return super.shouldOverrideUrlLoading(view, request)
-                    }
+    val webView = remember {
+        WebView(context).apply {
+            settings.javaScriptEnabled = true
+            settings.domStorageEnabled = true
+            settings.databaseEnabled = true
+            settings.useWideViewPort = true
+            settings.loadWithOverviewMode = true
+            settings.cacheMode = WebSettings.LOAD_DEFAULT
 
-                    override fun onPageFinished(view: WebView?, url: String?) {
-                        super.onPageFinished(view, url)
-                        view?.let(onPageFinished)
+            val cm = CookieManager.getInstance()
+            cm.setAcceptCookie(true)
+            cm.setAcceptThirdPartyCookies(this, true)
+
+            webViewClient = object : WebViewClient() {
+                override fun shouldOverrideUrlLoading(
+                    view: WebView?,
+                    request: WebResourceRequest?
+                ): Boolean {
+                    val currentUrl = request?.url?.toString().orEmpty()
+                    Log.d(TAG, "Navigate to: $currentUrl")
+                    if (currentUrl.startsWith("cookly://return_app/")) {
+                        val uri = currentUrl.toUri()
+                        val authCode = uri.getQueryParameter("auth_code")
+                        Log.d(TAG, "Detected redirect. auth_code=$authCode")
+
+                        authCode?.let { onAuthCodeReceived(it.trimEnd('/')) }
+                        return true
                     }
+                    return false
                 }
 
-                onWebViewCreated(this)
-                loadUrl(url.toString())
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    super.onPageFinished(view, url)
+                    view?.let(onPageFinished)
+                }
+
+                override fun onReceivedError(
+                    view: WebView,
+                    request: WebResourceRequest,
+                    error: WebResourceError
+                ) {
+                    Log.e(
+                        TAG,
+                        "onReceivedError mainFrame=${request.isForMainFrame} url=${request.url} " +
+                                "code=${error.errorCode} desc=${error.description}"
+                    )
+                    super.onReceivedError(view, request, error)
+                }
+
+                override fun onReceivedHttpError(
+                    view: WebView,
+                    request: WebResourceRequest,
+                    errorResponse: WebResourceResponse
+                ) {
+                    Log.e(
+                        TAG,
+                        "onReceivedHttpError mainFrame=${request.isForMainFrame} url=${request.url} " +
+                                "status=${errorResponse.statusCode}"
+                    )
+                    super.onReceivedHttpError(view, request, errorResponse)
+                }
             }
-        },
-        update = { webView ->
-            if (webView.url != url.toString()) {
-                webView.loadUrl(url.toString())
+
+            webChromeClient = object : WebChromeClient() {
+                override fun onConsoleMessage(consoleMessage: ConsoleMessage): Boolean {
+                    Log.d(
+                        TAG,
+                        "${consoleMessage.messageLevel()} ${consoleMessage.sourceId()}:${consoleMessage.lineNumber()} ${consoleMessage.message()}"
+                    )
+                    return true
+                }
             }
-        },
-        modifier = modifier.fillMaxSize()
+
+            onWebViewCreated(this)
+        }
+    }
+
+    LaunchedEffect(startUrl) {
+        webView.loadUrl(startUrl.toString())
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            webView.stopLoading()
+            webView.destroy()
+        }
+    }
+
+    AndroidView(
+        factory = { webView },
+        modifier = modifier
     )
 }
 
