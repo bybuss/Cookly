@@ -1,4 +1,4 @@
-package bob.colbaskin.cookly.home.presentation
+package bob.colbaskin.cookly.home.presentation.main
 
 import bob.colbaskin.cookly.home.domain.models.MealType
 import bob.colbaskin.cookly.home.domain.models.QuickCategoryType

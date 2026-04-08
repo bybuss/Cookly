@@ -1,4 +1,4 @@
-package bob.colbaskin.cookly.home.presentation
+package bob.colbaskin.cookly.home.presentation.main
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -136,7 +136,7 @@ private fun HomeScreen(
     }
 }
 
-@Preview()
+@Preview
 @Composable
 private fun HomeScreenPreview() {
     UfoodTheme {
