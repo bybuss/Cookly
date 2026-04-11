@@ -17,7 +17,7 @@ import bob.colbaskin.cookly.agreement.presentation.policy.PolicyScreenRoot
 import bob.colbaskin.cookly.agreement.presentation.terms_of_use.TermsOfUseScreenRoot
 import bob.colbaskin.cookly.auth.presentation.AuthScreenRoot
 import bob.colbaskin.cookly.home.presentation.main.HomeScreenRoot
-import bob.colbaskin.cookly.home.presentation.discovery.FeedScreenRoot
+import bob.colbaskin.cookly.home.presentation.meal_detailed.MealDetailedScreenRoot
 import bob.colbaskin.cookly.navigation.Screens
 import bob.colbaskin.cookly.onboarding_preferences.presentation.OnboardingScreenRoot
 
@@ -60,7 +60,7 @@ fun NavGraphBuilder.mainGraph(
         startDestination = Screens.Home
     ) {
         composable<Screens.Home> { HomeScreenRoot(navController = navController) }
-        composable<Screens.Cart> { FeedScreenRoot(navController = navController) }
+        composable<Screens.Cart> { MealDetailedScreenRoot(navController = navController) }
         composable<Screens.Chat> {
             Box(modifier = Modifier
                 .fillMaxSize()

@@ -48,22 +48,53 @@ import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.navigation.NavHostController
+import bob.colbaskin.cookly.home.presentation.components.DishCard
+import bob.colbaskin.cookly.home.presentation.components.recommended_dish.RecommendationBanner
+import bob.colbaskin.cookly.home.presentation.components.recommended_dish.RecommendedDish
 import io.github.fletchmckee.liquid.liquefiable
 import io.github.fletchmckee.liquid.liquid
 import io.github.fletchmckee.liquid.rememberLiquidState
+import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
+
+@Composable
+fun MealDetailedScreenRoot(
+    modifier: Modifier = Modifier,
+    navController: NavHostController,
+    viewModel: MealDetailedViewModel = hiltViewModel()
+) {
+    val state = viewModel.state
+
+    MealDetailedScreen(
+        modifier = modifier,
+        state = state,
+        onAction = { action ->
+            when (action) {
+                MealDetailedAction.NavigateBack -> navController.popBackStack()
+                is MealDetailedAction.NavigateToMealRecipe -> { /*navController.navigate(...)*/ }
+                else -> Unit
+            }
+            viewModel.onAction(action)
+        }
+    )
+}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -73,7 +104,22 @@ private fun MealDetailedScreen(
     onAction: (MealDetailedAction) -> Unit
 ) {
     val mealsList = state.mealsList
-    val pagerState = rememberPagerState(pageCount = { mealsList.size })
+    val realPageCount = mealsList.size
+    val initialPage = remember(realPageCount) {
+        if (realPageCount == 0) {
+            0
+        } else {
+            val middle = Int.MAX_VALUE / 2
+            middle - (middle % realPageCount)
+        }
+    }
+    val pagerState = rememberPagerState(
+        initialPage = initialPage,
+        pageCount = {
+            if (realPageCount == 0) 0 else Int.MAX_VALUE
+        }
+    )
+
     val liquidState = rememberLiquidState()
 
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
@@ -103,6 +149,33 @@ private fun MealDetailedScreen(
 
         LaunchedEffect(anchors) {
             sheetState.updateAnchors(anchors)
+        }
+
+        LaunchedEffect(sheetState.currentValue) {
+            onAction(
+                MealDetailedAction.OnSheetStateChanged(
+                    isExpanded = sheetState.currentValue == MealSheetValue.EXPANDED
+                )
+            )
+        }
+
+        LaunchedEffect(pagerState.settledPage, realPageCount) {
+            if (realPageCount > 0) {
+                onAction(
+                    MealDetailedAction.OnPagerPageSettled(
+                        pagerState.settledPage % realPageCount
+                    )
+                )
+            }
+        }
+
+        LaunchedEffect(state.isAutoScrollEnabled, realPageCount) {
+            if (!state.isAutoScrollEnabled || realPageCount <= 1) return@LaunchedEffect
+            while (true) {
+                delay(3000)
+                if (pagerState.isScrollInProgress) continue
+                pagerState.animateScrollToPage(pagerState.currentPage + 1)
+            }
         }
 
         val flingBehavior = AnchoredDraggableDefaults.flingBehavior(
@@ -249,7 +322,9 @@ private fun MealPagerOverlay(
 ) {
     val colors = CustomTheme.colors
     val typography = CustomTheme.typography
-    val currentMeal = mealsList.getOrNull(pagerState.currentPage) ?: return
+
+    if (mealsList.isEmpty()) return
+    val currentMeal = mealsList[pagerState.currentPage % mealsList.size]
 
     Box(modifier = modifier.fillMaxWidth()) {
         Row(
@@ -284,7 +359,7 @@ private fun MealPagerOverlay(
                 Spacer(modifier = Modifier.height(20.dp))
 
                 PagerIndicator(
-                    currentPage = pagerState.currentPage,
+                    currentPage = pagerState.currentPage % mealsList.size,
                     pageCount = mealsList.size,
                     selectedColor = CustomTheme.colors.accentColor,
                     unselectedColor = CustomTheme.colors.invertedText,
@@ -318,11 +393,13 @@ private fun MealPager(
     mealsList: List<Meal>,
     pagerState: PagerState
 ) {
+    if (mealsList.isEmpty()) return
+
     HorizontalPager(
         state = pagerState,
         modifier = modifier.fillMaxSize()
     ) {
-        val item = mealsList[it]
+        val item = mealsList[it % mealsList.size]
         MealPagerItem(
             modifier = Modifier.fillMaxSize(),
             item = item
@@ -355,7 +432,7 @@ private fun DraggableSheet(
 ) {
     val colors = CustomTheme.colors
 
-    val offsetY = if (state.offset.isNaN()) collapsedTopPxFallback else state.requireOffset()
+    val offsetY = if (state.offset.isNaN()) collapsedTopPxFallback else state.      requireOffset()
 
     Box(
         modifier = modifier
@@ -368,26 +445,68 @@ private fun DraggableSheet(
                 state = state,
                 orientation = Orientation.Vertical,
                 flingBehavior = flingBehavior
-            )
+            ),
+        contentAlignment = Alignment.TopCenter
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            Box(
-                modifier = Modifier
-                    .padding(top = 10.dp)
-                    .align(Alignment.CenterHorizontally)
-                    .width(40.dp)
-                    .height(5.dp)
-                    .clip(CircleShape)
-                    .background(colors.secondaryCardBackground)
-            )
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
+        HorizontalDivider(
+            modifier = Modifier
+                .width(134.dp)
+                .clip(CircleShape)
+                .padding(top = 8.dp),
+            thickness = 5.dp,
+            color =  colors.secondaryText.copy(alpha = 0.2f)
+        )
+        LazyVerticalGrid(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp)
+                .padding(top = 32.dp),
+            columns = GridCells.Fixed(2),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(bottom = 16.dp)
+        ) {
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                RecommendedDish(
+                    modifier = Modifier,
+                    title = "Блюдо от Шефа",
+                    aiAvatar = R.drawable.cheif_ai_avatar,
+                    recommendationCard = {
+                        RecommendationBanner(
+                            modifier = Modifier,
+                            cardTitle = "Fried Shrimp",
+                            backgroundImage = R.drawable.shrimp_soup_image,
+                            rating = 4.8,
+                            ratingAmount = 163,
+                            minutes = 20,
+                            kcal = 150,
+                            isFlameIconRed = false,
+                            border = false,
+                            backgroundHexColor = "#B9480D",
+                            isLeftCard = false
+                        )
+                    }
+                )
+            }
+            item(span = { GridItemSpan(maxLineSpan) }) {
                 Text(
-                    text = "Draggable content",
-                    style = CustomTheme.typography.inter.bodyMedium,
-                    color = colors.text
+                    text = "Рецепты",
+                    color = CustomTheme.colors.text,
+                    style = CustomTheme.typography.madeInfinity.headlineSmall,
+                    textAlign = TextAlign.Start,
+                    fontWeight = FontWeight.Normal
+                )
+            }
+            items(20) {
+                DishCard(
+                    modifier = Modifier,
+                    title = "Fried Shrimp",
+                    minutes = 20,
+                    dishImage = R.drawable.fried_egg_backgroiund,
+                    rating = 4.8,
+                    ratingAmount = 168,
+                    kcal = 150,
+                    isFlameIconRed = false,
                 )
             }
         }

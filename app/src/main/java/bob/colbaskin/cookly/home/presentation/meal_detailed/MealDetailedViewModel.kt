@@ -16,6 +16,15 @@ class MealDetailedViewModel @Inject constructor(
 
     fun onAction(action: MealDetailedAction) {
         when (action) {
+            is MealDetailedAction.OnPagerPageSettled -> {
+                state = state.copy(currentPage = action.page)
+            }
+            is MealDetailedAction.OnSheetStateChanged -> {
+                state = state.copy(
+                    isSheetExpanded = action.isExpanded,
+                    isAutoScrollEnabled = !action.isExpanded
+                )
+            }
             else -> Unit
         }
     }

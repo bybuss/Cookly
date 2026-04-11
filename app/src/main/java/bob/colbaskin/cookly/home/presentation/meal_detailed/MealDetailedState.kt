@@ -6,7 +6,10 @@ import bob.colbaskin.cookly.home.domain.models.MealType
 
 data class MealDetailedState(
     val mealsList: List<Meal> = mealsListMock,
-    val mealType: MealType = MealType.BREAKFAST
+    val mealType: MealType = MealType.BREAKFAST,
+    val currentPage: Int = 0,
+    val isSheetExpanded: Boolean = false,
+    val isAutoScrollEnabled: Boolean = true
 )
 
 private val mealsListMock: List<Meal> = listOf(
