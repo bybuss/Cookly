@@ -16,7 +16,8 @@ import bob.colbaskin.cookly.agreement.presentation.AgreementScreenRoot
 import bob.colbaskin.cookly.agreement.presentation.policy.PolicyScreenRoot
 import bob.colbaskin.cookly.agreement.presentation.terms_of_use.TermsOfUseScreenRoot
 import bob.colbaskin.cookly.auth.presentation.AuthScreenRoot
-import bob.colbaskin.cookly.home.presentation.HomeScreenRoot
+import bob.colbaskin.cookly.home.presentation.main.HomeScreenRoot
+import bob.colbaskin.cookly.home.presentation.discovery.FeedScreenRoot
 import bob.colbaskin.cookly.navigation.Screens
 import bob.colbaskin.cookly.onboarding_preferences.presentation.OnboardingScreenRoot
 
@@ -48,9 +49,7 @@ fun NavGraphBuilder.onboardingGraph(
     navigation<Graphs.Onboarding> (
         startDestination = Screens.Preferences
     ) {
-        composable<Screens.Preferences> {
-            OnboardingScreenRoot(navController = navController)
-        }
+        composable<Screens.Preferences> { OnboardingScreenRoot(navController = navController) }
     }
 }
 
@@ -61,13 +60,11 @@ fun NavGraphBuilder.mainGraph(
         startDestination = Screens.Home
     ) {
         composable<Screens.Home> { HomeScreenRoot(navController = navController) }
-        composable<Screens.Cart> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = "Cart Screen")
-            }
-        }
+        composable<Screens.Cart> { FeedScreenRoot(navController = navController) }
         composable<Screens.Chat> {
-            Box(modifier = Modifier.fillMaxSize().background(Color.Red), contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Red), contentAlignment = Alignment.Center) {
                 Text(text = "Chat Screen")
             }
         }
