@@ -432,7 +432,7 @@ private fun DraggableSheet(
 ) {
     val colors = CustomTheme.colors
 
-    val offsetY = if (state.offset.isNaN()) collapsedTopPxFallback else state.      requireOffset()
+    val offsetY = if (state.offset.isNaN()) collapsedTopPxFallback else state.requireOffset()
 
     Box(
         modifier = modifier
