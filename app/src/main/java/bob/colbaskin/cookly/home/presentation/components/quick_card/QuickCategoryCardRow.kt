@@ -15,7 +15,7 @@ import kotlin.collections.forEach
 @Composable
 fun QuickCategoryCardRow(
     modifier: Modifier = Modifier,
-        quickCardsList: List<QuickCategoryType>
+    quickCardsList: List<QuickCategoryType>
 ) {
     LazyRow (
         verticalAlignment = Alignment.CenterVertically,

@@ -82,14 +82,13 @@ fun DishCard(
             contentDescription = null,
             contentScale = ContentScale.FillWidth
         )
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
+        Row(modifier = Modifier.fillMaxWidth()) {
             DishDataIcon(
                 text = "$rating($ratingAmount)",
                 containerColor = CustomTheme.colors.statsCardBackground,
                 dishDataIcon = R.drawable.star_ic
             )
+            Spacer(modifier = Modifier.weight(1f))
             DishDataIcon(
                 text = "$kcal kcal",
                 containerColor = CustomTheme.colors.statsCardBackground,
@@ -101,7 +100,7 @@ fun DishCard(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = false)
 @Composable
 fun DishCardPreview() {
     UfoodTheme {

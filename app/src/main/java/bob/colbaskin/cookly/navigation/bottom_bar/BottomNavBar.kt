@@ -1,18 +1,22 @@
 package bob.colbaskin.cookly.navigation.bottom_bar
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
@@ -28,7 +32,6 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import bob.colbaskin.cookly.R
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
 import bob.colbaskin.cookly.navigation.Destinations
@@ -42,9 +45,10 @@ fun BottomNavBar(
 
     NavigationBar(
         modifier = modifier
-            .fillMaxWidth(1F)
+            .fillMaxWidth()
             .height(118.dp)
             .clip(BottomNavCurve()),
+        windowInsets = NavigationBarDefaults.windowInsets,
         contentColor = CustomTheme.colors.text,
         containerColor = CustomTheme.colors.background,
     ) {
@@ -53,9 +57,13 @@ fun BottomNavBar(
                 it.hasRoute(destination.screen::class)
             } == true
 
+            val labelAlpha: Float = animateFloatAsState(
+                targetValue = if (selected) 1f else 0f,
+                label = "BottomBarLabelAlpha"
+            ).value
+
             NavigationBarItem(
-                modifier = Modifier
-                    .padding(top = 16.dp),
+                modifier = Modifier.offset(y = 25.dp),
                 selected = selected,
                 onClick = {
                     navController.navigate(destination.screen) {
@@ -67,13 +75,16 @@ fun BottomNavBar(
                     }
                 },
                 icon = {
-                    if (destination.icon == R.drawable.chat_ic) {
+                    if (destination == Destinations.CHAT) {
                         Image(
-                            painter = painterResource(destination.icon),
+                            painter = painterResource(
+                                if (selected) destination.filledIcon else destination.outlinedIcon
+                            ),
                             contentDescription = stringResource(destination.label),
                             modifier = Modifier
-                                .padding(bottom = 32.dp)
                                 .size(72.dp)
+                                .padding(bottom = 8.dp)
+                                .offset(y = (-15).dp)
                                 .dropShadow(
                                     shape = CircleShape,
                                     shadow = Shadow(
@@ -86,19 +97,29 @@ fun BottomNavBar(
                         )
                     } else {
                         Icon(
-                            painter = painterResource(destination.icon),
+                            painter = painterResource(
+                                if (selected) destination.filledIcon else destination.outlinedIcon
+                            ),
                             contentDescription = stringResource(destination.label),
-                            modifier.size(24.dp)
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 },
                 label = {
                     Text(
                         text = stringResource(destination.label),
-                        style = CustomTheme.typography.inter.bodySmall
+                        modifier = Modifier
+                            .alpha(labelAlpha)
+                            .then(
+                                if (destination == Destinations.CHAT) {
+                                    Modifier.offset(y = (-25).dp)
+                                } else Modifier
+                            ),
+                        style = CustomTheme.typography.inter.bodySmall,
+                        maxLines = 1
                     )
                 },
-                alwaysShowLabel = selected,
+                alwaysShowLabel = true,
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = CustomTheme.colors.accentColor,
                     selectedTextColor = CustomTheme.colors.accentColor,

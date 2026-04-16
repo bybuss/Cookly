@@ -1,10 +1,12 @@
 package bob.colbaskin.cookly.navigation.graphs
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -14,6 +16,8 @@ import bob.colbaskin.cookly.agreement.presentation.AgreementScreenRoot
 import bob.colbaskin.cookly.agreement.presentation.policy.PolicyScreenRoot
 import bob.colbaskin.cookly.agreement.presentation.terms_of_use.TermsOfUseScreenRoot
 import bob.colbaskin.cookly.auth.presentation.AuthScreenRoot
+import bob.colbaskin.cookly.home.presentation.main.HomeScreenRoot
+import bob.colbaskin.cookly.home.presentation.meal_detailed.MealDetailedScreenRoot
 import bob.colbaskin.cookly.navigation.Screens
 import bob.colbaskin.cookly.onboarding_preferences.presentation.OnboardingScreenRoot
 
@@ -45,9 +49,7 @@ fun NavGraphBuilder.onboardingGraph(
     navigation<Graphs.Onboarding> (
         startDestination = Screens.Preferences
     ) {
-        composable<Screens.Preferences> {
-            OnboardingScreenRoot(navController = navController)
-        }
+        composable<Screens.Preferences> { OnboardingScreenRoot(navController = navController) }
     }
 }
 
@@ -57,18 +59,12 @@ fun NavGraphBuilder.mainGraph(
     navigation<Graphs.Main> (
         startDestination = Screens.Home
     ) {
-        composable<Screens.Home> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = "Home Screen")
-            }
-        }
-        composable<Screens.Cart> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = "Cart Screen")
-            }
-        }
+        composable<Screens.Home> { HomeScreenRoot(navController = navController) }
+        composable<Screens.Cart> { MealDetailedScreenRoot(navController = navController) }
         composable<Screens.Chat> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Red), contentAlignment = Alignment.Center) {
                 Text(text = "Chat Screen")
             }
         }

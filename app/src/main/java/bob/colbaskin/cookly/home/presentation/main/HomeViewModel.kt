@@ -1,4 +1,4 @@
-package bob.colbaskin.cookly.home.presentation
+package bob.colbaskin.cookly.home.presentation.main
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf

@@ -29,9 +29,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import bob.colbaskin.cookly.R
+import bob.colbaskin.cookly.common.components.PagerIndicator
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
 
@@ -46,7 +48,10 @@ fun PagerWithIndicator(
     Column(modifier = modifier) {
         PagerIndicator(
             currentPage = pagerState.currentPage,
-            pageCount = pageCount
+            pageCount = pageCount,
+            selectedColor = CustomTheme.colors.secondAccentColor,
+            unselectedColor = CustomTheme.colors.secondAccentColor.copy(alpha = 0.3f),
+            spacedByDp = 8.dp
         )
         Spacer(modifier = Modifier.height(42.dp))
         Row(
@@ -132,37 +137,9 @@ fun PagerWithIndicator(
     }
 }
 
-@Composable
-private fun PagerIndicator(
-    currentPage: Int,
-    pageCount: Int
-) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        repeat(pageCount) { pageIndex ->
-            val isSelected = pageIndex == currentPage
-            val color = if (isSelected) {
-                CustomTheme.colors.secondAccentColor
-            } else {
-                CustomTheme.colors.secondAccentColor.copy(alpha = 0.3f)
-            }
-
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .size(8.dp)
-                    .clip(RoundedCornerShape(percent = 50))
-                    .background(color)
-            )
-        }
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
-fun PagerIndicatorPreview() {
+fun PagerWithIndicatorPreview() {
     val pagerState = rememberPagerState(
         initialPage = 0,
         initialPageOffsetFraction = 0f,

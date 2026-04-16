@@ -26,8 +26,7 @@ private const val TAG = "AuthViewModel"
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val authRepository: AuthRepository,
-    private val authDataStoreRepository: AuthDataStoreRepository,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     var state by mutableStateOf(AuthState())
@@ -57,7 +56,7 @@ class AuthViewModel @Inject constructor(
             state = state.copy(isCheckingAuth = true)
 
             try {
-                codeVerifier = getOrGenerateCodeVerifier()
+                codeVerifier = generateCodeVerifier()
                 codeChallenge = codeVerifierToPkce(codeVerifier!!)
 
                 val authUrl = buildAuthUrl()
@@ -83,20 +82,6 @@ class AuthViewModel @Inject constructor(
                     )
                 )
             }
-        }
-    }
-
-    private suspend fun getOrGenerateCodeVerifier(): String {
-        val savedCodeVerifier = authDataStoreRepository.getCodeVerifier().first()
-
-        return if (!savedCodeVerifier.isNullOrEmpty()) {
-            Log.d(TAG, "Use saved codeVerifier")
-            savedCodeVerifier
-        } else {
-            val generatedCodeVerifier = generateCodeVerifier()
-            authDataStoreRepository.saveCodeVerifier(generatedCodeVerifier)
-            Log.d(TAG, "Generated new codeVerifier")
-            generatedCodeVerifier
         }
     }
 
