@@ -79,8 +79,8 @@ fun MealCategoryDetailedScreenRoot(
     navController: NavHostController,
     viewModel: MealCategoryDetailedViewModel = hiltViewModel()
 ) {
-    val mealId: Int?
-        = navController.currentBackStackEntry?.arguments?.getInt("")
+    val mealCategoryId: Int
+        = navController.currentBackStackEntry?.arguments?.getInt("mealCategoryId") ?: -1
     val state = viewModel.state
 
     MealCategoryDetailedScreen(
