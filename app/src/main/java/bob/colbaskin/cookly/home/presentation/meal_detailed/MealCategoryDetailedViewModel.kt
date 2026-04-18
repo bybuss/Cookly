@@ -8,18 +8,18 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 
 @HiltViewModel
-class MealDetailedViewModel @Inject constructor(
+class MealCategoryDetailedViewModel @Inject constructor(
 
 ) : ViewModel() {
     var state by mutableStateOf(MealDetailedState())
         private set
 
-    fun onAction(action: MealDetailedAction) {
+    fun onAction(action: MealCategoryDetailedAction) {
         when (action) {
-            is MealDetailedAction.OnPagerPageSettled -> {
+            is MealCategoryDetailedAction.OnPagerPageSettled -> {
                 state = state.copy(currentPage = action.page)
             }
-            is MealDetailedAction.OnSheetStateChanged -> {
+            is MealCategoryDetailedAction.OnSheetStateChanged -> {
                 state = state.copy(
                     isSheetExpanded = action.isExpanded,
                     isAutoScrollEnabled = !action.isExpanded

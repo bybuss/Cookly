@@ -7,7 +7,6 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -16,8 +15,9 @@ import bob.colbaskin.cookly.agreement.presentation.AgreementScreenRoot
 import bob.colbaskin.cookly.agreement.presentation.policy.PolicyScreenRoot
 import bob.colbaskin.cookly.agreement.presentation.terms_of_use.TermsOfUseScreenRoot
 import bob.colbaskin.cookly.auth.presentation.AuthScreenRoot
+import bob.colbaskin.cookly.home.presentation.dish_detailed.DishDetailedScreenRoot
 import bob.colbaskin.cookly.home.presentation.main.HomeScreenRoot
-import bob.colbaskin.cookly.home.presentation.meal_detailed.MealDetailedScreenRoot
+import bob.colbaskin.cookly.home.presentation.meal_detailed.MealCategoryDetailedScreenRoot
 import bob.colbaskin.cookly.navigation.Screens
 import bob.colbaskin.cookly.onboarding_preferences.presentation.OnboardingScreenRoot
 
@@ -60,7 +60,7 @@ fun NavGraphBuilder.mainGraph(
         startDestination = Screens.Home
     ) {
         composable<Screens.Home> { HomeScreenRoot(navController = navController) }
-        composable<Screens.Cart> { MealDetailedScreenRoot(navController = navController) }
+        composable<Screens.Cart> { MealCategoryDetailedScreenRoot(navController = navController) }
         composable<Screens.Chat> {
             Box(modifier = Modifier
                 .fillMaxSize()
@@ -68,11 +68,7 @@ fun NavGraphBuilder.mainGraph(
                 Text(text = "Chat Screen")
             }
         }
-        composable<Screens.Favourites> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = "Favourites Screen")
-            }
-        }
+        composable<Screens.Favourites> { DishDetailedScreenRoot(navController = navController) }
         composable<Screens.Profile> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(text = "Profile Screen")
@@ -82,20 +78,12 @@ fun NavGraphBuilder.mainGraph(
 }
 
 fun NavGraphBuilder.detailedGraph(
-    navController: NavController
+    navController: NavHostController
 ) {
     navigation<Graphs.Detailed>(
-        startDestination = Screens.CategoryDetails(-1)
+        startDestination = Screens.MealCategoryDetailed(-1)
     ) {
-        composable<Screens.CategoryDetails> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = "CategoryDetails Screen, id=$id")
-            }
-        }
-        composable<Screens.DishCategory> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = "DishCategory Screen, id=$id")
-            }
-        }
+        composable<Screens.MealCategoryDetailed> { MealCategoryDetailedScreenRoot(navController = navController) }
+        composable<Screens.DishDetailed> { DishDetailedScreenRoot(navController = navController) }
     }
 }

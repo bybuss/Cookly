@@ -74,20 +74,22 @@ import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
 @Composable
-fun MealDetailedScreenRoot(
+fun MealCategoryDetailedScreenRoot(
     modifier: Modifier = Modifier,
     navController: NavHostController,
-    viewModel: MealDetailedViewModel = hiltViewModel()
+    viewModel: MealCategoryDetailedViewModel = hiltViewModel()
 ) {
+    val mealId: Int?
+        = navController.currentBackStackEntry?.arguments?.getInt("")
     val state = viewModel.state
 
-    MealDetailedScreen(
+    MealCategoryDetailedScreen(
         modifier = modifier,
         state = state,
         onAction = { action ->
             when (action) {
-                MealDetailedAction.NavigateBack -> navController.popBackStack()
-                is MealDetailedAction.NavigateToMealRecipe -> { /*navController.navigate(...)*/ }
+                MealCategoryDetailedAction.NavigateBack -> navController.popBackStack()
+                is MealCategoryDetailedAction.NavigateToMealRecipe -> { /*navController.navigate(...)*/ }
                 else -> Unit
             }
             viewModel.onAction(action)
@@ -97,10 +99,10 @@ fun MealDetailedScreenRoot(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun MealDetailedScreen(
+private fun MealCategoryDetailedScreen(
     modifier: Modifier = Modifier,
     state: MealDetailedState,
-    onAction: (MealDetailedAction) -> Unit
+    onAction: (MealCategoryDetailedAction) -> Unit
 ) {
     val mealsList = state.mealsList
     val realPageCount = mealsList.size
@@ -135,14 +137,14 @@ private fun MealDetailedScreen(
 
         val sheetState = remember {
             AnchoredDraggableState(
-                initialValue = MealSheetValue.COLLAPSED
+                initialValue = MealCategorySheetValue.COLLAPSED
             )
         }
 
         val anchors = remember(collapsedTopPx, expandedTopPx) {
             DraggableAnchors {
-                MealSheetValue.EXPANDED at expandedTopPx
-                MealSheetValue.COLLAPSED at collapsedTopPx
+                MealCategorySheetValue.EXPANDED at expandedTopPx
+                MealCategorySheetValue.COLLAPSED at collapsedTopPx
             }
         }
 
@@ -152,8 +154,8 @@ private fun MealDetailedScreen(
 
         LaunchedEffect(sheetState.currentValue) {
             onAction(
-                MealDetailedAction.OnSheetStateChanged(
-                    isExpanded = sheetState.currentValue == MealSheetValue.EXPANDED
+                MealCategoryDetailedAction.OnSheetStateChanged(
+                    isExpanded = sheetState.currentValue == MealCategorySheetValue.EXPANDED
                 )
             )
         }
@@ -161,7 +163,7 @@ private fun MealDetailedScreen(
         LaunchedEffect(pagerState.settledPage, realPageCount) {
             if (realPageCount > 0) {
                 onAction(
-                    MealDetailedAction.OnPagerPageSettled(
+                    MealCategoryDetailedAction.OnPagerPageSettled(
                         pagerState.settledPage % realPageCount
                     )
                 )
@@ -231,7 +233,7 @@ private fun MealDetailedScreen(
                 .padding(16.dp)
                 .zIndex(3f),
             liquidBoxText = stringResource(state.mealType.displayNameId),
-            onBackClick = { onAction(MealDetailedAction.NavigateBack) },
+            onBackClick = { onAction(MealCategoryDetailedAction.NavigateBack) },
             avatarId = R.drawable.user_avatar_mock
         )
         DraggableSheet(
@@ -248,7 +250,7 @@ private fun MealPagerOverlay(
     modifier: Modifier = Modifier,
     mealsList: List<Meal>,
     pagerState: PagerState,
-    onAction: (MealDetailedAction) -> Unit
+    onAction: (MealCategoryDetailedAction) -> Unit
 ) {
     val colors = CustomTheme.colors
     val typography = CustomTheme.typography
@@ -303,7 +305,7 @@ private fun MealPagerOverlay(
                     .clip(CircleShape)
                     .background(colors.background.copy(alpha = 0.92f))
                     .clickable {
-                        onAction(MealDetailedAction.NavigateToMealRecipe(currentMeal.id))
+                        onAction(MealCategoryDetailedAction.NavigateToMealRecipe(currentMeal.id))
                     },
                 contentAlignment = Alignment.Center
             ) {
@@ -356,7 +358,7 @@ private fun MealPagerItem(
 @Composable
 private fun DraggableSheet(
     modifier: Modifier = Modifier,
-    state: AnchoredDraggableState<MealSheetValue>,
+    state: AnchoredDraggableState<MealCategorySheetValue>,
     flingBehavior: FlingBehavior,
     collapsedTopPxFallback: Float
 ) {
@@ -447,7 +449,7 @@ private fun DraggableSheet(
 @Composable
 private fun MealDetailedPreview() {
     UfoodTheme {
-        MealDetailedScreen(
+        MealCategoryDetailedScreen(
             state = MealDetailedState(),
             onAction = {}
         )

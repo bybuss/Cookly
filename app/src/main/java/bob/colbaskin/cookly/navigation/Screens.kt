@@ -35,8 +35,8 @@ sealed interface Screens {
     data object TermsOfUse: Screens
 
     @Serializable
-    data class CategoryDetails(val id: Int)
+    data class MealCategoryDetailed(val id: Int)
 
     @Serializable
-    data class DishCategory(val id: Int)
+    data class DishDetailed(val id: Int)
 }
