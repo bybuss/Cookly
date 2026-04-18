@@ -238,7 +238,7 @@ private fun MealCategoryDetailedScreen(
         )
         DraggableSheet(
             modifier = Modifier.zIndex(2f),
-            state = sheetState,
+            anchoredState = sheetState,
             flingBehavior = flingBehavior,
             collapsedTopPxFallback = collapsedTopPx
         )
@@ -358,13 +358,15 @@ private fun MealPagerItem(
 @Composable
 private fun DraggableSheet(
     modifier: Modifier = Modifier,
-    state: AnchoredDraggableState<MealCategorySheetValue>,
+    anchoredState: AnchoredDraggableState<MealCategorySheetValue>,
     flingBehavior: FlingBehavior,
     collapsedTopPxFallback: Float
 ) {
     val colors = CustomTheme.colors
 
-    val offsetY = if (state.offset.isNaN()) collapsedTopPxFallback else state.requireOffset()
+    val offsetY =
+        if (anchoredState.offset.isNaN()) collapsedTopPxFallback
+        else anchoredState.requireOffset()
 
     Box(
         modifier = modifier
@@ -374,7 +376,7 @@ private fun DraggableSheet(
             .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
             .background(colors.background)
             .anchoredDraggable(
-                state = state,
+                state = anchoredState,
                 orientation = Orientation.Vertical,
                 flingBehavior = flingBehavior
             ),
