@@ -1,6 +1,5 @@
 package bob.colbaskin.cookly.home.presentation.meal_detailed
 
-import androidx.annotation.DrawableRes
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
@@ -39,7 +38,6 @@ import bob.colbaskin.cookly.common.components.PagerIndicator
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
 import bob.colbaskin.cookly.home.domain.models.Meal
-import bob.colbaskin.cookly.home.presentation.components.LiquidBox
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.AnchoredDraggableDefaults
 import androidx.compose.foundation.gestures.AnchoredDraggableState
@@ -66,6 +64,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import bob.colbaskin.cookly.home.presentation.components.DishCard
+import bob.colbaskin.cookly.home.presentation.components.SheetTopBar
 import bob.colbaskin.cookly.home.presentation.components.recommended_dish.RecommendationBanner
 import bob.colbaskin.cookly.home.presentation.components.recommended_dish.RecommendedDish
 import io.github.fletchmckee.liquid.liquefiable
@@ -227,12 +226,12 @@ private fun MealDetailedScreen(
                 onAction = onAction
             )
         }
-        MealTopBar(
+        SheetTopBar(
             modifier = Modifier
                 .padding(16.dp)
                 .zIndex(3f),
             liquidBoxText = stringResource(state.mealType.displayNameId),
-            onAction = onAction,
+            onBackClick = { onAction(MealDetailedAction.NavigateBack) },
             avatarId = R.drawable.user_avatar_mock
         )
         DraggableSheet(
@@ -240,75 +239,6 @@ private fun MealDetailedScreen(
             state = sheetState,
             flingBehavior = flingBehavior,
             collapsedTopPxFallback = collapsedTopPx
-        )
-    }
-}
-
-@Composable
-private fun MealTopBar(
-    modifier: Modifier = Modifier,
-    liquidBoxText: String,
-    onAction: (MealDetailedAction) -> Unit,
-    @DrawableRes avatarId: Int // TODO: заменить потом на ссыллку
-) {
-    val colors = CustomTheme.colors
-
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(40.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-        Row(
-            modifier = Modifier
-                .clickable(onClick = { onAction(MealDetailedAction.NavigateBack) }),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(-(1).dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(colors.background),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.arrow_left),
-                    contentDescription = null,
-                    tint = colors.text
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .height(40.dp)
-                    .clip(CircleShape)
-                    .background(colors.background),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    text = "На главную",
-                    style = CustomTheme.typography.inter.bodyMedium,
-                    fontWeight = FontWeight.Normal,
-                    color = colors.text
-                )
-            }
-        }
-        Spacer(modifier = Modifier.weight(1f))
-        LiquidBox(
-            modifier = Modifier,
-            text = liquidBoxText
-        )
-        Spacer(modifier = Modifier.weight(1f))
-        Image(
-            painter = painterResource(avatarId),
-            contentDescription = null,
-            contentScale = ContentScale.FillWidth,
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
         )
     }
 }
