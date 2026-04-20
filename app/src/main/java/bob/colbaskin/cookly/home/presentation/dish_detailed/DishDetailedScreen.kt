@@ -373,12 +373,40 @@ private fun DishSheet(
                         .fillMaxWidth(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "контент",
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = Color(0xFF171717)
-                    )
+                    Column(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Text(
+                            text = "Очень вкусная свежая иичница их мятых иичек с вилочкой и хлебушком сочным и перчиком ммм",
+                            style = CustomTheme.typography.helvetica.titleMedium,
+                            fontWeight = FontWeight.Light,
+                            color = colors.tertiaryText
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Ингридиенты:",
+                            style = CustomTheme.typography.helvetica.headlineSmall,
+                            fontWeight = FontWeight.Normal,
+                            color = colors.text
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+//                        FlowRow(
+//                            modifier = Modifier
+//                                .fillMaxWidth()
+//                                .padding(8.dp),
+//                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+//                            verticalArrangement = Arrangement.spacedBy(8.dp)
+//                        ) {
+//                            AllergyOption.entries.forEach { allergy ->
+//                                val isSelected = selectedAllergies.contains(allergy)
+//                                AllergyChip(
+//                                    allergy = allergy,
+//                                    isSelected = isSelected,
+//                                    onClick = { onToggleAllergy(allergy) }
+//                                )
+//                            }
+//                        }
+                    }
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
