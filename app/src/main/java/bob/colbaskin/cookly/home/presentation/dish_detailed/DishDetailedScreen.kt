@@ -25,6 +25,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -49,6 +52,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -56,7 +60,7 @@ import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
 import kotlin.math.roundToInt
 import bob.colbaskin.cookly.R
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
-import bob.colbaskin.cookly.home.presentation.components.DishDataIcon
+import bob.colbaskin.cookly.home.domain.models.Allergen
 import bob.colbaskin.cookly.home.presentation.components.SheetTopBar
 
 @Composable
@@ -356,7 +360,6 @@ private fun DishSheet(
             modifier = Modifier
                 .offset { IntOffset(0, localSheetOffsetInt) }
                 .fillMaxSize()
-                .zIndex(1f)
                 .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
                 .background(colors.background)
         ) {
@@ -370,44 +373,68 @@ private fun DishSheet(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center
+                        .fillMaxWidth()
                 ) {
                     Column(
                         modifier = Modifier.fillMaxSize()
                     ) {
+                        DishMetaInfoCard(
+                            modifier = Modifier.fillMaxWidth(),
+                            minutes = state.minutes,
+                            difficulty = state.difficulty,
+                            spicyLevel = state.spicyLvl,
+                            allergens = state.allergensList,
+                            mealType = state.mealType,
+                            rating = state.rating,
+                            ratingAmount = state.ratingAmount,
+                            kcal = state.kcal,
+                            isFlameIconRed = state.isFlameIconRed
+                        )
+                        Spacer(modifier = Modifier.height(20.dp))
                         Text(
-                            text = "Очень вкусная свежая иичница их мятых иичек с вилочкой и хлебушком сочным и перчиком ммм",
+                            text = state.description,
                             style = CustomTheme.typography.helvetica.titleMedium,
                             fontWeight = FontWeight.Light,
                             color = colors.tertiaryText
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "Ингридиенты:",
+                            text = "Ингредиенты:",
                             style = CustomTheme.typography.helvetica.headlineSmall,
                             fontWeight = FontWeight.Normal,
                             color = colors.text
                         )
                         Spacer(modifier = Modifier.height(12.dp))
-//                        FlowRow(
-//                            modifier = Modifier
-//                                .fillMaxWidth()
-//                                .padding(8.dp),
-//                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-//                            verticalArrangement = Arrangement.spacedBy(8.dp)
-//                        ) {
-//                            AllergyOption.entries.forEach { allergy ->
-//                                val isSelected = selectedAllergies.contains(allergy)
-//                                AllergyChip(
-//                                    allergy = allergy,
-//                                    isSelected = isSelected,
-//                                    onClick = { onToggleAllergy(allergy) }
-//                                )
-//                            }
-//                        }
+                        LazyRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            items(state.ingredientsList) { ingredient ->
+                                Column(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(20.dp))
+                                        .background(colors.ingredientSurface)
+                                        .padding(horizontal = 28.dp, vertical = 8.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = ingredient.name,
+                                        style = CustomTheme.typography.nunito.titleSmall,
+                                        fontWeight = FontWeight.Normal,
+                                        fontSize = 18.sp,
+                                        color = colors.text
+                                    )
+                                    Text(
+                                        text = "${ingredient.count} ${ingredient.unitOfMeasurement}",
+                                        style = CustomTheme.typography.nunito.bodySmall,
+                                        color = colors.text
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
@@ -423,6 +450,7 @@ private fun DishSheet(
                 }
             }
         }
+
         DishAvatar(
             modifier = Modifier
                 .align(Alignment.TopCenter)
@@ -432,37 +460,155 @@ private fun DishSheet(
                         y = localSheetOffsetInt - halfAvatarPx
                     )
                 }
-                .size(avatarSize)
-                .zIndex(2f),
+                .size(avatarSize),
             dishAvatarId = dishAvatarId
         )
+    }
+}
+
+@Composable
+private fun DishMetaInfoCard(
+    modifier: Modifier = Modifier,
+    minutes: Int,
+    difficulty: String,
+    spicyLevel: Int,
+    allergens: List<Allergen>,
+    mealType: String,
+    rating: Double,
+    ratingAmount: Int,
+    kcal: Int,
+    isFlameIconRed: Boolean
+) {
+    val colors = CustomTheme.colors
+
+    Column(
+        modifier = modifier.background(colors.background)
+    ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .offset { IntOffset(0, localSheetOffsetInt) }
-                .padding(horizontal = 20.dp)
-                .padding(top = 24.dp)
-                .zIndex(3f),
-            horizontalArrangement = Arrangement.SpaceBetween
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            DishDataIcon(
-                text = "${state.rating}(${state.ratingAmount})",
-                containerColor = colors.outlinedStatsSurface,
-                dishDataIcon = R.drawable.star_ic
+            InfoIconValueBlock(
+                modifier = Modifier.weight(1f),
+                iconRes = R.drawable.timer_ic,
+                text = "$minutes минут",
+                iconTint = colors.text
             )
-            DishDataIcon(
-                modifier = Modifier.offset(y = avatarSize / 5),
-                text = "${state.kcal} kcal",
-                containerColor = colors.outlinedStatsSurface,
-                dishDataIcon = R.drawable.flame_ic,
-                isFlameIconRed = false
+            InfoIconValueBlock(
+                modifier = Modifier.weight(1f),
+                iconRes = R.drawable.flame_ic,
+                text = "$kcal kcal",
+                iconTint = if (isFlameIconRed) colors.flameColor else colors.text
             )
-            DishDataIcon(
-                text = "${state.minutes} min",
-                containerColor = colors.outlinedStatsSurface,
-                dishDataIcon = R.drawable.timer_ic
+            InfoIconValueBlock(
+                modifier = Modifier.weight(1f),
+                iconRes = R.drawable.star_ic,
+                text = "$rating ($ratingAmount)",
+                iconTint = colors.accentColor
             )
         }
+        Spacer(modifier = Modifier.height(12.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(24.dp)
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                InfoTitleValueBlock(
+                    title = "Сложность",
+                    value = difficulty
+                )
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Острота",
+                    style = CustomTheme.typography.nunito.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = colors.text
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                SpicyLevelRow(level = spicyLevel)
+            }
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        InfoTitleValueBlock(
+            title = "Кухня",
+            value = mealType.lowercase()
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        InfoTitleValueBlock(
+            title = "Распространенный аллерген",
+            value = allergens.takeIf { it.isNotEmpty() }
+                ?.joinToString(", ") { it.name }
+                ?: "Не указано"
+        )
+    }
+}
+
+@Composable
+private fun SpicyLevelRow(
+    level: Int,
+    maxLevel: Int = 5
+) {
+    val colors = CustomTheme.colors
+
+    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        repeat(maxLevel) { index ->
+            Icon(
+                painter = painterResource(id = R.drawable.hot_pepper_ic),
+                contentDescription = null,
+                tint = if (index < level) colors.likeColor else colors.secondaryText,
+                modifier = Modifier.size(16.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun InfoTitleValueBlock(
+    title: String,
+    value: String
+) {
+    val colors = CustomTheme.colors
+
+    Text(
+        text = title,
+        style = CustomTheme.typography.nunito.titleMedium,
+        fontWeight = FontWeight.SemiBold,
+        color = colors.text
+    )
+    Text(
+        text = value,
+        style = CustomTheme.typography.nunito.bodyLarge,
+        color = colors.text.copy(alpha = 0.8f)
+    )
+}
+
+@Composable
+private fun InfoIconValueBlock(
+    modifier: Modifier = Modifier,
+    @DrawableRes iconRes: Int,
+    text: String,
+    iconTint: Color
+) {
+    val colors = CustomTheme.colors
+
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painterResource(id = iconRes),
+            contentDescription = null,
+            tint = iconTint,
+            modifier = Modifier.size(18.dp)
+        )
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(
+            text = text,
+            style = CustomTheme.typography.nunito.bodyLarge,
+            fontWeight = FontWeight.Bold,
+            color = colors.text
+        )
     }
 }
 

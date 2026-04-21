@@ -2,6 +2,7 @@ package bob.colbaskin.cookly.common.design_system.theme
 
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import bob.colbaskin.cookly.home.domain.models.Ingredient
 
 data class AppColors(
     val background: Color,
@@ -30,7 +31,8 @@ data class AppColors(
     val dishCardBackground: Color,
     val liquidBackground: Color,
     val addToCartColor: Color,
-    val accentSecondSurface: Color
+    val accentSecondSurface: Color,
+    val ingredientSurface: Color
 )
 
 val localColors = staticCompositionLocalOf { darkColorsScheme }
@@ -63,6 +65,7 @@ val darkColorsScheme = AppColors(
     liquidBackground = Color(0xFFA1968A),
     addToCartColor = Color(0xFF3D3D3D),
     accentSecondSurface = Color(0xFFFFE27E),
+    ingredientSurface = Color(0xFFECF2F0),
 )
 
 val lightColorsScheme = AppColors(
@@ -93,4 +96,5 @@ val lightColorsScheme = AppColors(
     liquidBackground = Color(0xFFA1968A),
     addToCartColor = Color(0xFF3D3D3D),
     accentSecondSurface = Color(0xFFFFE27E),
+    ingredientSurface = Color(0xFFECF2F0),
 )
