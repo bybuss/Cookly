@@ -9,12 +9,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bob.colbaskin.cookly.BuildConfig
 import bob.colbaskin.cookly.auth.data.models.CodeToTokenDTO
-import bob.colbaskin.cookly.auth.domain.local.AuthDataStoreRepository
 import bob.colbaskin.cookly.auth.domain.network.AuthRepository
 import bob.colbaskin.cookly.common.UiState
 import bob.colbaskin.cookly.common.toUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.security.MessageDigest
 import java.security.SecureRandom
