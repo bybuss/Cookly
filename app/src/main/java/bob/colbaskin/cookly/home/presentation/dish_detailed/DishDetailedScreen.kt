@@ -13,12 +13,14 @@ import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.anchoredDraggable
+import androidx.compose.foundation.gestures.animateTo
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -35,7 +37,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -44,6 +49,7 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -61,6 +67,7 @@ import kotlin.math.roundToInt
 import bob.colbaskin.cookly.R
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.home.domain.models.Allergen
+import bob.colbaskin.cookly.home.domain.models.StartCookSwipeAnchor
 import bob.colbaskin.cookly.home.presentation.components.SheetTopBar
 
 @Composable
@@ -77,6 +84,7 @@ fun DishDetailedScreenRoot(
         onAction = { action ->
             when (action) {
                 DishDetailedAction.NavigateBack -> navController.popBackStack()
+                DishDetailedAction.StartCook -> navController.popBackStack() // FIXME: изменить потом на навигацию на шаги готовки рецепта жи ес
                 else -> Unit
             }
             viewModel.onAction(action)
@@ -276,46 +284,119 @@ private fun DishAvatar(
 }
 
 @Composable
-private fun StartCookSliderButton(
+private fun StartCookSwipeButton(
     modifier: Modifier = Modifier,
-    onClick: () -> Unit
+    onSwiped: () -> Unit
 ) {
-    Row(
+    val density = LocalDensity.current
+
+    val thumbSize = 62.dp
+    val horizontalPadding = 8.dp
+    val shape = RoundedCornerShape(999.dp)
+
+    var containerWidthPx by remember { mutableIntStateOf(0) }
+    val thumbSizePx = with(density) { thumbSize.roundToPx() }
+    val horizontalPaddingPx = with(density) { horizontalPadding.roundToPx() }
+
+    val maxDragPx = remember(containerWidthPx, thumbSizePx, horizontalPaddingPx) {
+        (containerWidthPx - thumbSizePx - horizontalPaddingPx * 2).coerceAtLeast(0)
+    }
+
+    val anchoredState = remember {
+        AnchoredDraggableState(
+            initialValue = StartCookSwipeAnchor.Start
+        )
+    }
+
+    val anchors = remember(maxDragPx) {
+        DraggableAnchors {
+            StartCookSwipeAnchor.Start at 0f
+            StartCookSwipeAnchor.End at maxDragPx.toFloat()
+        }
+    }
+
+    LaunchedEffect(anchors) {
+        anchoredState.updateAnchors(anchors)
+    }
+
+    LaunchedEffect(anchoredState.currentValue) {
+        if (anchoredState.currentValue == StartCookSwipeAnchor.End) {
+            onSwiped()
+            anchoredState.animateTo(StartCookSwipeAnchor.Start)
+        }
+    }
+
+    val flingBehavior = AnchoredDraggableDefaults.flingBehavior(
+        state = anchoredState,
+        positionalThreshold = { distance -> distance * 0.5f },
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioNoBouncy,
+            stiffness = Spring.StiffnessMedium
+        )
+    )
+
+    val rawOffset = if (anchoredState.offset.isNaN()) 0f else anchoredState.requireOffset()
+    val thumbOffset = rawOffset.coerceIn(0f, maxDragPx.toFloat())
+
+    Box(
         modifier = modifier
             .height(78.dp)
-            .clip(RoundedCornerShape(999.dp))
+            .clip(shape)
             .background(Color.White)
             .border(
                 width = 1.dp,
                 color = Color.Black.copy(alpha = 0.10f),
-                shape = RoundedCornerShape(999.dp)
+                shape = shape
             )
-            .clickable(onClick = onClick),
-        verticalAlignment = Alignment.CenterVertically
+            .onSizeChanged { containerWidthPx = it.width }
     ) {
         Box(
             modifier = Modifier
-                .padding(start = 8.dp)
-                .size(62.dp)
-                .clip(CircleShape)
-                .background(Color(0xFFE9A12D)),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "≫",
-                style = MaterialTheme.typography.titleLarge,
-                color = Color.White
-            )
-        }
+                .fillMaxHeight()
+                .fillMaxWidth(
+                    fraction = ((thumbOffset + thumbSizePx + horizontalPaddingPx) / containerWidthPx.toFloat())
+                        .coerceIn(0f, 1f)
+                )
+                .clip(shape)
+                .background(Color(0x14E9A12D))
+        )
 
         Box(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .matchParentSize()
+                .padding(horizontal = 24.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = "Приготовить!",
                 style = MaterialTheme.typography.titleLarge,
                 color = Color(0xFF171717)
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .offset {
+                    IntOffset(
+                        x = horizontalPaddingPx + thumbOffset.roundToInt(),
+                        y = 0
+                    )
+                }
+                .size(thumbSize)
+                .clip(CircleShape)
+                .background(Color(0xFFE9A12D))
+                .anchoredDraggable(
+                    state = anchoredState,
+                    orientation = Orientation.Horizontal,
+                    flingBehavior = flingBehavior
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "≫",
+                style = MaterialTheme.typography.titleLarge,
+                color = Color.White
             )
         }
     }
@@ -439,9 +520,9 @@ private fun DishSheet(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    StartCookSliderButton(
+                    StartCookSwipeButton(
                         modifier = Modifier.weight(1f),
-                        onClick = { onAction(DishDetailedAction.StartCook) }
+                        onSwiped = { onAction(DishDetailedAction.StartCook) }
                     )
                     Spacer(modifier = Modifier.size(16.dp))
                     CartBubble(
