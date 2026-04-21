@@ -88,7 +88,7 @@ private fun getStartDestination(
     when (agreementStatus) {
         AgreementConfig.ACCEPTED -> when (authStatus) {
             AuthConfig.AUTHENTICATED -> Graphs.Onboarding
-            AuthConfig.NOT_AUTHENTICATED -> Graphs.Main
+            AuthConfig.NOT_AUTHENTICATED -> Graphs.Auth
         }
         AgreementConfig.NOT_ACCEPTED -> Graphs.Agreement
     }
