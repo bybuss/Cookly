@@ -19,6 +19,7 @@ import bob.colbaskin.cookly.common.UiState
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.common.user_prefs.data.models.AgreementConfig
 import bob.colbaskin.cookly.common.user_prefs.data.models.AuthConfig
+import bob.colbaskin.cookly.common.user_prefs.data.models.OnboardingConfig
 import bob.colbaskin.cookly.common.user_prefs.data.models.UserPreferences
 import bob.colbaskin.cookly.navigation.bottom_bar.BottomNavBar
 import bob.colbaskin.cookly.navigation.graphs.Graphs
@@ -68,6 +69,7 @@ fun AppNavHost(uiState: UiState.Success<UserPreferences>) {
             startDestination = getStartDestination(
                 agreementStatus = uiState.data.agreementStatus,
                 authStatus = uiState.data.authStatus,
+                onboardingStatus = uiState.data.onboardingStatus
             ),
             navController = navController,
             modifier = Modifier.padding(adjustedPadding),
@@ -83,12 +85,16 @@ fun AppNavHost(uiState: UiState.Success<UserPreferences>) {
 
 private fun getStartDestination(
     agreementStatus: AgreementConfig,
-    authStatus: AuthConfig
+    authStatus: AuthConfig,
+    onboardingStatus: OnboardingConfig
 ) =
     when (agreementStatus) {
         AgreementConfig.ACCEPTED -> when (authStatus) {
-            AuthConfig.AUTHENTICATED -> Graphs.Onboarding
             AuthConfig.NOT_AUTHENTICATED -> Graphs.Auth
+            AuthConfig.AUTHENTICATED -> when (onboardingStatus) {
+                OnboardingConfig.NOT_STARTED, OnboardingConfig.IN_PROGRESS -> Graphs.Onboarding
+                OnboardingConfig.COMPLETED -> Graphs.Main
+            }
         }
         AgreementConfig.NOT_ACCEPTED -> Graphs.Agreement
     }
