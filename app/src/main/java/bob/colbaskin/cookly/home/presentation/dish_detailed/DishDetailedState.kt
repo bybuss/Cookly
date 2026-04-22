@@ -14,7 +14,7 @@ data class DishDetailedState(
     val ratingAmount: Int = 163,
     val minutes: Int = 20,
     val kcal: Int = 150,
-    val difficulty: String = "Легко",
+    val difficultyLvl: Int = 2,
     val spicyLvl: Int = 3,
     val allergensList: List<Allergen> = mockAllergensList,
     val isRecipeLiked: Boolean = true,

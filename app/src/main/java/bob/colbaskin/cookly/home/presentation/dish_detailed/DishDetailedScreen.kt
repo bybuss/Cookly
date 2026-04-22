@@ -462,7 +462,7 @@ private fun DishSheet(
                         DishMetaInfoCard(
                             modifier = Modifier.fillMaxWidth(),
                             minutes = state.minutes,
-                            difficulty = state.difficulty,
+                            difficultyLvl = state.difficultyLvl,
                             spicyLevel = state.spicyLvl,
                             allergens = state.allergensList,
                             mealType = state.mealType,
@@ -471,7 +471,7 @@ private fun DishSheet(
                             kcal = state.kcal,
                             isFlameIconRed = state.isFlameIconRed
                         )
-                        Spacer(modifier = Modifier.height(20.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
                         Text(
                             text = state.description,
                             style = CustomTheme.typography.helvetica.titleMedium,
@@ -551,7 +551,7 @@ private fun DishSheet(
 private fun DishMetaInfoCard(
     modifier: Modifier = Modifier,
     minutes: Int,
-    difficulty: String,
+    difficultyLvl: Int,
     spicyLevel: Int,
     allergens: List<Allergen>,
     mealType: String,
@@ -567,55 +567,53 @@ private fun DishMetaInfoCard(
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(20.dp)
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             InfoIconValueBlock(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier,
                 iconRes = R.drawable.timer_ic,
                 text = "$minutes минут",
                 iconTint = colors.text
             )
             InfoIconValueBlock(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier,
                 iconRes = R.drawable.flame_ic,
                 text = "$kcal kcal",
                 iconTint = if (isFlameIconRed) colors.flameColor else colors.text
             )
             InfoIconValueBlock(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier,
                 iconRes = R.drawable.star_ic,
                 text = "$rating ($ratingAmount)",
                 iconTint = colors.accentColor
             )
         }
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(24.dp)
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                InfoTitleValueBlock(
-                    title = "Сложность",
-                    value = difficulty
-                )
-            }
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "Острота",
-                    style = CustomTheme.typography.nunito.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = colors.text
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                SpicyLevelRow(level = spicyLevel)
-            }
+            IconLevelBlock(
+                modifier = Modifier,
+                title = "Сложность",
+                currentLvl = difficultyLvl,
+                iconId = R.drawable.chef_hat_ai,
+                activeColor = colors.accentColor
+            )
+            IconLevelBlock(
+                modifier = Modifier,
+                title = "Острота",
+                currentLvl = spicyLevel,
+                iconId = R.drawable.hot_pepper_ic,
+                activeColor = colors.likeColor
+            )
         }
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         InfoTitleValueBlock(
             title = "Кухня",
             value = mealType.lowercase()
         )
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         InfoTitleValueBlock(
             title = "Распространенный аллерген",
             value = allergens.takeIf { it.isNotEmpty() }
@@ -626,20 +624,33 @@ private fun DishMetaInfoCard(
 }
 
 @Composable
-private fun SpicyLevelRow(
-    level: Int,
-    maxLevel: Int = 5
+private fun IconLevelBlock(
+    modifier: Modifier = Modifier,
+    title: String,
+    currentLvl: Int,
+    maxLevel: Int = 5,
+    @DrawableRes iconId: Int,
+    activeColor: Color
 ) {
     val colors = CustomTheme.colors
 
-    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        repeat(maxLevel) { index ->
-            Icon(
-                painter = painterResource(id = R.drawable.hot_pepper_ic),
-                contentDescription = null,
-                tint = if (index < level) colors.likeColor else colors.secondaryText,
-                modifier = Modifier.size(16.dp)
-            )
+    Column(modifier = modifier) {
+        Text(
+            text = title,
+            style = CustomTheme.typography.nunito.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = colors.text
+        )
+        Spacer(modifier = Modifier.height(6.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            repeat(maxLevel) { index ->
+                Icon(
+                    painter = painterResource(id = iconId),
+                    contentDescription = null,
+                    tint = if (index < currentLvl) activeColor else colors.secondaryText,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
         }
     }
 }
