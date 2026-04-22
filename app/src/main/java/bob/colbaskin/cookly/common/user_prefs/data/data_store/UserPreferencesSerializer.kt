@@ -1,4 +1,4 @@
-package bob.colbaskin.cookly.common.user_prefs.data.dataStore
+package bob.colbaskin.cookly.common.user_prefs.data.data_store
 
 import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.Serializer

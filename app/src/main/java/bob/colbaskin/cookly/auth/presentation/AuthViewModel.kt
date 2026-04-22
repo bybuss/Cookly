@@ -8,7 +8,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bob.colbaskin.cookly.BuildConfig
-import bob.colbaskin.cookly.auth.data.models.CodeToTokenBody
 import bob.colbaskin.cookly.auth.domain.network.AuthRepository
 import bob.colbaskin.cookly.common.UiState
 import bob.colbaskin.cookly.common.toUiState
@@ -137,10 +136,8 @@ class AuthViewModel @Inject constructor(
 
         viewModelScope.launch {
             val response = authRepository.codeToToken(
-                request = CodeToTokenBody(
-                    authCode = code,
-                    codeChallenger = codeChallenge ?: ""
-                )
+                authCode = code,
+                codeChallenger = codeChallenge ?: ""
             ).toUiState()
 
             state = state.copy(

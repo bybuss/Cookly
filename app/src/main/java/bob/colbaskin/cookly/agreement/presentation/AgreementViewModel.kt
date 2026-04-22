@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bob.colbaskin.cookly.common.user_prefs.data.models.AgreementConfig
+import bob.colbaskin.cookly.common.user_prefs.domain.models.proto_configs.AgreementConfig
 import bob.colbaskin.cookly.common.user_prefs.domain.UserPreferencesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch

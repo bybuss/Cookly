@@ -6,7 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bob.colbaskin.cookly.common.user_prefs.data.models.OnboardingConfig
+import bob.colbaskin.cookly.common.user_prefs.domain.models.proto_configs.OnboardingConfig
 import bob.colbaskin.cookly.common.user_prefs.domain.UserPreferencesRepository
 import bob.colbaskin.cookly.onboarding_preferences.domain.models.AllergyOption
 import bob.colbaskin.cookly.onboarding_preferences.domain.models.DietOption

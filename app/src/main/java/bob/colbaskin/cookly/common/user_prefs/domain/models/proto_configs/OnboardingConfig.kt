@@ -1,4 +1,4 @@
-package bob.colbaskin.cookly.common.user_prefs.data.models
+package bob.colbaskin.cookly.common.user_prefs.domain.models.proto_configs
 
 enum class OnboardingConfig {
     NOT_STARTED,

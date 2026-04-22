@@ -3,8 +3,8 @@ syntax = "proto3";
 option java_package = "bob.colbaskin.cookly.datastore";
 option java_multiple_files = true;
 
-enum OnboardingStatus {
-  NOT_STARTED = 0;
-  IN_PROGRESS = 1;
-  COMPLETED = 2;
+enum RoleStatus {
+  ADMIN = 0;
+  MODERATOR = 1;
+  USER = 2;
 }

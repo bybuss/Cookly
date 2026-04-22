@@ -1,11 +1,12 @@
 package bob.colbaskin.cookly.common.user_prefs.data
 
-import bob.colbaskin.cookly.common.user_prefs.data.dataStore.UserDataStore
-import bob.colbaskin.cookly.common.user_prefs.data.models.AgreementConfig
-import bob.colbaskin.cookly.common.user_prefs.data.models.AuthConfig
-import bob.colbaskin.cookly.common.user_prefs.data.models.OnboardingConfig
-import bob.colbaskin.cookly.common.user_prefs.data.models.UserPreferences
+import bob.colbaskin.cookly.common.user_prefs.data.data_store.UserDataStore
+import bob.colbaskin.cookly.common.user_prefs.domain.models.proto_configs.AgreementConfig
+import bob.colbaskin.cookly.common.user_prefs.domain.models.proto_configs.AuthConfig
+import bob.colbaskin.cookly.common.user_prefs.domain.models.proto_configs.OnboardingConfig
+import bob.colbaskin.cookly.common.user_prefs.domain.models.UserPreferences
 import bob.colbaskin.cookly.common.user_prefs.domain.UserPreferencesRepository
+import bob.colbaskin.cookly.common.user_prefs.domain.models.User
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -14,6 +15,8 @@ class UserPreferencesRepositoryImpl @Inject constructor(
 ): UserPreferencesRepository {
     override fun getUserPreferences(): Flow<UserPreferences> = dataStore.getUserPreferences()
 
+    override fun getAuthStatus(): Flow<AuthConfig> = dataStore.getAuthStatus()
+
     override suspend fun saveAgreementStatus(status: AgreementConfig)
         = dataStore.saveAgreementStatus(status)
 
@@ -21,4 +24,8 @@ class UserPreferencesRepositoryImpl @Inject constructor(
 
     override suspend fun saveOnboardingStatus(status: OnboardingConfig)
         = dataStore.saveOnboardingStatus(status)
+
+    override suspend fun saveUserInfo(user: User)
+        = dataStore.saveUserInfo(user)
+
 }

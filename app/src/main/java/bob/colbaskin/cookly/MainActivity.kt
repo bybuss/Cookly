@@ -19,7 +19,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import bob.colbaskin.cookly.common.MainViewModel
 import bob.colbaskin.cookly.common.UiState
 import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
-import bob.colbaskin.cookly.common.user_prefs.data.models.UserPreferences
+import bob.colbaskin.cookly.common.user_prefs.domain.models.UserPreferences
 import bob.colbaskin.cookly.navigation.AppNavHost
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect

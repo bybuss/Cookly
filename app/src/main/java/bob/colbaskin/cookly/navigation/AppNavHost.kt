@@ -17,10 +17,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import bob.colbaskin.cookly.common.UiState
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
-import bob.colbaskin.cookly.common.user_prefs.data.models.AgreementConfig
-import bob.colbaskin.cookly.common.user_prefs.data.models.AuthConfig
-import bob.colbaskin.cookly.common.user_prefs.data.models.OnboardingConfig
-import bob.colbaskin.cookly.common.user_prefs.data.models.UserPreferences
+import bob.colbaskin.cookly.common.user_prefs.domain.models.proto_configs.AgreementConfig
+import bob.colbaskin.cookly.common.user_prefs.domain.models.proto_configs.AuthConfig
+import bob.colbaskin.cookly.common.user_prefs.domain.models.proto_configs.OnboardingConfig
+import bob.colbaskin.cookly.common.user_prefs.domain.models.UserPreferences
 import bob.colbaskin.cookly.navigation.bottom_bar.BottomNavBar
 import bob.colbaskin.cookly.navigation.graphs.Graphs
 import bob.colbaskin.cookly.navigation.graphs.agreementGraph

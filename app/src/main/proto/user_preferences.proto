@@ -3,6 +3,7 @@ syntax = "proto3";
 import "auth_status.proto";
 import "onboarding_status.proto";
 import "agreement_status.proto";
+import "role_status.proto";
 
 option java_package = "bob.colbaskin.cookly.datastore";
 option java_multiple_files = true;
@@ -11,4 +12,8 @@ message UserPreferencesProto {
   OnboardingStatus onboardingStatus = 1;
   AuthStatus authStatus = 2;
   AgreementStatus agreementStatus  = 3;
+  string id = 4;
+  string email = 5;
+  RoleStatus role = 6;
+  string avatarUrl = 7;
 }

@@ -2,6 +2,7 @@ package bob.colbaskin.cookly.auth.data
 
 import bob.colbaskin.cookly.auth.data.models.CodeToTokenBody
 import bob.colbaskin.cookly.auth.data.models.CodeToTokenDTO
+import bob.colbaskin.cookly.auth.data.models.UserDTO
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -13,4 +14,7 @@ interface AuthApiService {
 
     @GET("/auth/login")
     suspend fun login()
+
+    @GET("/user/me")
+    suspend fun me(): UserDTO
 }
