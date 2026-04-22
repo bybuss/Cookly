@@ -8,7 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bob.colbaskin.cookly.BuildConfig
-import bob.colbaskin.cookly.auth.data.models.CodeToTokenDTO
+import bob.colbaskin.cookly.auth.data.models.CodeToTokenBody
 import bob.colbaskin.cookly.auth.domain.network.AuthRepository
 import bob.colbaskin.cookly.common.UiState
 import bob.colbaskin.cookly.common.toUiState
@@ -118,7 +118,7 @@ class AuthViewModel @Inject constructor(
     }
 
     private fun buildAuthUrl(): String {
-        return "${BuildConfig.BASE_API_URL}/pages/login.html".toUri()
+        return "${BuildConfig.AUTH_SERVICE_BASE_API_URL}/pages/login.html".toUri()
             .buildUpon()
             .appendQueryParameter("ref_id", refId)
             .appendQueryParameter("redirect_url", redirectUrl)
@@ -137,7 +137,7 @@ class AuthViewModel @Inject constructor(
 
         viewModelScope.launch {
             val response = authRepository.codeToToken(
-                request = CodeToTokenDTO(
+                request = CodeToTokenBody(
                     authCode = code,
                     codeChallenger = codeChallenge ?: ""
                 )

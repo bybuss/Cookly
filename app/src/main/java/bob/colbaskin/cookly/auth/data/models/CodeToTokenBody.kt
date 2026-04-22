@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CodeToTokenDTO(
-    @SerialName("refresh_token") val refreshToken: String,
-    @SerialName("access_token") val accessToken: String,
+data class CodeToTokenBody(
+    @SerialName("auth_code") val authCode: String,
+    @SerialName("code_challenger") val codeChallenger: String,
 )
