@@ -252,7 +252,6 @@ class CreateRecipeViewModel @Inject constructor(
     }
 
     private fun estimatedTimeToApiValue(hour: Int, minute: Int): Int {
-        // [Смоделировано] Если backend хранит не минуты, меняется только этот mapper.
         return hour * 60 + minute
     }
 }

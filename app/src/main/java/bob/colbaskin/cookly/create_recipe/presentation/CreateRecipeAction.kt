@@ -40,14 +40,4 @@ sealed interface CreateRecipeAction {
     data object Submit: CreateRecipeAction
     data object ConsumeSuccess: CreateRecipeAction
     data object DismissError: CreateRecipeAction
-
-    data class ShowSheet(val sheet: CreateRecipeBottomSheet) : CreateRecipeAction
-    data object HideSheet : CreateRecipeAction
-
-    data class ToggleCategory(val id: Int) : CreateRecipeAction
-    data object ConfirmCategories : CreateRecipeAction
-
-    data class UpdateIngredientGroupQuery(val value: String) : CreateRecipeAction
-    data class ToggleIngredientGroup(val id: Int) : CreateRecipeAction
-    data object ConfirmIngredientGroups : CreateRecipeAction
 }
