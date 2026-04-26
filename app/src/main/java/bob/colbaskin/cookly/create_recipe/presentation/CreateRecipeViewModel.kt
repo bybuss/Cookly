@@ -223,10 +223,7 @@ class CreateRecipeViewModel @Inject constructor(
         return CreateRecipeCommand(
             title = title.trim(),
             description = description.trim(),
-            estimatedTime = estimatedTimeToApiValue(
-                hour = estimatedHour,
-                minute = estimatedMinute
-            ),
+            estimatedTime = (estimatedHour * 60) + estimatedMinute,
             caloriesBy100Grams = caloriesBy100Grams.toIntOrNull(),
             mealTime = mealTime.trim().takeIf { it.isNotBlank() },
             categories = categories.map {
@@ -249,10 +246,6 @@ class CreateRecipeViewModel @Inject constructor(
             },
             mainPhoto = mainPhoto?.toDomain()
         )
-    }
-
-    private fun estimatedTimeToApiValue(hour: Int, minute: Int): Int {
-        return hour * 60 + minute
     }
 }
 
