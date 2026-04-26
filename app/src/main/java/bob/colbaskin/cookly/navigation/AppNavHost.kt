@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -16,6 +18,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import bob.colbaskin.cookly.common.UiState
+import bob.colbaskin.cookly.common.components.CustomSnackbarHost
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.common.user_prefs.domain.models.proto_configs.AgreementConfig
 import bob.colbaskin.cookly.common.user_prefs.domain.models.proto_configs.AuthConfig
@@ -46,7 +49,10 @@ fun AppNavHost(uiState: UiState.Success<UserPreferences>) {
     }
     val layoutDirection = LocalLayoutDirection.current
 
+    val snackbarHostState = remember { SnackbarHostState() }
+
     Scaffold(
+        snackbarHost = { CustomSnackbarHost(hostState = snackbarHostState) },
         bottomBar = {
             AnimatedVisibility(visible = isBottomBarVisible) {
                 BottomNavBar(navController = navController)
@@ -77,7 +83,7 @@ fun AppNavHost(uiState: UiState.Success<UserPreferences>) {
             agreementGraph(navController = navController)
             authGraph(navController = navController)
             onboardingGraph(navController = navController)
-            mainGraph(navController = navController)
+            mainGraph(navController = navController, snackbarHostState = snackbarHostState)
             detailedGraph(navController = navController)
         }
     }

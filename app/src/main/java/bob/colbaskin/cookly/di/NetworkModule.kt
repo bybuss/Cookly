@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import bob.colbaskin.cookly.BuildConfig
 import bob.colbaskin.cookly.auth.data.AuthApiService
+import bob.colbaskin.cookly.create_recipe.data.CreateRecipeApiService
 import bob.colbaskin.cookly.di.token.TokenAuthenticator
 import bob.colbaskin.cookly.di.token.TokenInterceptor
 import com.franmontiel.persistentcookiejar.PersistentCookieJar
@@ -138,5 +139,13 @@ object NetworkModule {
         @Named("RecipeServiceRetrofit") recipeServiceRetrofit: Retrofit
     ): AuthApiService {
         return recipeServiceRetrofit.create(AuthApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCreateRecipeApiService(
+        @Named("RecipeServiceRetrofit") recipeServiceRetrofit: Retrofit
+    ): CreateRecipeApiService {
+        return recipeServiceRetrofit.create(CreateRecipeApiService::class.java)
     }
 }

@@ -7,6 +7,9 @@ import bob.colbaskin.cookly.auth.domain.network.AuthRepository
 import bob.colbaskin.cookly.common.user_prefs.data.UserPreferencesRepositoryImpl
 import bob.colbaskin.cookly.common.user_prefs.data.data_store.UserDataStore
 import bob.colbaskin.cookly.common.user_prefs.domain.UserPreferencesRepository
+import bob.colbaskin.cookly.create_recipe.data.CreateRecipeApiService
+import bob.colbaskin.cookly.create_recipe.data.CreateRecipeRepositoryImpl
+import bob.colbaskin.cookly.create_recipe.domain.CreateRecipeRepository
 import bob.colbaskin.cookly.di.token.TokenDataStore
 import dagger.Module
 import dagger.Provides
@@ -41,6 +44,18 @@ object RepositoryModule {
             authApiAuthService = authApiAuthService,
             authApiRecipeService = authApiRecipeService,
             userPreferencesRepository = userPreferencesRepository
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideCreateRecipeRepository(
+        @ApplicationContext context: Context,
+        apiService: CreateRecipeApiService
+    ): CreateRecipeRepository {
+        return CreateRecipeRepositoryImpl(
+            context = context,
+            apiService = apiService
         )
     }
 }

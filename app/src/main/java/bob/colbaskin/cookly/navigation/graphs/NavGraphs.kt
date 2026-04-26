@@ -3,6 +3,7 @@ package bob.colbaskin.cookly.navigation.graphs
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,6 +16,7 @@ import bob.colbaskin.cookly.agreement.presentation.AgreementScreenRoot
 import bob.colbaskin.cookly.agreement.presentation.policy.PolicyScreenRoot
 import bob.colbaskin.cookly.agreement.presentation.terms_of_use.TermsOfUseScreenRoot
 import bob.colbaskin.cookly.auth.presentation.AuthScreenRoot
+import bob.colbaskin.cookly.create_recipe.presentation.CreateRecipeScreenRoot
 import bob.colbaskin.cookly.home.presentation.dish_detailed.DishDetailedScreenRoot
 import bob.colbaskin.cookly.home.presentation.main.HomeScreenRoot
 import bob.colbaskin.cookly.home.presentation.meal_detailed.MealCategoryDetailedScreenRoot
@@ -54,7 +56,8 @@ fun NavGraphBuilder.onboardingGraph(
 }
 
 fun NavGraphBuilder.mainGraph(
-    navController: NavHostController
+    navController: NavHostController,
+    snackbarHostState: SnackbarHostState
 ) {
     navigation<Graphs.Main> (
         startDestination = Screens.Home
@@ -62,11 +65,11 @@ fun NavGraphBuilder.mainGraph(
         composable<Screens.Home> { HomeScreenRoot(navController = navController) }
         composable<Screens.Cart> { MealCategoryDetailedScreenRoot(navController = navController) }
         composable<Screens.Chat> {
-            Box(modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Red), contentAlignment = Alignment.Center) {
-                Text(text = "Chat Screen")
-            }
+            CreateRecipeScreenRoot(
+                navController = navController,
+                snackbarHostState = snackbarHostState,
+                onNavigateToSuccess = { navController.popBackStack() },
+            )
         }
         composable<Screens.Favourites> { DishDetailedScreenRoot(navController = navController) }
         composable<Screens.Profile> {

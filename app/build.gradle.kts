@@ -120,4 +120,7 @@ dependencies {
     implementation(libs.retrofit2.kotlinx.serialization.converter)
     implementation(libs.logging.interceptor)
     implementation(libs.persistentcookiejar)
+
+    // Coil
+    implementation(libs.coil.compose)
 }   
