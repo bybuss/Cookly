@@ -24,6 +24,8 @@ import retrofit2.Retrofit
 import javax.inject.Named
 import javax.inject.Singleton
 import dagger.Lazy
+import okhttp3.Interceptor
+import java.util.TimeZone
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -34,6 +36,8 @@ object NetworkModule {
     @Named("AuthServiceOkHttpClient")
     fun provideAuthServiceOkHttpClient(
         @ApplicationContext context: Context,
+        @Named("TimezoneInterceptor") timezoneInterceptor: Interceptor,
+        @Named("HttpLogger") httpLogger: HttpLoggingInterceptor
     ): OkHttpClient {
         val cookieJar = PersistentCookieJar(
             SetCookieCache(),
@@ -42,7 +46,8 @@ object NetworkModule {
 
         return OkHttpClient.Builder()
             .cookieJar(cookieJar)
-            .addInterceptor(provideHttpLogger())
+            .addInterceptor(timezoneInterceptor)
+            .addInterceptor(httpLogger)
             .addInterceptor { chain ->
                 val request = chain.request()
                 Log.i("Cookies", "Sending cookies in auth service: ${request.headers["Cookie"]}")
@@ -77,7 +82,9 @@ object NetworkModule {
     fun provideRecipeServiceOkHttpClient(
         @ApplicationContext context: Context,
         tokenInterceptor: TokenInterceptor,
-        tokenAuthenticator: Lazy<TokenAuthenticator>
+        tokenAuthenticator: Lazy<TokenAuthenticator>,
+        @Named("TimezoneInterceptor") timezoneInterceptor: Interceptor,
+        @Named("HttpLogger") httpLogger: HttpLoggingInterceptor
     ): OkHttpClient {
         val cookieJar = PersistentCookieJar(
             SetCookieCache(),
@@ -86,7 +93,8 @@ object NetworkModule {
 
         return OkHttpClient.Builder()
             .cookieJar(cookieJar)
-            .addInterceptor(provideHttpLogger())
+            .addInterceptor(timezoneInterceptor)
+            .addInterceptor(httpLogger)
             .authenticator { route, response ->
                 tokenAuthenticator.get().authenticate(route, response)
             }
@@ -146,8 +154,10 @@ object NetworkModule {
     }
 }
 
-
-private fun provideHttpLogger(): HttpLoggingInterceptor {
+@Provides
+@Singleton
+@Named("HttpLogger")
+fun provideHttpLogger(): HttpLoggingInterceptor {
     return HttpLoggingInterceptor { message ->
         val isMultipartContent = message.contains("Content-Disposition: form-data") ||
                 message.contains("Content-Type: image/") ||
@@ -156,4 +166,18 @@ private fun provideHttpLogger(): HttpLoggingInterceptor {
             Log.i("OkHttp", message)
         }
     }.apply { level = HttpLoggingInterceptor.Level.BODY }
+}
+
+@Provides
+@Singleton
+@Named("TimezoneInterceptor")
+fun provideTimezoneInterceptor(): Interceptor {
+    return okhttp3.Interceptor { chain ->
+        val timezone = TimeZone.getDefault().id
+        val request = chain.request()
+            .newBuilder()
+            .header("X-Timezone", timezone)
+            .build()
+        chain.proceed(request)
+    }
 }
