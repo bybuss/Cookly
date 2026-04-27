@@ -2,6 +2,7 @@ package bob.colbaskin.cookly.di
 
 import bob.colbaskin.cookly.auth.data.AuthApiService
 import bob.colbaskin.cookly.create_recipe.data.CreateRecipeApiService
+import bob.colbaskin.cookly.profile.data.ProfileApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -38,5 +39,13 @@ object ServiceModule {
         @Named("RecipeServiceRetrofit") recipeServiceRetrofit: Retrofit
     ): CreateRecipeApiService {
         return recipeServiceRetrofit.create(CreateRecipeApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideProfileApiService(
+        @Named("RecipeServiceRetrofit") recipeServiceRetrofit: Retrofit
+    ): ProfileApiService {
+        return recipeServiceRetrofit.create(ProfileApiService::class.java)
     }
 }

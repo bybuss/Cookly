@@ -10,9 +10,10 @@ import kotlinx.coroutines.flow.Flow
 interface UserPreferencesRepository {
     fun getUserPreferences(): Flow<UserPreferences>
     fun getAuthStatus(): Flow<AuthConfig>
+    fun getUser(): Flow<User>
     suspend fun saveAgreementStatus(status: AgreementConfig)
     suspend fun saveAuthStatus(status: AuthConfig)
     suspend fun saveOnboardingStatus(status: OnboardingConfig)
-
     suspend fun saveUserInfo(user: User)
+    suspend fun clearUserSessionPreservingAgreement()
 }

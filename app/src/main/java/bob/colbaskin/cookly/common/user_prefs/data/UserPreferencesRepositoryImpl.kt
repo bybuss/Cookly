@@ -17,6 +17,8 @@ class UserPreferencesRepositoryImpl @Inject constructor(
 
     override fun getAuthStatus(): Flow<AuthConfig> = dataStore.getAuthStatus()
 
+    override fun getUser(): Flow<User> = dataStore.getUser()
+
     override suspend fun saveAgreementStatus(status: AgreementConfig)
         = dataStore.saveAgreementStatus(status)
 
@@ -28,4 +30,7 @@ class UserPreferencesRepositoryImpl @Inject constructor(
     override suspend fun saveUserInfo(user: User)
         = dataStore.saveUserInfo(user)
 
+    override suspend fun clearUserSessionPreservingAgreement() {
+        dataStore.clearUserSessionPreservingAgreement()
+    }
 }

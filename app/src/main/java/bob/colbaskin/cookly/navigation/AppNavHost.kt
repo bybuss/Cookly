@@ -84,7 +84,7 @@ fun AppNavHost(uiState: UiState.Success<UserPreferences>) {
             authGraph(navController = navController)
             onboardingGraph(navController = navController)
             mainGraph(navController = navController, snackbarHostState = snackbarHostState)
-            detailedGraph(navController = navController)
+            detailedGraph(navController = navController, snackbarHostState = snackbarHostState)
         }
     }
 }

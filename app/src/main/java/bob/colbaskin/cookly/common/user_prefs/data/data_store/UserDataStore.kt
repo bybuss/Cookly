@@ -9,6 +9,7 @@ import bob.colbaskin.cookly.common.user_prefs.domain.models.proto_configs.Agreem
 import bob.colbaskin.cookly.common.user_prefs.domain.models.proto_configs.AuthConfig
 import bob.colbaskin.cookly.common.user_prefs.domain.models.proto_configs.OnboardingConfig
 import bob.colbaskin.cookly.common.user_prefs.domain.models.UserPreferences
+import bob.colbaskin.cookly.common.user_prefs.domain.models.proto_configs.RoleConfig
 import bob.colbaskin.cookly.common.user_prefs.domain.models.proto_configs.toDomain
 import bob.colbaskin.cookly.common.user_prefs.domain.models.proto_configs.toProto
 import bob.colbaskin.cookly.datastore.UserPreferencesProto
@@ -30,6 +31,15 @@ class UserDataStore(context: Context) {
     fun getUserPreferences(): Flow<UserPreferences> = dataStore.data.map { it.toDomain() }
 
     fun getAuthStatus(): Flow<AuthConfig> = dataStore.data.map { it.authStatus.toDomain() }
+
+    fun getUser(): Flow<User> = dataStore.data.map { proto ->
+        User(
+            id = proto.id,
+            email = proto.email,
+            role = proto.role.toDomain(),
+            avatarUrl = proto.avatarUrl
+        )
+    }
 
     suspend fun saveAgreementStatus(status: AgreementConfig) {
         Log.d(TAG, "saveAgreementStatus: $status")
@@ -60,6 +70,20 @@ class UserDataStore(context: Context) {
                 email = user.email
                 role = user.role.toProto()
                 avatarUrl = user.avatarUrl
+            }
+        }
+    }
+
+    suspend fun clearUserSessionPreservingAgreement() {
+        Log.d(TAG, "Clear user session preserving agreement status")
+        dataStore.updateData { prefs ->
+            prefs.copy {
+                id = ""
+                email = ""
+                avatarUrl = ""
+                authStatus = AuthConfig.NOT_AUTHENTICATED.toProto()
+                onboardingStatus = OnboardingConfig.NOT_STARTED.toProto()
+                role = RoleConfig.USER.toProto()
             }
         }
     }

@@ -1,13 +1,11 @@
 package bob.colbaskin.cookly.navigation.graphs
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -22,6 +20,7 @@ import bob.colbaskin.cookly.home.presentation.main.HomeScreenRoot
 import bob.colbaskin.cookly.home.presentation.meal_detailed.MealCategoryDetailedScreenRoot
 import bob.colbaskin.cookly.navigation.Screens
 import bob.colbaskin.cookly.onboarding_preferences.presentation.OnboardingScreenRoot
+import bob.colbaskin.cookly.profile.presentation.ProfileScreenRoot
 
 fun NavGraphBuilder.agreementGraph(
     navController: NavHostController
@@ -65,28 +64,52 @@ fun NavGraphBuilder.mainGraph(
         composable<Screens.Home> { HomeScreenRoot(navController = navController) }
         composable<Screens.Cart> { MealCategoryDetailedScreenRoot(navController = navController) }
         composable<Screens.Chat> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(text = "Chat Screen")
+            }
+        }
+        composable<Screens.Favourites> { DishDetailedScreenRoot(navController = navController) }
+        composable<Screens.Profile> {
+            ProfileScreenRoot(
+                navController = navController,
+                snackbarHostState = snackbarHostState
+            )
+        }
+    }
+}
+
+fun NavGraphBuilder.detailedGraph(
+    navController: NavHostController,
+    snackbarHostState: SnackbarHostState
+) {
+    navigation<Graphs.Detailed>(
+        startDestination = Screens.MealCategoryDetailed(-1)
+    ) {
+        composable<Screens.MealCategoryDetailed> {
+            MealCategoryDetailedScreenRoot(navController = navController)
+        }
+        composable<Screens.DishDetailed> { DishDetailedScreenRoot(navController = navController) }
+        composable<Screens.CreateRecipe> {
             CreateRecipeScreenRoot(
                 navController = navController,
                 snackbarHostState = snackbarHostState,
                 onNavigateToSuccess = { navController.popBackStack() },
             )
         }
-        composable<Screens.Favourites> { DishDetailedScreenRoot(navController = navController) }
-        composable<Screens.Profile> {
+        composable<Screens.ApplicationsReview> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = "Profile Screen")
+                Text(text = "Applications Review Screen")
             }
         }
-    }
-}
-
-fun NavGraphBuilder.detailedGraph(
-    navController: NavHostController
-) {
-    navigation<Graphs.Detailed>(
-        startDestination = Screens.MealCategoryDetailed(-1)
-    ) {
-        composable<Screens.MealCategoryDetailed> { MealCategoryDetailedScreenRoot(navController = navController) }
-        composable<Screens.DishDetailed> { DishDetailedScreenRoot(navController = navController) }
+        composable<Screens.CookingHistory> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(text = "Cooking History Screen")
+            }
+        }
+        composable<Screens.RecipeStatuses> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(text = "Recipe Statuses Screen")
+            }
+        }
     }
 }

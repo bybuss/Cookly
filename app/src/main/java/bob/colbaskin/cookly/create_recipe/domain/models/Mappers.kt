@@ -37,6 +37,8 @@ fun CreateRecipeCommand.toDto(): CreateRecipeRequestDto {
         estimatedTime = estimatedTime,
         caloriesBy100Grams = caloriesBy100Grams,
         mealTime = mealTime,
+        spicyLevel = spicyLevel,
+        difficultyLevel = difficultyLevel,
         steps = steps.map {
             CreateRecipeStepDto(
                 title = it.title,
@@ -72,6 +74,8 @@ fun CreateRecipeState.toCommand(): CreateRecipeCommand {
                 unitMeasurement = it.unitMeasurement.trim()
             )
         },
+        spicyLevel = spicyLevel,
+        difficultyLevel = difficultyLevel,
         steps = steps.map {
             CreateRecipeStepCommand(
                 number = it.number,
