@@ -8,19 +8,24 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
@@ -30,6 +35,8 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -37,6 +44,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
@@ -45,10 +54,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerDefaults
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -56,8 +67,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -78,10 +91,11 @@ import bob.colbaskin.cookly.create_recipe.domain.models.CreateRecipeIngredient
 import bob.colbaskin.cookly.create_recipe.domain.models.CreateRecipeStep
 import bob.colbaskin.cookly.create_recipe.domain.models.LocalImage
 import bob.colbaskin.cookly.create_recipe.domain.models.PhotoTarget
+import bob.colbaskin.cookly.home.domain.models.MealTimeType
 import coil3.compose.rememberAsyncImagePainter
 import compose.icons.TablerIcons
-import compose.icons.tablericons.KeyboardHide
-import compose.icons.tablericons.KeyboardShow
+import compose.icons.tablericons.ChevronDown
+import compose.icons.tablericons.ChevronUp
 import compose.icons.tablericons.Photo
 import compose.icons.tablericons.Plus
 import compose.icons.tablericons.Trash
@@ -109,6 +123,7 @@ fun CreateRecipeScreenRoot(
             PhotoTarget.Main -> {
                 viewModel.onAction(CreateRecipeAction.SetMainPhoto(image))
             }
+
             is PhotoTarget.Step -> {
                 viewModel.onAction(
                     CreateRecipeAction.SetStepPhoto(
@@ -117,8 +132,10 @@ fun CreateRecipeScreenRoot(
                     )
                 )
             }
-            else -> Unit
+
+            null -> Unit
         }
+
         photoTarget = null
     }
 
@@ -132,10 +149,12 @@ fun CreateRecipeScreenRoot(
                     )
                 }
             }
+
             is UiState.Success -> {
                 onNavigateToSuccess(submitState.data)
                 viewModel.onAction(CreateRecipeAction.ConsumeSuccess)
             }
+
             else -> Unit
         }
     }
@@ -222,12 +241,14 @@ private fun CreateRecipeScreen(
                     )
                 }
             }
+
             item {
                 RequiredFieldLabel(
                     modifier = Modifier.padding(horizontal = 16.dp),
                     text = "Основная информация"
                 )
             }
+
             item {
                 FormTextField(
                     modifier = Modifier.padding(horizontal = 16.dp),
@@ -240,6 +261,7 @@ private fun CreateRecipeScreen(
                     }
                 )
             }
+
             item {
                 FormTextField(
                     modifier = Modifier.padding(horizontal = 16.dp),
@@ -254,6 +276,7 @@ private fun CreateRecipeScreen(
                     }
                 )
             }
+
             item {
                 Column(
                     modifier = Modifier
@@ -274,6 +297,7 @@ private fun CreateRecipeScreen(
                     }
                 }
             }
+
             item {
                 FormTextField(
                     modifier = Modifier.padding(horizontal = 16.dp),
@@ -281,42 +305,37 @@ private fun CreateRecipeScreen(
                     value = state.caloriesBy100Grams,
                     placeholder = "Например, 250",
                     keyboardType = KeyboardType.Number,
+                    isRequired = true,
                     onValueChange = {
                         onAction(CreateRecipeAction.UpdateCaloriesBy100Grams(it))
                     }
                 )
             }
+
             item {
-                FormTextField(
+                MealTimeSelector(
                     modifier = Modifier.padding(horizontal = 16.dp),
-                    title = "Тип блюда",
-                    value = state.mealTime,
-                    placeholder = "Завтрак",
-                    onValueChange = {
-                        onAction(CreateRecipeAction.UpdateMealTime(it))
+                    selectedMealTimeType = state.mealTimeType,
+                    onSelect = {
+                        onAction(CreateRecipeAction.SelectMealTime(it))
                     }
                 )
             }
+
             item {
                 Column(
                     modifier = Modifier.padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text(
-                        text = "Категории кухни",
-                        modifier = modifier,
-                        style = CustomTheme.typography.inter.titleLarge,
-                        color = CustomTheme.colors.text
-                    )
+                    RequiredFieldLabel(text = "Категории кухни")
                     AddItemTextButton(
-                        text = "Добавить категорию",
+                        text = "Добавить категории",
                         onClick = { onAction(CreateRecipeAction.ShowCategorySheet) }
                     )
                     if (state.categories.isEmpty()) {
                         HelperText("Категории пока не добавлены.")
                     } else {
                         state.categories.forEach { category ->
-                            //FIXME: заменить
                             CategoryRow(
                                 category = category,
                                 onDelete = {
@@ -329,6 +348,7 @@ private fun CreateRecipeScreen(
                     }
                 }
             }
+
             item {
                 Column(
                     modifier = Modifier.padding(horizontal = 16.dp),
@@ -343,7 +363,6 @@ private fun CreateRecipeScreen(
                         HelperText("Добавьте хотя бы один ингредиент.")
                     } else {
                         state.ingredients.forEachIndexed { index, ingredient ->
-                            //FIXME: заменить
                             IngredientRow(
                                 ingredient = ingredient,
                                 canMoveUp = index > 0,
@@ -376,6 +395,7 @@ private fun CreateRecipeScreen(
                     }
                 }
             }
+
             item {
                 Column(
                     modifier = Modifier.padding(horizontal = 16.dp),
@@ -383,12 +403,12 @@ private fun CreateRecipeScreen(
                 ) {
                     Text(
                         text = "Пошаговая инструкция",
-                        modifier = modifier,
                         style = CustomTheme.typography.inter.titleLarge,
                         color = CustomTheme.colors.text
                     )
                 }
             }
+
             itemsIndexed(
                 items = state.steps,
                 key = { _, item -> item.localId }
@@ -444,6 +464,7 @@ private fun CreateRecipeScreen(
                     }
                 )
             }
+
             item {
                 AddItemTextButton(
                     modifier = Modifier.padding(horizontal = 16.dp),
@@ -451,6 +472,7 @@ private fun CreateRecipeScreen(
                     onClick = { onAction(CreateRecipeAction.AddStep) }
                 )
             }
+
             item {
                 Button(
                     onClick = { onAction(CreateRecipeAction.Submit) },
@@ -473,6 +495,7 @@ private fun CreateRecipeScreen(
                         )
                         Spacer(Modifier.width(8.dp))
                     }
+
                     Text("Отправить рецепт")
                 }
             }
@@ -492,16 +515,347 @@ private fun CreateRecipeScreen(
 
     if (state.isCategorySheetVisible) {
         CategoryPickerBottomSheet(
+            state = state,
             onDismiss = { onAction(CreateRecipeAction.HideCategorySheet) },
-            onSave = { onAction(CreateRecipeAction.AddCategory(it)) }
+            onSave = { categories ->
+                onAction(CreateRecipeAction.SetCategories(categories))
+            }
         )
     }
 
     if (state.isIngredientSheetVisible) {
         IngredientPickerBottomSheet(
+            state = state,
             onDismiss = { onAction(CreateRecipeAction.HideIngredientSheet) },
-            onSave = { onAction(CreateRecipeAction.AddIngredient(it)) }
+            onSearch = { query ->
+                onAction(CreateRecipeAction.SearchIngredients(query))
+            },
+            onSave = { ingredient ->
+                onAction(CreateRecipeAction.AddIngredient(ingredient))
+            }
         )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CategoryPickerBottomSheet(
+    state: CreateRecipeState,
+    onDismiss: () -> Unit,
+    onSave: (List<CreateRecipeCategory>) -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val selectedIds = remember(state.categories) {
+        mutableStateListOf<Int>().apply {
+            addAll(state.categories.map { it.categoryId })
+        }
+    }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = CustomTheme.colors.background
+    ) {
+        FullHeightSheetContainer {
+            Text(
+                text = "Выберите категории",
+                style = CustomTheme.typography.inter.titleLarge,
+                color = CustomTheme.colors.text
+            )
+
+            when {
+                state.isCategoriesLoading -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = CustomTheme.colors.accentColor)
+                    }
+                }
+
+                state.categoriesError != null -> {
+                    ErrorText(text = state.categoriesError)
+                }
+
+                state.availableCategories.isEmpty() -> {
+                    HelperText("Категории не найдены.")
+                }
+
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(
+                            items = state.availableCategories,
+                            key = { it.categoryId }
+                        ) { category ->
+                            val checked = category.categoryId in selectedIds
+
+                            SelectableRow(
+                                title = category.title,
+                                checked = checked,
+                                onClick = {
+                                    if (checked) {
+                                        selectedIds.remove(category.categoryId)
+                                    } else {
+                                        selectedIds.add(category.categoryId)
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+
+            Button(
+                onClick = {
+                    val selected = state.availableCategories.filter {
+                        it.categoryId in selectedIds
+                    }
+                    onSave(selected)
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = CustomTheme.colors.accentColor,
+                    contentColor = CustomTheme.colors.invertedText
+                )
+            ) {
+                Text("Сохранить")
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun IngredientPickerBottomSheet(
+    state: CreateRecipeState,
+    onDismiss: () -> Unit,
+    onSearch: (String) -> Unit,
+    onSave: (CreateRecipeIngredient) -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    var selectedIngredient by remember {
+        mutableStateOf<CreateRecipeIngredient?>(null)
+    }
+
+    var quantity by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    var localError by rememberSaveable {
+        mutableStateOf<String?>(null)
+    }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = CustomTheme.colors.background
+    ) {
+        FullHeightSheetContainer {
+            Text(
+                text = "Добавить ингредиент",
+                style = CustomTheme.typography.inter.titleLarge,
+                color = CustomTheme.colors.text
+            )
+
+            FormTextField(
+                title = "Поиск",
+                value = state.ingredientSearchQuery,
+                placeholder = "Например, картофель",
+                onValueChange = {
+                    selectedIngredient = null
+                    onSearch(it)
+                }
+            )
+
+            if (selectedIngredient != null) {
+                Text(
+                    text = "Выбран ингредиент: ${selectedIngredient!!.title}",
+                    style = CustomTheme.typography.inter.titleMedium,
+                    color = CustomTheme.colors.text
+                )
+                FormTextField(
+                    title = "Единица измерения: ${selectedIngredient!!.unitMeasurement}",
+                    value = quantity,
+                    placeholder = "Например, 250",
+                    keyboardType = KeyboardType.Decimal,
+                    isRequired = true,
+                    onValueChange = {
+                        quantity = it
+                    }
+                )
+            }
+
+            localError?.let {
+                ErrorText(text = it)
+            }
+
+            when {
+                state.isIngredientSearchLoading -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = CustomTheme.colors.accentColor)
+                    }
+                }
+
+                state.ingredientSearchError != null -> {
+                    ErrorText(text = state.ingredientSearchError)
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+
+                state.ingredientSearchQuery.isBlank() -> {
+                    HelperText("Введите название ингредиента для поиска.")
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+
+                state.ingredientSearchResults.isEmpty() -> {
+                    HelperText("Ничего не найдено.")
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(
+                            items = state.ingredientSearchResults,
+                            key = { it.ingredientId }
+                        ) { ingredient ->
+                            val checked = selectedIngredient?.ingredientId == ingredient.ingredientId
+
+                            SelectableRow(
+                                title = ingredient.title,
+                                subtitle = "Единица: ${ingredient.unitMeasurement}",
+                                checked = checked,
+                                onClick = {
+                                    selectedIngredient = ingredient
+                                    localError = null
+                                },
+                                isIngredientSelect = true
+                            )
+                        }
+                    }
+                }
+            }
+
+            Button(
+                onClick = {
+                    val ingredient = selectedIngredient
+                    val parsedQuantity = quantity.replace(",", ".").toDoubleOrNull()
+
+                    when {
+                        ingredient == null -> {
+                            localError = "Выберите ингредиент из списка."
+                        }
+
+                        parsedQuantity == null || parsedQuantity <= 0.0 -> {
+                            localError = "Укажите корректное количество."
+                        }
+
+                        else -> {
+                            onSave(
+                                ingredient.copy(
+                                    quantity = quantity.trim()
+                                )
+                            )
+                        }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = CustomTheme.colors.accentColor,
+                    contentColor = CustomTheme.colors.invertedText
+                )
+            ) {
+                Text("Добавить")
+            }
+        }
+    }
+}
+
+@Composable
+private fun FullHeightSheetContainer(
+    content: @Composable ColumnScope.() -> Unit
+) {
+    val configuration = LocalConfiguration.current
+    val sheetHeight = configuration.screenHeightDp.dp * 0.88f
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(sheetHeight)
+            .navigationBarsPadding()
+            .imePadding()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        content = content
+    )
+}
+
+@Composable
+private fun SelectableRow(
+    title: String,
+    subtitle: String? = null,
+    checked: Boolean,
+    onClick: () -> Unit,
+    isIngredientSelect: Boolean = false
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = CustomTheme.colors.secondaryCardBackground,
+                shape = RoundedCornerShape(16.dp)
+            )
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (isIngredientSelect) {
+            RadioButton(
+                selected = checked,
+                onClick = onClick,
+                colors = RadioButtonDefaults.colors(
+                    selectedColor = CustomTheme.colors.accentColor,
+                    unselectedColor = CustomTheme.colors.secondaryText
+                )
+            )
+        } else {
+            Checkbox(
+                checked = checked,
+                onCheckedChange = { onClick() },
+                colors = CheckboxDefaults.colors(
+                    checkedColor = CustomTheme.colors.accentColor,
+                    uncheckedColor = CustomTheme.colors.secondaryText,
+                    checkmarkColor = CustomTheme.colors.invertedText
+                )
+            )
+        }
+        Spacer(modifier = Modifier.width(8.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = CustomTheme.typography.inter.titleSmall,
+                color = CustomTheme.colors.text
+            )
+            subtitle?.let { text ->
+                Text(
+                    text = text,
+                    style = CustomTheme.typography.inter.bodyMedium,
+                    color = CustomTheme.colors.tertiaryText
+                )
+            }
+        }
     }
 }
 
@@ -518,7 +872,9 @@ private fun RequiredFieldLabel(
             append(text)
             withStyle(
                 style = SpanStyle(color = colors.flameColor)
-            ) { append(" *") }
+            ) {
+                append(" *")
+            }
         },
         modifier = modifier,
         style = style,
@@ -542,7 +898,6 @@ private fun FormTextField(
     val coroutineScope = rememberCoroutineScope()
     val colors = CustomTheme.colors
     val typography = CustomTheme.typography
-
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -635,7 +990,9 @@ private fun PhotoBlock(
         if (image != null) {
             TextButton(
                 onClick = onRemove,
-                colors = ButtonDefaults.textButtonColors(contentColor = CustomTheme.colors.text)
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = CustomTheme.colors.text
+                )
             ) {
                 Text("Удалить")
             }
@@ -643,7 +1000,67 @@ private fun PhotoBlock(
     }
 }
 
-//FIXME: заменить
+@Composable
+private fun MealTimeSelector(
+    selectedMealTimeType: MealTimeType?,
+    onSelect: (MealTimeType) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        RequiredFieldLabel(
+            text = "Тип блюда",
+            style = CustomTheme.typography.inter.bodyMedium
+        )
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(
+                items = MealTimeType.entries,
+                key = { it.name }
+            ) { mealTimeType ->
+                MealTimeCard(
+                    title = mealTimeType.title,
+                    isSelected = selectedMealTimeType == mealTimeType,
+                    onClick = { onSelect(mealTimeType) },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun MealTimeCard(
+    title: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val colors = CustomTheme.colors
+    val typography = CustomTheme.typography
+
+    val backgroundColor =
+        if (isSelected) colors.secondAccentColor else colors.secondaryCardBackground
+
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(backgroundColor)
+            .clickable(onClick = onClick)
+    ) {
+        Text(
+            modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp),
+            text = title,
+            style = typography.inter.bodyMedium,
+            color = colors.text
+        )
+    }
+}
+
 @Composable
 private fun CategoryRow(
     category: CreateRecipeCategory,
@@ -662,26 +1079,20 @@ private fun CategoryRow(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = category.title,
-                style = CustomTheme.typography.inter.titleSmall,
+                style = CustomTheme.typography.inter.titleMedium,
                 color = CustomTheme.colors.text
             )
-            Text(
-                text = "ID: ${category.categoryId}",
-                style = CustomTheme.typography.inter.bodyMedium,
-                color = CustomTheme.colors.tertiaryText
-            )
         }
-
         IconButton(onClick = onDelete) {
             Icon(
                 imageVector = TablerIcons.Trash,
-                contentDescription = null
+                contentDescription = null,
+                tint = CustomTheme.colors.text
             )
         }
     }
 }
 
-//FIXME: заменить
 @Composable
 private fun IngredientRow(
     ingredient: CreateRecipeIngredient,
@@ -707,49 +1118,42 @@ private fun IngredientRow(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = ingredient.title,
-                style = typography.inter.titleSmall,
+                style = typography.inter.titleMedium,
                 color = colors.text
             )
             Text(
-                text = "ID: ${ingredient.ingredientId}",
-                style = typography.inter.bodyMedium,
-                color = colors.tertiaryText
-            )
-            Text(
                 text = "${ingredient.quantity} ${ingredient.unitMeasurement}",
-                style = typography.inter.bodyMedium,
+                style = typography.inter.titleMedium,
                 color = colors.tertiaryText
             )
         }
-
         IconButton(
             onClick = onMoveUp,
             enabled = canMoveUp
         ) {
             Icon(
-                imageVector = TablerIcons.KeyboardHide,
+                imageVector = TablerIcons.ChevronUp,
                 contentDescription = null,
                 tint = colors.text,
                 modifier = Modifier.size(24.dp)
             )
         }
-
         IconButton(
             onClick = onMoveDown,
             enabled = canMoveDown
         ) {
             Icon(
-                imageVector = TablerIcons.KeyboardShow,
+                imageVector = TablerIcons.ChevronDown,
                 contentDescription = null,
                 tint = colors.text,
                 modifier = Modifier.size(24.dp)
             )
         }
-
         IconButton(onClick = onDelete) {
             Icon(
                 imageVector = TablerIcons.Trash,
-                contentDescription = null
+                contentDescription = null,
+                tint = colors.text
             )
         }
     }
@@ -791,32 +1195,28 @@ private fun StepCard(
                 color = colors.text,
                 modifier = Modifier.weight(1f)
             )
-
             IconButton(
                 onClick = onMoveUp,
                 enabled = canMoveUp
             ) {
                 Icon(
-                    imageVector = TablerIcons.KeyboardHide,
+                    imageVector = TablerIcons.ChevronUp,
                     contentDescription = null,
                     tint = colors.text,
                     modifier = Modifier.size(24.dp)
                 )
             }
-
             IconButton(
                 onClick = onMoveDown,
                 enabled = canMoveDown
             ) {
                 Icon(
-                    imageVector = TablerIcons.KeyboardShow,
+                    imageVector = TablerIcons.ChevronDown,
                     contentDescription = null,
                     tint = colors.text,
                     modifier = Modifier.size(24.dp)
                 )
             }
-
-
             if (step.number > 1) {
                 IconButton(onClick = onDeleteStep) {
                     Icon(
@@ -828,7 +1228,6 @@ private fun StepCard(
                 }
             }
         }
-
         FormTextField(
             title = "Заголовок шага",
             value = step.title,
@@ -836,7 +1235,6 @@ private fun StepCard(
             isRequired = true,
             onValueChange = onStepTitleChange
         )
-
         FormTextField(
             title = "Описание шага",
             value = step.description,
@@ -846,15 +1244,12 @@ private fun StepCard(
             isRequired = true,
             onValueChange = onDescriptionChange
         )
-
         HelperText("Поле поддерживает markdown.")
-
         Text(
             text = "Фото шага",
             style = typography.inter.bodyMedium,
             color = colors.text
         )
-
         step.image?.let {
             Image(
                 painter = rememberAsyncImagePainter(model = it.uri),
@@ -871,221 +1266,16 @@ private fun StepCard(
             OutlinedButton(onClick = onPickImage) {
                 Text(if (step.image == null) "Загрузить фото" else "Заменить фото")
             }
-
             if (step.image != null) {
                 TextButton(
                     onClick = onRemoveImage,
-                    colors = ButtonDefaults.textButtonColors(contentColor = CustomTheme.colors.text)
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = CustomTheme.colors.text
+                    )
                 ) {
                     Text("Удалить")
                 }
             }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun CategoryPickerBottomSheet(
-    onDismiss: () -> Unit,
-    onSave: (CreateRecipeCategory) -> Unit
-) {
-    var searchQuery by rememberSaveable { mutableStateOf("") }
-    var categoryId by rememberSaveable { mutableStateOf("") }
-    var title by rememberSaveable { mutableStateOf("") }
-    var localError by rememberSaveable { mutableStateOf<String?>(null) }
-
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        containerColor = CustomTheme.colors.background
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .imePadding()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Text(
-                text = "Добавить категорию",
-                style = CustomTheme.typography.inter.titleLarge,
-                color = CustomTheme.colors.text
-            )
-
-            FormTextField(
-                title = "Поиск",
-                value = searchQuery,
-                placeholder = "Поиск пока не подключён",
-                onValueChange = { searchQuery = it }
-            )
-
-            FormTextField(
-                title = "ID категории",
-                value = categoryId,
-                placeholder = "Например, 1",
-                keyboardType = KeyboardType.Number,
-                isRequired = true,
-                onValueChange = { categoryId = it.filter(Char::isDigit) }
-            )
-
-            FormTextField(
-                title = "Название категории",
-                value = title,
-                placeholder = "Например, Итальянская кухня",
-                isRequired = true,
-                onValueChange = { title = it }
-            )
-
-            localError?.let {
-                ErrorText(text = it)
-            }
-
-            Button(
-                onClick = {
-                    val parsedId = categoryId.toIntOrNull()
-
-                    when {
-                        parsedId == null || parsedId <= 0 -> {
-                            localError = "Укажите корректный ID категории."
-                        }
-
-                        title.isBlank() -> {
-                            localError = "Укажите название категории."
-                        }
-
-                        else -> {
-                            onSave(
-                                CreateRecipeCategory(
-                                    categoryId = parsedId,
-                                    title = title.trim()
-                                )
-                            )
-                            onDismiss()
-                        }
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = CustomTheme.colors.accentColor,
-                    contentColor = CustomTheme.colors.invertedText
-                )
-            ) {
-                Text("Добавить")
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun IngredientPickerBottomSheet(
-    onDismiss: () -> Unit,
-    onSave: (CreateRecipeIngredient) -> Unit
-) {
-    var searchQuery by rememberSaveable { mutableStateOf("") }
-    var ingredientId by rememberSaveable { mutableStateOf("") }
-    var title by rememberSaveable { mutableStateOf("") }
-    var quantity by rememberSaveable { mutableStateOf("") }
-    var unit by rememberSaveable { mutableStateOf("") }
-    var localError by rememberSaveable { mutableStateOf<String?>(null) }
-
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        containerColor = CustomTheme.colors.background
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .imePadding()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Text(
-                text = "Добавить ингредиент",
-                style = CustomTheme.typography.inter.titleLarge,
-                color = CustomTheme.colors.text
-            )
-            FormTextField(
-                title = "Поиск",
-                value = searchQuery,
-                placeholder = "Поиск пока не подключён",
-                onValueChange = { searchQuery = it }
-            )
-            FormTextField(
-                title = "ID ингредиента",
-                value = ingredientId,
-                placeholder = "Например, 10",
-                keyboardType = KeyboardType.Number,
-                isRequired = true,
-                onValueChange = { ingredientId = it.filter(Char::isDigit) }
-            )
-            FormTextField(
-                title = "Название ингредиента",
-                value = title,
-                placeholder = "Например, Мука",
-                isRequired = true,
-                onValueChange = { title = it }
-            )
-            FormTextField(
-                title = "Количество",
-                value = quantity,
-                placeholder = "Например, 250",
-                keyboardType = KeyboardType.Decimal,
-                isRequired = true,
-                onValueChange = { quantity = it }
-            )
-            FormTextField(
-                title = "Единица измерения",
-                value = unit,
-                placeholder = "Например, г",
-                isRequired = true,
-                onValueChange = { unit = it }
-            )
-            localError?.let {
-                ErrorText(text = it)
-            }
-            Button(
-                onClick = {
-                    val parsedId = ingredientId.toIntOrNull()
-                    val parsedQuantity = quantity.replace(",", ".").toDoubleOrNull()
-
-                    when {
-                        parsedId == null || parsedId <= 0 -> {
-                            localError = "Укажите корректный ID ингредиента."
-                        }
-                        title.isBlank() -> {
-                            localError = "Укажите название ингредиента."
-                        }
-                        parsedQuantity == null || parsedQuantity <= 0.0 -> {
-                            localError = "Укажите корректное количество."
-                        }
-                        unit.isBlank() -> {
-                            localError = "Укажите единицу измерения."
-                        }
-                        else -> {
-                            onSave(
-                                CreateRecipeIngredient(
-                                    ingredientId = parsedId,
-                                    title = title.trim(),
-                                    quantity = quantity.trim(),
-                                    unitMeasurement = unit.trim()
-                                )
-                            )
-                            onDismiss()
-                        }
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = CustomTheme.colors.accentColor,
-                    contentColor = Color.White
-                )
-            ) {
-                Text("Добавить")
-            }
-            Spacer(modifier = Modifier.height(12.dp))
         }
     }
 }
@@ -1211,6 +1401,7 @@ private fun Context.toLocalImageUi(uri: Uri): LocalImage {
             if (nameIndex != -1) {
                 displayName = cursor.getString(nameIndex) ?: displayName
             }
+
             if (sizeIndex != -1 && !cursor.isNull(sizeIndex)) {
                 sizeBytes = cursor.getLong(sizeIndex)
             }

@@ -5,17 +5,27 @@ import bob.colbaskin.cookly.create_recipe.domain.models.CreateRecipeCategory
 import bob.colbaskin.cookly.create_recipe.domain.models.CreateRecipeIngredient
 import bob.colbaskin.cookly.create_recipe.domain.models.CreateRecipeStep
 import bob.colbaskin.cookly.create_recipe.domain.models.LocalImage
+import bob.colbaskin.cookly.home.domain.models.MealTimeType
 
 data class CreateRecipeState(
     val title: String = "",
     val description: String = "",
     val caloriesBy100Grams: String = "",
-    val mealTime: String = "",
+    val mealTimeType: MealTimeType? = null,
     val estimatedHour: Int = 0,
     val estimatedMinute: Int = 0,
 
     val categories: List<CreateRecipeCategory> = emptyList(),
+    val availableCategories: List<CreateRecipeCategory> = emptyList(),
+    val isCategoriesLoading: Boolean = false,
+    val categoriesError: String? = null,
+
     val ingredients: List<CreateRecipeIngredient> = emptyList(),
+    val ingredientSearchQuery: String = "",
+    val ingredientSearchResults: List<CreateRecipeIngredient> = emptyList(),
+    val isIngredientSearchLoading: Boolean = false,
+    val ingredientSearchError: String? = null,
+
     val steps: List<CreateRecipeStep> = listOf(
         CreateRecipeStep(localId = 1L, number = 1)
     ),

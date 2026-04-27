@@ -3,6 +3,7 @@ package bob.colbaskin.cookly.create_recipe.presentation
 import bob.colbaskin.cookly.create_recipe.domain.models.CreateRecipeCategory
 import bob.colbaskin.cookly.create_recipe.domain.models.CreateRecipeIngredient
 import bob.colbaskin.cookly.create_recipe.domain.models.LocalImage
+import bob.colbaskin.cookly.home.domain.models.MealTimeType
 
 sealed interface CreateRecipeAction {
     data object Back : CreateRecipeAction
@@ -10,19 +11,20 @@ sealed interface CreateRecipeAction {
     data class UpdateTitle(val value: String): CreateRecipeAction
     data class UpdateDescription(val value: String): CreateRecipeAction
     data class UpdateCaloriesBy100Grams(val value: String): CreateRecipeAction
-    data class UpdateMealTime(val value: String):  CreateRecipeAction
+    data class SelectMealTime(val mealTimeType: MealTimeType) : CreateRecipeAction
 
     data object OpenTimePicker: CreateRecipeAction
     data object DismissTimePicker: CreateRecipeAction
     data class ConfirmTime(val hour: Int, val minute: Int): CreateRecipeAction
 
     data object ShowCategorySheet: CreateRecipeAction
-    data object HideCategorySheet: CreateRecipeAction
-    data class AddCategory(val category: CreateRecipeCategory): CreateRecipeAction
+    data object HideCategorySheet : CreateRecipeAction
+    data class SetCategories(val categories: List<CreateRecipeCategory>): CreateRecipeAction
     data class RemoveCategory(val categoryId: Int): CreateRecipeAction
 
     data object ShowIngredientSheet: CreateRecipeAction
     data object HideIngredientSheet: CreateRecipeAction
+    data class SearchIngredients(val query: String): CreateRecipeAction
     data class AddIngredient(val ingredient: CreateRecipeIngredient): CreateRecipeAction
     data class RemoveIngredient(val ingredientId: Int): CreateRecipeAction
     data class MoveIngredient(val fromIndex: Int, val toIndex: Int): CreateRecipeAction

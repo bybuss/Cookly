@@ -6,26 +6,45 @@ import bob.colbaskin.cookly.common.ApiResult
 import bob.colbaskin.cookly.common.utils.safeApiCall
 import bob.colbaskin.cookly.create_recipe.domain.models.CreateRecipeCommand
 import bob.colbaskin.cookly.create_recipe.domain.CreateRecipeRepository
+import bob.colbaskin.cookly.create_recipe.domain.models.CreateRecipeCategory
+import bob.colbaskin.cookly.create_recipe.domain.models.CreateRecipeIngredient
+import bob.colbaskin.cookly.create_recipe.domain.models.toDomain
 import bob.colbaskin.cookly.create_recipe.domain.models.toDto
 import javax.inject.Inject
 
 private const val TAG = "CreateRecipeRepositoryImpl"
-
 
 class CreateRecipeRepositoryImpl @Inject constructor(
     private val context: Context,
     private val apiService: CreateRecipeApiService
 ) : CreateRecipeRepository {
 
+    override suspend fun searchIngredients(
+        query: String
+    ): ApiResult<List<CreateRecipeIngredient>> {
+        return safeApiCall(
+            apiCall = { apiService.searchIngredients(query) },
+            successHandler = { response -> response.map { it.toDomain() } },
+            context = context
+        )
+    }
+
+    override suspend fun getRecipeCategories(): ApiResult<List<CreateRecipeCategory>> {
+        return safeApiCall(
+            apiCall = { apiService.getRecipeCategories() },
+            successHandler = { response -> response.map { it.toDomain() } },
+            context = context
+        )
+    }
+
     override suspend fun submitRecipe(command: CreateRecipeCommand): ApiResult<Int> {
         Log.d(TAG, "Recipe has been submitted.")
+
         var createdRecipeId: Int? = null
 
         val result = safeApiCall(
             apiCall = {
-                apiService.createRecipe(command.toDto())
-            },
-            successHandler = { createdRecipe ->
+                val createdRecipe = apiService.createRecipe(command.toDto())
                 createdRecipeId = createdRecipe.id
 
                 command.mainPhoto?.let { image ->
@@ -50,7 +69,7 @@ class CreateRecipeRepositoryImpl @Inject constructor(
 
                     apiService.uploadRecipeStepAvatar(
                         recipeId = createdRecipe.id,
-                        recipeStepId = serverStep.id,
+                        recipeStepNumber = serverStep.number,
                         file = createMultipartBodyPart(
                             context = context,
                             uri = image.uri,
@@ -62,18 +81,22 @@ class CreateRecipeRepositoryImpl @Inject constructor(
 
                 createdRecipe.id
             },
+            successHandler = { response -> response },
             context = context
         )
 
         return when {
             result is ApiResult.Error && createdRecipeId != null -> {
-                Log.e(TAG, "Recipe created with id=$createdRecipeId, but uploading photo failed. Error: ${result.text}")
+                Log.e(
+                    TAG,
+                    "Recipe created with id=$createdRecipeId, but photo upload failed. Error: ${result.text}"
+                )
+
                 ApiResult.Error(
                     title = "Рецепт создан не полностью",
                     text = "Рецепт создан, но не удалось загрузить фото."
                 )
             }
-
             else -> result
         }
     }

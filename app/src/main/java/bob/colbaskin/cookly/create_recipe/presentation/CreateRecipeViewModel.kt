@@ -5,18 +5,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.launch
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
+import bob.colbaskin.cookly.common.ApiResult
 import bob.colbaskin.cookly.common.UiState
 import bob.colbaskin.cookly.common.toUiState
-import bob.colbaskin.cookly.create_recipe.domain.models.CreateRecipeCategoryCommand
-import bob.colbaskin.cookly.create_recipe.domain.models.CreateRecipeCommand
-import bob.colbaskin.cookly.create_recipe.domain.models.CreateRecipeIngredientCommand
-import bob.colbaskin.cookly.create_recipe.domain.models.CreateRecipeStep
-import bob.colbaskin.cookly.create_recipe.domain.models.CreateRecipeStepCommand
-import bob.colbaskin.cookly.create_recipe.domain.models.toDomain
 import bob.colbaskin.cookly.create_recipe.domain.CreateRecipeRepository
+import bob.colbaskin.cookly.create_recipe.domain.models.CreateRecipeStep
+import bob.colbaskin.cookly.create_recipe.domain.models.toCommand
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class CreateRecipeViewModel @Inject constructor(
@@ -27,14 +26,13 @@ class CreateRecipeViewModel @Inject constructor(
         private set
 
     private var nextStepLocalId: Long = 2L
+    private var ingredientSearchJob: Job? = null
 
     fun onAction(action: CreateRecipeAction) {
         when (action) {
             CreateRecipeAction.Back -> Unit
 
-            is CreateRecipeAction.UpdateTitle -> {
-                state = state.copy(title = action.value)
-            }
+            is CreateRecipeAction.UpdateTitle -> { state = state.copy(title = action.value) }
 
             is CreateRecipeAction.UpdateDescription -> {
                 state = state.copy(description = action.value)
@@ -46,17 +44,13 @@ class CreateRecipeViewModel @Inject constructor(
                 )
             }
 
-            is CreateRecipeAction.UpdateMealTime -> {
-                state = state.copy(mealTime = action.value)
+            is CreateRecipeAction.SelectMealTime -> {
+                state = state.copy(mealTimeType = action.mealTimeType)
             }
 
-            CreateRecipeAction.OpenTimePicker -> {
-                state = state.copy(isTimePickerVisible = true)
-            }
+            CreateRecipeAction.OpenTimePicker -> { state = state.copy(isTimePickerVisible = true) }
 
-            CreateRecipeAction.DismissTimePicker -> {
-                state = state.copy(isTimePickerVisible = false)
-            }
+            CreateRecipeAction.DismissTimePicker -> { state = state.copy(isTimePickerVisible = false) }
 
             is CreateRecipeAction.ConfirmTime -> {
                 state = state.copy(
@@ -68,41 +62,47 @@ class CreateRecipeViewModel @Inject constructor(
 
             CreateRecipeAction.ShowCategorySheet -> {
                 state = state.copy(isCategorySheetVisible = true)
+                loadCategoriesIfNeeded()
             }
 
             CreateRecipeAction.HideCategorySheet -> {
                 state = state.copy(isCategorySheetVisible = false)
             }
 
-            is CreateRecipeAction.AddCategory -> {
-                val updated = state.categories
-                    .filterNot { it.categoryId == action.category.categoryId } + action.category
-
+            is CreateRecipeAction.SetCategories -> {
                 state = state.copy(
-                    categories = updated,
+                    categories = action.categories,
                     isCategorySheetVisible = false
                 )
             }
 
             is CreateRecipeAction.RemoveCategory -> {
                 state = state.copy(
-                    categories = state.categories.filterNot { it.categoryId == action.categoryId }
+                    categories = state.categories.filterNot {
+                        it.categoryId == action.categoryId
+                    }
                 )
             }
 
             CreateRecipeAction.ShowIngredientSheet -> {
-                state = state.copy(isIngredientSheetVisible = true)
+                state = state.copy(
+                    isIngredientSheetVisible = true,
+                    ingredientSearchQuery = "",
+                    ingredientSearchResults = emptyList(),
+                    ingredientSearchError = null
+                )
             }
 
             CreateRecipeAction.HideIngredientSheet -> {
                 state = state.copy(isIngredientSheetVisible = false)
             }
 
+            is CreateRecipeAction.SearchIngredients -> { searchIngredients(action.query) }
+
             is CreateRecipeAction.AddIngredient -> {
                 val updated = state.ingredients
                     .filterNot { it.ingredientId == action.ingredient.ingredientId } +
                         action.ingredient
-
                 state = state.copy(
                     ingredients = updated,
                     isIngredientSheetVisible = false
@@ -170,7 +170,6 @@ class CreateRecipeViewModel @Inject constructor(
 
             is CreateRecipeAction.RemoveStep -> {
                 if (state.steps.size == 1) return
-
                 state = state.copy(
                     steps = state.steps
                         .filterNot { it.localId == action.stepLocalId }
@@ -186,19 +185,13 @@ class CreateRecipeViewModel @Inject constructor(
                 )
             }
 
-            is CreateRecipeAction.SetMainPhoto -> {
-                state = state.copy(mainPhoto = action.image)
-            }
+            is CreateRecipeAction.SetMainPhoto -> { state = state.copy(mainPhoto = action.image) }
 
-            CreateRecipeAction.RemoveMainPhoto -> {
-                state = state.copy(mainPhoto = null)
-            }
+            CreateRecipeAction.RemoveMainPhoto -> { state = state.copy(mainPhoto = null) }
 
             CreateRecipeAction.Submit -> submit()
 
-            CreateRecipeAction.ConsumeSuccess -> {
-                state = state.copy(submitState = null)
-            }
+            CreateRecipeAction.ConsumeSuccess -> { state = state.copy(submitState = null) }
 
             CreateRecipeAction.DismissError -> {
                 if (state.submitState is UiState.Error) {
@@ -208,8 +201,87 @@ class CreateRecipeViewModel @Inject constructor(
         }
     }
 
+    private fun loadCategoriesIfNeeded() {
+        if (state.availableCategories.isNotEmpty() || state.isCategoriesLoading) return
+
+        state = state.copy(
+            isCategoriesLoading = true,
+            categoriesError = null
+        )
+
+        viewModelScope.launch {
+            state = when (val result = repository.getRecipeCategories()) {
+                is ApiResult.Success -> {
+                    state.copy(
+                        availableCategories = result.data,
+                        isCategoriesLoading = false
+                    )
+                }
+
+                is ApiResult.Error -> {
+                    state.copy(
+                        isCategoriesLoading = false,
+                        categoriesError = result.title
+                    )
+                }
+            }
+        }
+    }
+
+    private fun searchIngredients(query: String) {
+        state = state.copy(ingredientSearchQuery = query)
+
+        ingredientSearchJob?.cancel()
+
+        if (query.isBlank()) {
+            state = state.copy(
+                ingredientSearchResults = emptyList(),
+                isIngredientSearchLoading = false,
+                ingredientSearchError = null
+            )
+            return
+        }
+
+        ingredientSearchJob = viewModelScope.launch {
+            delay(350)
+
+            state = state.copy(
+                isIngredientSearchLoading = true,
+                ingredientSearchError = null
+            )
+
+            when (val result = repository.searchIngredients(query.trim())) {
+                is ApiResult.Success -> {
+                    state = state.copy(
+                        ingredientSearchResults = result.data,
+                        isIngredientSearchLoading = false
+                    )
+                }
+
+                is ApiResult.Error -> {
+                    state = state.copy(
+                        ingredientSearchResults = emptyList(),
+                        isIngredientSearchLoading = false,
+                        ingredientSearchError = result.title
+                    )
+                }
+            }
+        }
+    }
+
     private fun submit() {
         if (state.isSubmitting) return
+
+        val validationError = validateBeforeSubmit()
+        if (validationError != null) {
+            state = state.copy(
+                submitState = UiState.Error(
+                    title = validationError,
+                    text = validationError
+                )
+            )
+            return
+        }
 
         state = state.copy(submitState = UiState.Loading)
 
@@ -219,33 +291,18 @@ class CreateRecipeViewModel @Inject constructor(
         }
     }
 
-    private fun CreateRecipeState.toCommand(): CreateRecipeCommand {
-        return CreateRecipeCommand(
-            title = title.trim(),
-            description = description.trim(),
-            estimatedTime = (estimatedHour * 60) + estimatedMinute,
-            caloriesBy100Grams = caloriesBy100Grams.toIntOrNull(),
-            mealTime = mealTime.trim().takeIf { it.isNotBlank() },
-            categories = categories.map {
-                CreateRecipeCategoryCommand(categoryId = it.categoryId)
-            },
-            ingredients = ingredients.map {
-                CreateRecipeIngredientCommand(
-                    ingredientId = it.ingredientId,
-                    quantity = it.quantity.replace(",", ".").toDouble(),
-                    unitMeasurement = it.unitMeasurement.trim()
-                )
-            },
-            steps = steps.map {
-                CreateRecipeStepCommand(
-                    number = it.number,
-                    title = it.title.trim(),
-                    description = it.description,
-                    image = it.image?.toDomain()
-                )
-            },
-            mainPhoto = mainPhoto?.toDomain()
-        )
+    private fun validateBeforeSubmit(): String? {
+        return when {
+            state.title.isBlank() -> "Укажите название рецепта."
+            state.description.isBlank() -> "Укажите описание рецепта."
+            state.estimatedHour == 0 && state.estimatedMinute == 0 -> "Укажите время приготовления."
+            state.mealTimeType == null -> "Выберите тип блюда."
+            state.ingredients.isEmpty() -> "Добавьте хотя бы один ингредиент."
+            state.steps.any { it.title.isBlank() || it.description.isBlank() } -> {
+                "Заполните заголовок и описание каждого шага."
+            }
+            else -> null
+        }
     }
 }
 
@@ -256,6 +313,7 @@ private fun <T> List<T>.move(fromIndex: Int, toIndex: Int): List<T> {
     val mutable = toMutableList()
     val item = mutable.removeAt(fromIndex)
     mutable.add(toIndex, item)
+
     return mutable.toList()
 }
 
