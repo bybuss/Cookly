@@ -152,32 +152,32 @@ object NetworkModule {
     ): CreateRecipeApiService {
         return recipeServiceRetrofit.create(CreateRecipeApiService::class.java)
     }
-}
 
-@Provides
-@Singleton
-@Named("HttpLogger")
-fun provideHttpLogger(): HttpLoggingInterceptor {
-    return HttpLoggingInterceptor { message ->
-        val isMultipartContent = message.contains("Content-Disposition: form-data") ||
-                message.contains("Content-Type: image/") ||
-                message.contains("Content-Type: multipart/form-data")
-        if (!isMultipartContent) {
-            Log.i("OkHttp", message)
+    @Provides
+    @Singleton
+    @Named("HttpLogger")
+    fun provideHttpLogger(): HttpLoggingInterceptor {
+        return HttpLoggingInterceptor { message ->
+            val isMultipartContent = message.contains("Content-Disposition: form-data") ||
+                    message.contains("Content-Type: image/") ||
+                    message.contains("Content-Type: multipart/form-data")
+            if (!isMultipartContent) {
+                Log.i("OkHttp", message)
+            }
+        }.apply { level = HttpLoggingInterceptor.Level.BODY }
+    }
+
+    @Provides
+    @Singleton
+    @Named("TimezoneInterceptor")
+    fun provideTimezoneInterceptor(): Interceptor {
+        return okhttp3.Interceptor { chain ->
+            val timezone = TimeZone.getDefault().id
+            val request = chain.request()
+                .newBuilder()
+                .header("X-Timezone", timezone)
+                .build()
+            chain.proceed(request)
         }
-    }.apply { level = HttpLoggingInterceptor.Level.BODY }
-}
-
-@Provides
-@Singleton
-@Named("TimezoneInterceptor")
-fun provideTimezoneInterceptor(): Interceptor {
-    return okhttp3.Interceptor { chain ->
-        val timezone = TimeZone.getDefault().id
-        val request = chain.request()
-            .newBuilder()
-            .header("X-Timezone", timezone)
-            .build()
-        chain.proceed(request)
     }
 }
