@@ -42,9 +42,7 @@ object NetworkModule {
 
         return OkHttpClient.Builder()
             .cookieJar(cookieJar)
-            .addInterceptor(HttpLoggingInterceptor().apply {
-                setLevel(HttpLoggingInterceptor.Level.BODY)
-            })
+            .addInterceptor(provideHttpLogger())
             .addInterceptor { chain ->
                 val request = chain.request()
                 Log.i("Cookies", "Sending cookies in auth service: ${request.headers["Cookie"]}")
@@ -88,9 +86,7 @@ object NetworkModule {
 
         return OkHttpClient.Builder()
             .cookieJar(cookieJar)
-            .addInterceptor(HttpLoggingInterceptor().apply {
-                setLevel(HttpLoggingInterceptor.Level.BODY)
-            })
+            .addInterceptor(provideHttpLogger())
             .authenticator { route, response ->
                 tokenAuthenticator.get().authenticate(route, response)
             }
@@ -148,4 +144,16 @@ object NetworkModule {
     ): CreateRecipeApiService {
         return recipeServiceRetrofit.create(CreateRecipeApiService::class.java)
     }
+}
+
+
+private fun provideHttpLogger(): HttpLoggingInterceptor {
+    return HttpLoggingInterceptor { message ->
+        val isMultipartContent = message.contains("Content-Disposition: form-data") ||
+                message.contains("Content-Type: image/") ||
+                message.contains("Content-Type: multipart/form-data")
+        if (!isMultipartContent) {
+            Log.i("OkHttp", message)
+        }
+    }.apply { level = HttpLoggingInterceptor.Level.BODY }
 }
