@@ -62,8 +62,8 @@ fun CreateRecipeState.toCommand(): CreateRecipeCommand {
         title = title.trim(),
         description = description.trim(),
         estimatedTime = (estimatedHour * 60) + estimatedMinute,
-        caloriesBy100Grams = caloriesBy100Grams.toIntOrNull(),
-        mealTime = mealTimeType?.apiValue,
+        caloriesBy100Grams = caloriesBy100Grams.toInt(),
+        mealTime = mealTimeType.apiValue,
         categories = categories.map {
             CreateRecipeCategoryCommand(categoryId = it.categoryId)
         },

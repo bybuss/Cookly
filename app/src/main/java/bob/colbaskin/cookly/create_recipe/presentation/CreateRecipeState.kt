@@ -11,7 +11,7 @@ data class CreateRecipeState(
     val title: String = "",
     val description: String = "",
     val caloriesBy100Grams: String = "",
-    val mealTimeType: MealTimeType? = null,
+    val mealTimeType: MealTimeType = MealTimeType.BREAKFAST,
     val estimatedHour: Int = 0,
     val estimatedMinute: Int = 0,
 
@@ -26,6 +26,9 @@ data class CreateRecipeState(
     val ingredientSearchResults: List<CreateRecipeIngredient> = emptyList(),
     val isIngredientSearchLoading: Boolean = false,
     val ingredientSearchError: String? = null,
+
+    val spicyLevel: Int = 0,
+    val difficultyLevel: Int = 1,
 
     val steps: List<CreateRecipeStep> = listOf(
         CreateRecipeStep(localId = 1L, number = 1)

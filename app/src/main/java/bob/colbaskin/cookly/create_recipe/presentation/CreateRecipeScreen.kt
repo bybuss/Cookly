@@ -6,6 +6,7 @@ import android.provider.OpenableColumns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -76,6 +77,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -198,7 +200,7 @@ private fun CreateRecipeScreen(
                 title = {
                     Text(
                         text = "Оформление рецепта",
-                        style = CustomTheme.typography.inter.headlineSmall
+                        style = CustomTheme.typography.nunito.headlineSmall
                     )
                 },
                 navigationIcon = {
@@ -400,13 +402,27 @@ private fun CreateRecipeScreen(
             }
 
             item {
+                RecipeLevelsSelector(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    difficultyLevel = state.difficultyLevel,
+                    spicyLevel = state.spicyLevel,
+                    onDifficultyLevelChange = {
+                        onAction(CreateRecipeAction.UpdateDifficultyLevel(it))
+                    },
+                    onSpicyLevelChange = {
+                        onAction(CreateRecipeAction.UpdateSpicyLevel(it))
+                    }
+                )
+            }
+
+            item {
                 Column(
                     modifier = Modifier.padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
                         text = "Пошаговая инструкция",
-                        style = CustomTheme.typography.inter.titleLarge,
+                        style = CustomTheme.typography.nunito.titleLarge,
                         color = CustomTheme.colors.text
                     )
                 }
@@ -562,7 +578,7 @@ private fun CategoryPickerBottomSheet(
         FullHeightSheetContainer {
             Text(
                 text = "Выберите категории",
-                style = CustomTheme.typography.inter.titleLarge,
+                style = CustomTheme.typography.nunito.titleLarge,
                 color = CustomTheme.colors.text
             )
 
@@ -668,7 +684,7 @@ private fun IngredientPickerBottomSheet(
                 } else {
                     "Добавить ингредиент"
                 },
-                style = CustomTheme.typography.inter.titleLarge,
+                style = CustomTheme.typography.nunito.titleLarge,
                 color = CustomTheme.colors.text
             )
             FormTextField(
@@ -685,16 +701,11 @@ private fun IngredientPickerBottomSheet(
             selectedIngredient?.let { ingredient ->
                 Text(
                     text = "Выбран ингредиент: ${ingredient.title}",
-                    style = CustomTheme.typography.inter.bodyMedium,
+                    style = CustomTheme.typography.nunito.bodyMedium,
                     color = CustomTheme.colors.text
                 )
-                Text(
-                    text = "Единица измерения: ${ingredient.unitMeasurement}",
-                    style = CustomTheme.typography.inter.bodyMedium,
-                    color = CustomTheme.colors.tertiaryText
-                )
                 FormTextField(
-                    title = "Количество",
+                    title = "Единица измерения: ${ingredient.unitMeasurement}",
                     value = quantity,
                     placeholder = "Например, 250",
                     keyboardType = KeyboardType.Decimal,
@@ -778,7 +789,7 @@ private fun IngredientPickerBottomSheet(
                             localError = "Укажите корректное количество."
                         }
                         parsedQuantity > 100_000.0 -> {
-                            localError = "Количество не должно быть больше 100000."
+                            localError = "Значение не должно быть больше 100000."
                         }
                         else -> {
                             onSave(
@@ -863,13 +874,13 @@ private fun SelectableRow(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
-                style = CustomTheme.typography.inter.titleSmall,
+                style = CustomTheme.typography.nunito.titleSmall,
                 color = CustomTheme.colors.text
             )
             subtitle?.let { text ->
                 Text(
                     text = text,
-                    style = CustomTheme.typography.inter.bodyMedium,
+                    style = CustomTheme.typography.nunito.bodyMedium,
                     color = CustomTheme.colors.tertiaryText
                 )
             }
@@ -881,7 +892,7 @@ private fun SelectableRow(
 private fun RequiredFieldLabel(
     modifier: Modifier = Modifier,
     text: String,
-    style: TextStyle = CustomTheme.typography.inter.titleLarge
+    style: TextStyle = CustomTheme.typography.nunito.titleLarge
 ) {
     val colors = CustomTheme.colors
 
@@ -924,12 +935,12 @@ private fun FormTextField(
         if (isRequired) {
             RequiredFieldLabel(
                 text = title,
-                style = typography.inter.bodyMedium
+                style = typography.nunito.titleMedium
             )
         } else {
             Text(
                 text = title,
-                style = typography.inter.bodyMedium,
+                style = typography.nunito.titleMedium,
                 color = colors.text
             )
         }
@@ -1030,7 +1041,7 @@ private fun MealTimeSelector(
     ) {
         RequiredFieldLabel(
             text = "Тип блюда",
-            style = CustomTheme.typography.inter.bodyMedium
+            style = CustomTheme.typography.nunito.bodyMedium
         )
         LazyRow(
             modifier = Modifier.fillMaxWidth(),
@@ -1073,7 +1084,7 @@ private fun MealTimeCard(
         Text(
             modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp),
             text = title,
-            style = typography.inter.bodyMedium,
+            style = typography.nunito.bodyMedium,
             color = colors.text
         )
     }
@@ -1097,7 +1108,7 @@ private fun CategoryRow(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = category.title,
-                style = CustomTheme.typography.inter.titleMedium,
+                style = CustomTheme.typography.nunito.titleMedium,
                 color = CustomTheme.colors.text
             )
         }
@@ -1138,12 +1149,12 @@ private fun IngredientRow(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = ingredient.title,
-                style = typography.inter.titleMedium,
+                style = typography.nunito.titleMedium,
                 color = colors.text
             )
             Text(
                 text = "${ingredient.quantity} ${ingredient.unitMeasurement}",
-                style = typography.inter.titleMedium,
+                style = typography.nunito.titleMedium,
                 color = colors.tertiaryText
             )
         }
@@ -1180,6 +1191,88 @@ private fun IngredientRow(
 }
 
 @Composable
+private fun RecipeLevelsSelector(
+    modifier: Modifier = Modifier,
+    difficultyLevel: Int,
+    spicyLevel: Int,
+    onDifficultyLevelChange: (Int) -> Unit,
+    onSpicyLevelChange: (Int) -> Unit
+) {
+    val colors = CustomTheme.colors
+
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        ClickableIconLevelBlock(
+            title = "Сложность",
+            currentLevel = difficultyLevel,
+            minLevel = 1,
+            maxLevel = 5,
+            iconId = R.drawable.chef_hat_ai,
+            activeColor = colors.accentColor,
+            onLevelChange = onDifficultyLevelChange
+        )
+        ClickableIconLevelBlock(
+            title = "Острота",
+            currentLevel = spicyLevel,
+            minLevel = 0,
+            maxLevel = 5,
+            iconId = R.drawable.hot_pepper_ic,
+            activeColor = colors.likeColor,
+            onLevelChange = onSpicyLevelChange
+        )
+    }
+}
+
+@Composable
+private fun ClickableIconLevelBlock(
+    modifier: Modifier = Modifier,
+    title: String,
+    currentLevel: Int,
+    minLevel: Int,
+    maxLevel: Int = 5,
+    @DrawableRes iconId: Int,
+    activeColor: Color,
+    onLevelChange: (Int) -> Unit
+) {
+    val colors = CustomTheme.colors
+
+    Column(modifier = modifier) {
+        Text(
+            text = title,
+            style = CustomTheme.typography.nunito.titleLarge,
+            color = colors.text
+        )
+        Spacer(modifier = Modifier.height(6.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            repeat(maxLevel) { index ->
+                val level = index + 1
+                val isActive = index < currentLevel
+                Icon(
+                    painter = painterResource(id = iconId),
+                    contentDescription = "$title $level",
+                    tint = if (isActive) {
+                        activeColor
+                    } else {
+                        colors.secondaryText
+                    },
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clickable {
+                            val newLevel = when {
+                                minLevel == 0 && currentLevel == level -> 0
+                                else -> level.coerceIn(minLevel, maxLevel)
+                            }
+                            onLevelChange(newLevel)
+                        }
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun StepCard(
     modifier: Modifier = Modifier,
     step: CreateRecipeStep,
@@ -1211,7 +1304,7 @@ private fun StepCard(
         ) {
             Text(
                 text = "Шаг ${step.number}",
-                style = typography.inter.headlineSmall,
+                style = typography.nunito.headlineSmall,
                 color = colors.text,
                 modifier = Modifier.weight(1f)
             )
@@ -1267,7 +1360,7 @@ private fun StepCard(
         HelperText("Поле поддерживает markdown.")
         Text(
             text = "Фото шага",
-            style = typography.inter.bodyMedium,
+            style = typography.nunito.bodyMedium,
             color = colors.text
         )
         step.image?.let {
@@ -1320,7 +1413,7 @@ private fun CreateRecipeTimePickerDialog(
         title = {
             Text(
                 text = "Время приготовления",
-                style = CustomTheme.typography.inter.titleLarge,
+                style = CustomTheme.typography.nunito.titleLarge,
                 color = CustomTheme.colors.text
             )
         },
@@ -1394,7 +1487,7 @@ private fun AddItemTextButton(
 private fun HelperText(text: String) {
     Text(
         text = text,
-        style = CustomTheme.typography.inter.bodyMedium,
+        style = CustomTheme.typography.nunito.bodyMedium,
         color = CustomTheme.colors.tertiaryText
     )
 }
@@ -1403,7 +1496,7 @@ private fun HelperText(text: String) {
 private fun ErrorText(text: String) {
     Text(
         text = text,
-        style = CustomTheme.typography.inter.bodyMedium,
+        style = CustomTheme.typography.nunito.bodyMedium,
         color = CustomTheme.colors.errorContainer
     )
 }

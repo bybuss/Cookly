@@ -12,6 +12,8 @@ sealed interface CreateRecipeAction {
     data class UpdateDescription(val value: String): CreateRecipeAction
     data class UpdateCaloriesBy100Grams(val value: String): CreateRecipeAction
     data class SelectMealTime(val mealTimeType: MealTimeType) : CreateRecipeAction
+    data class UpdateSpicyLevel(val value: Int): CreateRecipeAction
+    data class UpdateDifficultyLevel(val value: Int): CreateRecipeAction
 
     data object OpenTimePicker: CreateRecipeAction
     data object DismissTimePicker: CreateRecipeAction

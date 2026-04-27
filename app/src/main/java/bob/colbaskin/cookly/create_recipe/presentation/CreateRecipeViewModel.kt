@@ -44,6 +44,14 @@ class CreateRecipeViewModel @Inject constructor(
                 )
             }
 
+            is CreateRecipeAction.UpdateSpicyLevel -> {
+                state = state.copy(spicyLevel = action.value.coerceIn(0, 5))
+            }
+
+            is CreateRecipeAction.UpdateDifficultyLevel -> {
+                state = state.copy(difficultyLevel = action.value.coerceIn(1, 5))
+            }
+
             is CreateRecipeAction.SelectMealTime -> {
                 state = state.copy(mealTimeType = action.mealTimeType)
             }
@@ -334,10 +342,10 @@ class CreateRecipeViewModel @Inject constructor(
         val calories = state.caloriesBy100Grams.toIntOrNull()
 
         return when {
+            state.mainPhoto == null -> "Добавьте изображение к вашему рецепту."
             state.title.isBlank() -> "Укажите название рецепта."
             state.description.isBlank() -> "Укажите описание рецепта."
             state.estimatedHour == 0 && state.estimatedMinute == 0 -> "Укажите время приготовления."
-            state.mealTimeType == null -> "Выберите тип блюда."
             state.caloriesBy100Grams.isNotBlank() && calories == null -> {
                 "Укажите корректную калорийность."
             }
