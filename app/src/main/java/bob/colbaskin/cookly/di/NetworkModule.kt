@@ -3,8 +3,7 @@ package bob.colbaskin.cookly.di
 import android.content.Context
 import android.util.Log
 import bob.colbaskin.cookly.BuildConfig
-import bob.colbaskin.cookly.auth.data.AuthApiService
-import bob.colbaskin.cookly.create_recipe.data.CreateRecipeApiService
+
 import bob.colbaskin.cookly.di.token.TokenAuthenticator
 import bob.colbaskin.cookly.di.token.TokenInterceptor
 import com.franmontiel.persistentcookiejar.PersistentCookieJar
