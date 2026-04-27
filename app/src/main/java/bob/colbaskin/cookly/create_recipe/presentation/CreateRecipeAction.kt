@@ -23,9 +23,12 @@ sealed interface CreateRecipeAction {
     data class RemoveCategory(val categoryId: Int): CreateRecipeAction
 
     data object ShowIngredientSheet: CreateRecipeAction
+    data class ShowEditIngredientSheet(
+        val ingredient: CreateRecipeIngredient
+    ) : CreateRecipeAction
     data object HideIngredientSheet: CreateRecipeAction
     data class SearchIngredients(val query: String): CreateRecipeAction
-    data class AddIngredient(val ingredient: CreateRecipeIngredient): CreateRecipeAction
+    data class SaveIngredient(val ingredient: CreateRecipeIngredient) : CreateRecipeAction
     data class RemoveIngredient(val ingredientId: Int): CreateRecipeAction
     data class MoveIngredient(val fromIndex: Int, val toIndex: Int): CreateRecipeAction
 

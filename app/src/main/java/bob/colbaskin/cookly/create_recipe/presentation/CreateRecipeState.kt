@@ -21,6 +21,7 @@ data class CreateRecipeState(
     val categoriesError: String? = null,
 
     val ingredients: List<CreateRecipeIngredient> = emptyList(),
+    val editingIngredient: CreateRecipeIngredient? = null,
     val ingredientSearchQuery: String = "",
     val ingredientSearchResults: List<CreateRecipeIngredient> = emptyList(),
     val isIngredientSearchLoading: Boolean = false,

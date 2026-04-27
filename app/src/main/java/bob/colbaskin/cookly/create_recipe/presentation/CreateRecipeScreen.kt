@@ -367,6 +367,9 @@ private fun CreateRecipeScreen(
                                 ingredient = ingredient,
                                 canMoveUp = index > 0,
                                 canMoveDown = index < state.ingredients.lastIndex,
+                                onClick = {
+                                    onAction(CreateRecipeAction.ShowEditIngredientSheet(ingredient))
+                                },
                                 onMoveUp = {
                                     onAction(
                                         CreateRecipeAction.MoveIngredient(
@@ -531,7 +534,7 @@ private fun CreateRecipeScreen(
                 onAction(CreateRecipeAction.SearchIngredients(query))
             },
             onSave = { ingredient ->
-                onAction(CreateRecipeAction.AddIngredient(ingredient))
+                onAction(CreateRecipeAction.SaveIngredient(ingredient))
             }
         )
     }
@@ -638,16 +641,18 @@ private fun IngredientPickerBottomSheet(
     onSave: (CreateRecipeIngredient) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val editingIngredient = state.editingIngredient
+    val isEditMode = editingIngredient != null
 
-    var selectedIngredient by remember {
-        mutableStateOf<CreateRecipeIngredient?>(null)
+    var selectedIngredient by remember(editingIngredient?.ingredientId) {
+        mutableStateOf(editingIngredient)
     }
 
-    var quantity by rememberSaveable {
-        mutableStateOf("")
+    var quantity by rememberSaveable(editingIngredient?.ingredientId) {
+        mutableStateOf(editingIngredient?.quantity.orEmpty())
     }
 
-    var localError by rememberSaveable {
+    var localError by rememberSaveable(editingIngredient?.ingredientId) {
         mutableStateOf<String?>(null)
     }
 
@@ -658,43 +663,51 @@ private fun IngredientPickerBottomSheet(
     ) {
         FullHeightSheetContainer {
             Text(
-                text = "Добавить ингредиент",
+                text = if (isEditMode) {
+                    "Редактировать ингредиент"
+                } else {
+                    "Добавить ингредиент"
+                },
                 style = CustomTheme.typography.inter.titleLarge,
                 color = CustomTheme.colors.text
             )
-
             FormTextField(
                 title = "Поиск",
                 value = state.ingredientSearchQuery,
                 placeholder = "Например, картофель",
-                onValueChange = {
+                onValueChange = { query ->
                     selectedIngredient = null
-                    onSearch(it)
+                    localError = null
+                    onSearch(query)
                 }
             )
 
-            if (selectedIngredient != null) {
+            selectedIngredient?.let { ingredient ->
                 Text(
-                    text = "Выбран ингредиент: ${selectedIngredient!!.title}",
-                    style = CustomTheme.typography.inter.titleMedium,
+                    text = "Выбран ингредиент: ${ingredient.title}",
+                    style = CustomTheme.typography.inter.bodyMedium,
                     color = CustomTheme.colors.text
                 )
+                Text(
+                    text = "Единица измерения: ${ingredient.unitMeasurement}",
+                    style = CustomTheme.typography.inter.bodyMedium,
+                    color = CustomTheme.colors.tertiaryText
+                )
                 FormTextField(
-                    title = "Единица измерения: ${selectedIngredient!!.unitMeasurement}",
+                    title = "Количество",
                     value = quantity,
                     placeholder = "Например, 250",
                     keyboardType = KeyboardType.Decimal,
                     isRequired = true,
-                    onValueChange = {
-                        quantity = it
+                    onValueChange = { value ->
+                        quantity = value
+                            .replace(",", ".")
+                            .filter { char -> char.isDigit() || char == '.' }
+                            .take(10)
                     }
                 )
             }
-
-            localError?.let {
-                ErrorText(text = it)
-            }
-
+            localError?.let { ErrorText(text = it) }
             when {
                 state.isIngredientSearchLoading -> {
                     Box(
@@ -703,22 +716,25 @@ private fun IngredientPickerBottomSheet(
                             .weight(1f),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator(color = CustomTheme.colors.accentColor)
+                        CircularProgressIndicator(
+                            color = CustomTheme.colors.accentColor
+                        )
                     }
                 }
-
                 state.ingredientSearchError != null -> {
                     ErrorText(text = state.ingredientSearchError)
                     Spacer(modifier = Modifier.weight(1f))
                 }
-
                 state.ingredientSearchQuery.isBlank() -> {
                     HelperText("Введите название ингредиента для поиска.")
                     Spacer(modifier = Modifier.weight(1f))
                 }
-
                 state.ingredientSearchResults.isEmpty() -> {
-                    HelperText("Ничего не найдено.")
+                    if (selectedIngredient == null) {
+                        HelperText("Ничего не найдено.")
+                    } else {
+                        HelperText("Можно изменить количество или найти другой ингредиент.")
+                    }
                     Spacer(modifier = Modifier.weight(1f))
                 }
 
@@ -732,13 +748,14 @@ private fun IngredientPickerBottomSheet(
                             key = { it.ingredientId }
                         ) { ingredient ->
                             val checked = selectedIngredient?.ingredientId == ingredient.ingredientId
-
                             SelectableRow(
                                 title = ingredient.title,
                                 subtitle = "Единица: ${ingredient.unitMeasurement}",
                                 checked = checked,
                                 onClick = {
-                                    selectedIngredient = ingredient
+                                    selectedIngredient = ingredient.copy(
+                                        quantity = quantity
+                                    )
                                     localError = null
                                 },
                                 isIngredientSelect = true
@@ -751,17 +768,18 @@ private fun IngredientPickerBottomSheet(
             Button(
                 onClick = {
                     val ingredient = selectedIngredient
-                    val parsedQuantity = quantity.replace(",", ".").toDoubleOrNull()
-
+                    val parsedQuantity
+                        = quantity.replace(",", ".").toDoubleOrNull()
                     when {
                         ingredient == null -> {
                             localError = "Выберите ингредиент из списка."
                         }
-
                         parsedQuantity == null || parsedQuantity <= 0.0 -> {
                             localError = "Укажите корректное количество."
                         }
-
+                        parsedQuantity > 100_000.0 -> {
+                            localError = "Количество не должно быть больше 100000."
+                        }
                         else -> {
                             onSave(
                                 ingredient.copy(
@@ -777,7 +795,7 @@ private fun IngredientPickerBottomSheet(
                     contentColor = CustomTheme.colors.invertedText
                 )
             ) {
-                Text("Добавить")
+                Text(text = if (isEditMode) "Сохранить изменения" else "Добавить")
             }
         }
     }
@@ -1098,6 +1116,7 @@ private fun IngredientRow(
     ingredient: CreateRecipeIngredient,
     canMoveUp: Boolean,
     canMoveDown: Boolean,
+    onClick: () -> Unit,
     onMoveUp: () -> Unit,
     onMoveDown: () -> Unit,
     onDelete: () -> Unit
@@ -1112,6 +1131,7 @@ private fun IngredientRow(
                 color = colors.ingredientSurface,
                 shape = RoundedCornerShape(16.dp)
             )
+            .clickable(onClick = onClick)
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

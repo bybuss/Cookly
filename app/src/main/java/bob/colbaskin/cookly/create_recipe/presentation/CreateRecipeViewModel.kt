@@ -85,27 +85,66 @@ class CreateRecipeViewModel @Inject constructor(
             }
 
             CreateRecipeAction.ShowIngredientSheet -> {
+                ingredientSearchJob?.cancel()
                 state = state.copy(
                     isIngredientSheetVisible = true,
+                    editingIngredient = null,
                     ingredientSearchQuery = "",
                     ingredientSearchResults = emptyList(),
+                    isIngredientSearchLoading = false,
+                    ingredientSearchError = null
+                )
+            }
+
+            is CreateRecipeAction.ShowEditIngredientSheet -> {
+                ingredientSearchJob?.cancel()
+                state = state.copy(
+                    isIngredientSheetVisible = true,
+                    editingIngredient = action.ingredient,
+                    ingredientSearchQuery = action.ingredient.title,
+                    ingredientSearchResults = emptyList(),
+                    isIngredientSearchLoading = false,
                     ingredientSearchError = null
                 )
             }
 
             CreateRecipeAction.HideIngredientSheet -> {
-                state = state.copy(isIngredientSheetVisible = false)
+                ingredientSearchJob?.cancel()
+                state = state.copy(
+                    isIngredientSheetVisible = false,
+                    editingIngredient = null,
+                    ingredientSearchQuery = "",
+                    ingredientSearchResults = emptyList(),
+                    isIngredientSearchLoading = false,
+                    ingredientSearchError = null
+                )
             }
 
             is CreateRecipeAction.SearchIngredients -> { searchIngredients(action.query) }
 
-            is CreateRecipeAction.AddIngredient -> {
-                val updated = state.ingredients
-                    .filterNot { it.ingredientId == action.ingredient.ingredientId } +
-                        action.ingredient
+            is CreateRecipeAction.SaveIngredient -> {
+                val currentIndex = state.ingredients.indexOfFirst {
+                    it.ingredientId == action.ingredient.ingredientId
+                }
+                val updated = if (currentIndex == -1) {
+                    state.ingredients + action.ingredient
+                } else {
+                    state.ingredients.map {
+                        if (it.ingredientId == action.ingredient.ingredientId) {
+                            action.ingredient
+                        } else {
+                            it
+                        }
+                    }
+                }
                 state = state.copy(
                     ingredients = updated,
-                    isIngredientSheetVisible = false
+                    isIngredientSheetVisible = false,
+                    editingIngredient = null,
+                    ingredientSearchQuery = "",
+                    ingredientSearchResults = emptyList(),
+                    isIngredientSearchLoading = false,
+                    ingredientSearchError = null
                 )
             }
 
