@@ -129,32 +129,6 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    @Named("AuthApiAuthService")
-    fun provideAuthApiAuthService(
-        @Named("AuthServiceRetrofit") authServiceRetrofit: Retrofit
-    ): AuthApiService {
-        return authServiceRetrofit.create(AuthApiService::class.java)
-    }
-
-    @Provides
-    @Singleton
-    @Named("AuthApiRecipeService")
-    fun provideAuthApiRecipeService(
-        @Named("RecipeServiceRetrofit") recipeServiceRetrofit: Retrofit
-    ): AuthApiService {
-        return recipeServiceRetrofit.create(AuthApiService::class.java)
-    }
-
-    @Provides
-    @Singleton
-    fun provideCreateRecipeApiService(
-        @Named("RecipeServiceRetrofit") recipeServiceRetrofit: Retrofit
-    ): CreateRecipeApiService {
-        return recipeServiceRetrofit.create(CreateRecipeApiService::class.java)
-    }
-
-    @Provides
-    @Singleton
     @Named("HttpLogger")
     fun provideHttpLogger(): HttpLoggingInterceptor {
         return HttpLoggingInterceptor { message ->
