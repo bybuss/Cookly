@@ -1,4 +1,4 @@
-package bob.colbaskin.cookly.home.domain.models
+package bob.colbaskin.cookly.home.domain.models.old
 
 import androidx.annotation.StringRes
 import bob.colbaskin.cookly.R

@@ -1,4 +1,4 @@
-package bob.colbaskin.cookly.home.domain.models
+package bob.colbaskin.cookly.home.domain.models.recipe_detailed
 
 data class Ingredient(
     val name: String,

@@ -1,7 +1,7 @@
 package bob.colbaskin.cookly.home.presentation.main
 
-import bob.colbaskin.cookly.home.domain.models.MealType
-import bob.colbaskin.cookly.home.domain.models.QuickCategoryType
+import bob.colbaskin.cookly.home.domain.models.old.MealType
+import bob.colbaskin.cookly.home.domain.models.old.QuickCategoryType
 
 data class HomeState(
     val quickCardsList: List<QuickCategoryType> = listOf(

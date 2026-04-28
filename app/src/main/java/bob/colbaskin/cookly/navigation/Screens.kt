@@ -38,7 +38,7 @@ sealed interface Screens {
     data class MealCategoryDetailed(val mealCategoryId: Int)
 
     @Serializable
-    data class DishDetailed(val dishId: Int)
+    data class RecipeDetailed(val recipeId: Int)
 
     @Serializable
     data object ApplicationsReview

@@ -1,9 +1,8 @@
-package bob.colbaskin.cookly.home.presentation.dish_detailed
+package bob.colbaskin.cookly.home.presentation.recipe_detailed
 
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -32,14 +31,20 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,26 +70,49 @@ import androidx.navigation.NavHostController
 import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
 import kotlin.math.roundToInt
 import bob.colbaskin.cookly.R
+import bob.colbaskin.cookly.common.UiState
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
-import bob.colbaskin.cookly.home.domain.models.Allergen
-import bob.colbaskin.cookly.home.domain.models.StartCookSwipeAnchor
+import bob.colbaskin.cookly.home.domain.models.old.StartCookSwipeAnchor
+import bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeDetailed
+import bob.colbaskin.cookly.home.domain.models.recipe_detailed.toDomainMealTime
 import bob.colbaskin.cookly.home.presentation.components.SheetTopBar
+import coil3.compose.AsyncImage
+import kotlinx.coroutines.launch
 
 @Composable
-fun DishDetailedScreenRoot(
+fun RecipeDetailedScreenRoot(
     modifier: Modifier = Modifier,
     navController: NavHostController,
-    viewModel: DishDetailedViewModel = hiltViewModel()
+    snackbarHostState: SnackbarHostState,
+    viewModel: RecipeDetailedViewModel = hiltViewModel()
 ) {
+    val recipeId: Int =
+        navController.currentBackStackEntry?.arguments?.getInt("recipeId") ?: -1
     val state = viewModel.state
+    val scope = rememberCoroutineScope()
 
-    DishDetailedScreen(
+    LaunchedEffect(recipeId) {
+        viewModel.loadRecipe(recipeId)
+    }
+
+    LaunchedEffect(state.recipeState) {
+        if (state.recipeState is UiState.Error) {
+            scope.launch {
+                snackbarHostState.showSnackbar(
+                    message = state.recipeState.title,
+                    duration = SnackbarDuration.Short
+                )
+            }
+        }
+    }
+
+    RecipeDetailedScreen(
         modifier = modifier,
         state = state,
         onAction = { action ->
             when (action) {
-                DishDetailedAction.NavigateBack -> navController.popBackStack()
-                DishDetailedAction.StartCook -> navController.popBackStack() // FIXME: изменить потом на навигацию на шаги готовки рецепта жи ес
+                RecipeDetailedAction.NavigateBack -> navController.popBackStack()
+                RecipeDetailedAction.StartCook -> navController.popBackStack()
                 else -> Unit
             }
             viewModel.onAction(action)
@@ -93,10 +121,86 @@ fun DishDetailedScreenRoot(
 }
 
 @Composable
-private fun DishDetailedScreen(
+private fun RecipeDetailedScreen(
     modifier: Modifier = Modifier,
-    state: DishDetailedState,
-    onAction: (DishDetailedAction) -> Unit
+    state: RecipeDetailedState,
+    onAction: (RecipeDetailedAction) -> Unit
+) {
+    when (state.recipeState) {
+        is UiState.Success -> {
+            RecipeDetailedContent(
+                modifier = modifier,
+                recipe = state.recipeState.data,
+                state = state,
+                onAction = onAction
+            )
+        }
+        is UiState.Error -> {
+            RecipeDetailedErrorScreen(
+                modifier = modifier,
+                title = state.recipeState.title,
+                onBackClick = { onAction(RecipeDetailedAction.NavigateBack) }
+            )
+        }
+        else -> {
+            Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = CustomTheme.colors.accentColor)
+            }
+        }
+    }
+}
+
+@Composable
+private fun RecipeDetailedErrorScreen(
+    modifier: Modifier = Modifier,
+    title: String,
+    text: String? = null,
+    onBackClick: () -> Unit
+) {
+    val colors = CustomTheme.colors
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(colors.background)
+            .padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = title,
+            style = CustomTheme.typography.inter.headlineSmall,
+            color = colors.text,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        text?.let {
+            Text(
+                text = it,
+                style = CustomTheme.typography.nunito.bodyLarge,
+                color = colors.tertiaryText,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+        }
+        Button(
+            onClick = onBackClick,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = colors.accentColor,
+                contentColor = colors.invertedText
+            )
+        ) {
+            Text("Назад")
+        }
+    }
+}
+
+@Composable
+private fun RecipeDetailedContent(
+    modifier: Modifier = Modifier,
+    recipe: RecipeDetailed,
+    state: RecipeDetailedState,
+    onAction: (RecipeDetailedAction) -> Unit
 ) {
     BoxWithConstraints(
         modifier = modifier
@@ -116,14 +220,14 @@ private fun DishDetailedScreen(
 
         val sheetState = remember {
             AnchoredDraggableState(
-                initialValue = DishSheetValue.COLLAPSED
+                initialValue = RecipeDetailedSheetValue.COLLAPSED
             )
         }
 
         val anchors = remember(expandedTopPx, collapsedTopPx) {
             DraggableAnchors {
-                DishSheetValue.EXPANDED at expandedTopPx
-                DishSheetValue.COLLAPSED at collapsedTopPx
+                RecipeDetailedSheetValue.EXPANDED at expandedTopPx
+                RecipeDetailedSheetValue.COLLAPSED at collapsedTopPx
             }
         }
 
@@ -140,25 +244,26 @@ private fun DishDetailedScreen(
             )
         )
 
-        DishBackground(
+        RecipeBackground(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(collapsedTop + avatarSize / 2 + 24.dp)
                 .align(Alignment.TopStart),
-            dishName = state.dishName,
-            dishImageRes = state.dishAvatar
+            dishName = recipe.title,
+            dishImageUrl = recipe.imageUrl,
+            fallbackImageRes = state.dishAvatarFallback
         )
-        DishSheet(
+        RecipeSheet(
             modifier = Modifier.zIndex(3f),
             onAction = onAction,
             state = state,
+            recipe = recipe,
             anchoredState = sheetState,
             flingBehavior = flingBehavior,
             expandedTop = expandedTop,
             expandedTopPx = expandedTopPx,
             collapsedTopPxFallback = collapsedTopPx,
             avatarSize = avatarSize,
-            dishAvatarId = state.dishAvatar,
         )
         Column(
             modifier = Modifier
@@ -169,31 +274,34 @@ private fun DishDetailedScreen(
         ) {
             SheetTopBar(
                 modifier = Modifier,
-                liquidBoxText = state.mealType,
-                onBackClick = { onAction(DishDetailedAction.NavigateBack) },
+                liquidBoxText = recipe.mealTime.toDomainMealTime(isPlural = false),
+                onBackClick = { onAction(RecipeDetailedAction.NavigateBack) },
                 avatarId = R.drawable.user_avatar_mock
             )
             Spacer(modifier = Modifier.height(16.dp))
             HeartBubble(
                 modifier = Modifier,
                 isLiked = state.isRecipeLiked,
-                onClick = { onAction(DishDetailedAction.ToggleLike) }
+                onClick = { onAction(RecipeDetailedAction.ToggleLike) }
             )
         }
     }
 }
 
 @Composable
-private fun DishBackground(
+private fun RecipeBackground(
     modifier: Modifier = Modifier,
     dishName: String,
-    @DrawableRes dishImageRes: Int
+    dishImageUrl: String?,
+    @DrawableRes fallbackImageRes: Int
 ) {
     Box(modifier = modifier) {
-        Image(
-            painter = painterResource(id = dishImageRes),
+        AsyncImage(
+            model = dishImageUrl,
             contentDescription = null,
             contentScale = ContentScale.Crop,
+            fallback = painterResource(id = fallbackImageRes),
+            error = painterResource(id = fallbackImageRes),
             modifier = Modifier
                 .matchParentSize()
                 .blur(16.dp)
@@ -259,9 +367,10 @@ private fun HeartBubble(
 }
 
 @Composable
-private fun DishAvatar(
+private fun RecipeAvatar(
     modifier: Modifier = Modifier,
-    @DrawableRes dishAvatarId: Int
+    dishAvatarUrl: String?,
+    @DrawableRes fallbackImageRes: Int
 ) {
     Box(
         modifier = modifier
@@ -272,10 +381,12 @@ private fun DishAvatar(
             )
             .clip(CircleShape)
     ) {
-        Image(
-            painter = painterResource(id = dishAvatarId),
+        AsyncImage(
+            model = dishAvatarUrl,
             contentDescription = null,
             contentScale = ContentScale.Crop,
+            fallback = painterResource(id = fallbackImageRes),
+            error = painterResource(id = fallbackImageRes),
             modifier = Modifier
                 .fillMaxSize()
                 .clip(CircleShape)
@@ -403,17 +514,17 @@ private fun StartCookSwipeButton(
 }
 
 @Composable
-private fun DishSheet(
+private fun RecipeSheet(
     modifier: Modifier = Modifier,
-    state: DishDetailedState,
-    onAction: (DishDetailedAction) -> Unit,
-    anchoredState: AnchoredDraggableState<DishSheetValue>,
+    state: RecipeDetailedState,
+    recipe: RecipeDetailed,
+    onAction: (RecipeDetailedAction) -> Unit,
+    anchoredState: AnchoredDraggableState<RecipeDetailedSheetValue>,
     flingBehavior: FlingBehavior,
     expandedTop: Dp,
     expandedTopPx: Float,
     collapsedTopPxFallback: Float,
-    avatarSize: Dp,
-    @DrawableRes dishAvatarId: Int
+    avatarSize: Dp
 ) {
     val sheetOffsetPx =
         if (anchoredState.offset.isNaN()) collapsedTopPxFallback
@@ -459,21 +570,19 @@ private fun DishSheet(
                     Column(
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        DishMetaInfoCard(
+                        RecipeMetaInfoCard(
                             modifier = Modifier.fillMaxWidth(),
-                            minutes = state.minutes,
-                            difficultyLvl = state.difficultyLvl,
-                            spicyLevel = state.spicyLvl,
-                            allergens = state.allergensList,
-                            mealType = state.mealType,
-                            rating = state.rating,
-                            ratingAmount = state.ratingAmount,
-                            kcal = state.kcal,
-                            isFlameIconRed = state.isFlameIconRed
+                            minutes = recipe.estimatedTime,
+                            difficultyLvl = recipe.difficultyLevel,
+                            spicyLevel = recipe.spicyLevel,
+                            rating = recipe.rating,
+                            ratingAmount = recipe.ratingCount,
+                            kcal = recipe.caloriesBy100Grams,
+                            isFlameIconRed = false
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = state.description,
+                            text = recipe.description,
                             style = CustomTheme.typography.helvetica.titleMedium,
                             fontWeight = FontWeight.Light,
                             color = colors.tertiaryText
@@ -490,7 +599,7 @@ private fun DishSheet(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            items(state.ingredientsList) { ingredient ->
+                            items(recipe.ingredients) { ingredient ->
                                 Column(
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(20.dp))
@@ -522,17 +631,17 @@ private fun DishSheet(
                 ) {
                     StartCookSwipeButton(
                         modifier = Modifier.weight(1f),
-                        onSwiped = { onAction(DishDetailedAction.StartCook) }
+                        onSwiped = { onAction(RecipeDetailedAction.StartCook) }
                     )
                     Spacer(modifier = Modifier.size(16.dp))
                     CartBubble(
-                        onClick = { onAction(DishDetailedAction.AddToCart) }
+                        onClick = { onAction(RecipeDetailedAction.AddToCart) }
                     )
                 }
             }
         }
 
-        DishAvatar(
+        RecipeAvatar(
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .offset {
@@ -542,19 +651,18 @@ private fun DishSheet(
                     )
                 }
                 .size(avatarSize),
-            dishAvatarId = dishAvatarId
+            dishAvatarUrl = recipe.imageUrl,
+            fallbackImageRes = state.dishAvatarFallback
         )
     }
 }
 
 @Composable
-private fun DishMetaInfoCard(
+private fun RecipeMetaInfoCard(
     modifier: Modifier = Modifier,
     minutes: Int,
     difficultyLvl: Int,
     spicyLevel: Int,
-    allergens: List<Allergen>,
-    mealType: String,
     rating: Double,
     ratingAmount: Int,
     kcal: Int,
@@ -608,18 +716,6 @@ private fun DishMetaInfoCard(
                 activeColor = colors.likeColor
             )
         }
-        Spacer(modifier = Modifier.height(16.dp))
-        InfoTitleValueBlock(
-            title = "Кухня",
-            value = mealType.lowercase()
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        InfoTitleValueBlock(
-            title = "Распространенный аллерген",
-            value = allergens.takeIf { it.isNotEmpty() }
-                ?.joinToString(", ") { it.name }
-                ?: "Не указано"
-        )
     }
 }
 
@@ -656,26 +752,6 @@ private fun IconLevelBlock(
 }
 
 @Composable
-private fun InfoTitleValueBlock(
-    title: String,
-    value: String
-) {
-    val colors = CustomTheme.colors
-
-    Text(
-        text = title,
-        style = CustomTheme.typography.nunito.titleMedium,
-        fontWeight = FontWeight.SemiBold,
-        color = colors.text
-    )
-    Text(
-        text = value,
-        style = CustomTheme.typography.nunito.bodyLarge,
-        color = colors.text.copy(alpha = 0.8f)
-    )
-}
-
-@Composable
 private fun InfoIconValueBlock(
     modifier: Modifier = Modifier,
     @DrawableRes iconRes: Int,
@@ -706,10 +782,10 @@ private fun InfoIconValueBlock(
 
 @Preview
 @Composable
-private fun DishDetailedScreenPreview() {
+private fun RecipeDetailedScreenPreview() {
     UfoodTheme {
-        DishDetailedScreen(
-            state = DishDetailedState(),
+        RecipeDetailedScreen(
+            state = RecipeDetailedState(),
             onAction = {}
         )
     }

@@ -15,7 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
-import bob.colbaskin.cookly.home.domain.models.QuickCategoryType
+import bob.colbaskin.cookly.home.domain.models.old.QuickCategoryType
 
 @Composable
 fun QuickCategoryCard(

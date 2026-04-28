@@ -15,7 +15,7 @@ import bob.colbaskin.cookly.agreement.presentation.policy.PolicyScreenRoot
 import bob.colbaskin.cookly.agreement.presentation.terms_of_use.TermsOfUseScreenRoot
 import bob.colbaskin.cookly.auth.presentation.AuthScreenRoot
 import bob.colbaskin.cookly.create_recipe.presentation.CreateRecipeScreenRoot
-import bob.colbaskin.cookly.home.presentation.dish_detailed.DishDetailedScreenRoot
+import bob.colbaskin.cookly.home.presentation.recipe_detailed.RecipeDetailedScreenRoot
 import bob.colbaskin.cookly.home.presentation.main.HomeScreenRoot
 import bob.colbaskin.cookly.home.presentation.meal_detailed.MealCategoryDetailedScreenRoot
 import bob.colbaskin.cookly.navigation.Screens
@@ -68,7 +68,11 @@ fun NavGraphBuilder.mainGraph(
                 Text(text = "Chat Screen")
             }
         }
-        composable<Screens.Favourites> { DishDetailedScreenRoot(navController = navController) }
+        composable<Screens.Favourites> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(text = "Favourites Screen")
+            }
+        }
         composable<Screens.Profile> {
             ProfileScreenRoot(
                 navController = navController,
@@ -88,7 +92,12 @@ fun NavGraphBuilder.detailedGraph(
         composable<Screens.MealCategoryDetailed> {
             MealCategoryDetailedScreenRoot(navController = navController)
         }
-        composable<Screens.DishDetailed> { DishDetailedScreenRoot(navController = navController) }
+        composable<Screens.RecipeDetailed> {
+            RecipeDetailedScreenRoot(
+                navController = navController,
+                snackbarHostState = snackbarHostState
+            )
+        }
         composable<Screens.CreateRecipe> {
             CreateRecipeScreenRoot(
                 navController = navController,

@@ -1,8 +1,8 @@
 package bob.colbaskin.cookly.home.presentation.meal_detailed
 
 import bob.colbaskin.cookly.R
-import bob.colbaskin.cookly.home.domain.models.Meal
-import bob.colbaskin.cookly.home.domain.models.MealType
+import bob.colbaskin.cookly.home.domain.models.old.Meal
+import bob.colbaskin.cookly.home.domain.models.old.MealType
 
 data class MealDetailedState(
     val mealsList: List<Meal> = mealsListMock,

@@ -77,7 +77,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -93,7 +92,7 @@ import bob.colbaskin.cookly.create_recipe.domain.models.CreateRecipeIngredient
 import bob.colbaskin.cookly.create_recipe.domain.models.CreateRecipeStep
 import bob.colbaskin.cookly.create_recipe.domain.models.LocalImage
 import bob.colbaskin.cookly.create_recipe.domain.models.PhotoTarget
-import bob.colbaskin.cookly.home.domain.models.MealTimeType
+import bob.colbaskin.cookly.home.domain.models.old.MealTimeType
 import coil3.compose.rememberAsyncImagePainter
 import compose.icons.TablerIcons
 import compose.icons.tablericons.ChevronDown

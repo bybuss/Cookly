@@ -2,7 +2,6 @@ package bob.colbaskin.cookly.common.design_system.theme
 
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
-import bob.colbaskin.cookly.home.domain.models.Ingredient
 
 data class AppColors(
     val background: Color,
