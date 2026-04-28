@@ -54,6 +54,7 @@ import compose.icons.tablericons.Clock
 import compose.icons.tablericons.FileText
 import compose.icons.tablericons.Logout
 import compose.icons.tablericons.Settings
+import compose.icons.tablericons.ToolsKitchen
 import kotlinx.coroutines.launch
 
 @Composable
@@ -107,7 +108,8 @@ fun ProfileScreenRoot(
                     navController.navigate(Screens.ApplicationsReview)
                 }
                 ProfileAction.OpenCookingHistory -> {
-                    navController.navigate(Screens.CookingHistory)
+                    //navController.navigate(Screens.CookingHistory)
+                    navController.navigate(Screens.RecipeDetailed(recipeId = 63))
                 }
                 ProfileAction.OpenPreferencesAndAllergies -> {
                     navController.navigate(Graphs.Onboarding)
@@ -207,7 +209,7 @@ private fun ProfileScreen(
                     title = "Создание своего рецепта",
                     icon = {
                         Icon(
-                            imageVector = TablerIcons.FileText,
+                            imageVector = TablerIcons.ToolsKitchen,
                             contentDescription = null,
                             tint = CustomTheme.colors.accentColor
                         )
