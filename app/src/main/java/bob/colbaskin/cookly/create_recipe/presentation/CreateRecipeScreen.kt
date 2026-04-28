@@ -704,11 +704,11 @@ private fun IngredientPickerBottomSheet(
                     color = CustomTheme.colors.text
                 )
                 FormTextField(
-                    title = "Единица измерения: ${ingredient.unitMeasurement}",
+                    title = null,
+                    label = "Коичество",
                     value = quantity,
-                    placeholder = "Например, 250",
+                    unitMeasurement = ingredient.unitMeasurement,
                     keyboardType = KeyboardType.Decimal,
-                    isRequired = true,
                     onValueChange = { value ->
                         quantity = value
                             .replace(",", ".")
@@ -913,9 +913,11 @@ private fun RequiredFieldLabel(
 @Composable
 private fun FormTextField(
     modifier: Modifier = Modifier,
-    title: String,
+    title: String? = null,
+    label: String = "",
     value: String,
-    placeholder: String,
+    unitMeasurement: String = "",
+    placeholder: String = "",
     singleLine: Boolean = true,
     minLines: Int = 1,
     isRequired: Boolean = false,
@@ -931,19 +933,20 @@ private fun FormTextField(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        if (isRequired) {
-            RequiredFieldLabel(
-                text = title,
-                style = typography.nunito.titleMedium
-            )
-        } else {
-            Text(
-                text = title,
-                style = typography.nunito.titleMedium,
-                color = colors.text
-            )
+        title?.let {
+            if (isRequired) {
+                RequiredFieldLabel(
+                    text = it,
+                    style = typography.nunito.titleMedium
+                )
+            } else {
+                Text(
+                    text = it,
+                    style = typography.nunito.titleMedium,
+                    color = colors.text
+                )
+            }
         }
-
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
@@ -957,6 +960,8 @@ private fun FormTextField(
                         }
                     }
                 },
+            label = { Text(label) },
+            suffix = { Text(unitMeasurement) },
             singleLine = singleLine,
             minLines = minLines,
             placeholder = {
