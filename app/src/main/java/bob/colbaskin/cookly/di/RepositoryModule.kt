@@ -17,6 +17,9 @@ import bob.colbaskin.cookly.home.domain.HomeRecipeRepository
 import bob.colbaskin.cookly.profile.data.ProfileApiService
 import bob.colbaskin.cookly.profile.data.ProfileRepositoryImpl
 import bob.colbaskin.cookly.profile.domain.ProfileRepository
+import bob.colbaskin.cookly.shopping_cart.data.CartDao
+import bob.colbaskin.cookly.shopping_cart.data.ShoppingCartRepositoryImpl
+import bob.colbaskin.cookly.shopping_cart.domain.ShoppingCartRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -91,5 +94,11 @@ object RepositoryModule {
             context = context,
             apiService = apiService
         )
+    }
+
+    @Provides
+    @Singleton
+    fun provideShoppingCartRepository(cartDao: CartDao): ShoppingCartRepository {
+        return ShoppingCartRepositoryImpl(cartDao = cartDao)
     }
 }

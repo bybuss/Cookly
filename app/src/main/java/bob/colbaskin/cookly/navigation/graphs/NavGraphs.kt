@@ -21,6 +21,7 @@ import bob.colbaskin.cookly.home.presentation.meal_detailed.MealCategoryDetailed
 import bob.colbaskin.cookly.navigation.Screens
 import bob.colbaskin.cookly.onboarding_preferences.presentation.OnboardingScreenRoot
 import bob.colbaskin.cookly.profile.presentation.ProfileScreenRoot
+import bob.colbaskin.cookly.shopping_cart.presentation.ShoppingCartScreenRoot
 
 fun NavGraphBuilder.agreementGraph(
     navController: NavHostController
@@ -62,11 +63,9 @@ fun NavGraphBuilder.mainGraph(
         startDestination = Screens.Home
     ) {
         composable<Screens.Home> { HomeScreenRoot(navController = navController) }
-        composable<Screens.Cart> { MealCategoryDetailedScreenRoot(navController = navController) }
+        composable<Screens.ShoppingCart> { ShoppingCartScreenRoot() }
         composable<Screens.Chat> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = "Chat Screen")
-            }
+            MealCategoryDetailedScreenRoot(navController = navController)
         }
         composable<Screens.Favourites> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

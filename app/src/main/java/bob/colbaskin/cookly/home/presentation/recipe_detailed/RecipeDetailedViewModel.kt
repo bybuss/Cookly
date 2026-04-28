@@ -8,16 +8,18 @@ import androidx.lifecycle.viewModelScope
 import bob.colbaskin.cookly.common.UiState
 import bob.colbaskin.cookly.common.toUiState
 import bob.colbaskin.cookly.home.domain.HomeRecipeRepository
-import bob.colbaskin.cookly.home.domain.models.old.Allergen
-import bob.colbaskin.cookly.home.domain.models.recipe_detailed.Ingredient
-import bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeDetailed
+import bob.colbaskin.cookly.home.domain.models.recipe_detailed.recalculateByPortions
+import bob.colbaskin.cookly.home.domain.models.recipe_detailed.toCartIngredientUiItems
+import bob.colbaskin.cookly.shopping_cart.domain.ShoppingCartRepository
+import bob.colbaskin.cookly.shopping_cart.domain.models.CartIngredient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class RecipeDetailedViewModel @Inject constructor(
-    private val repository: HomeRecipeRepository
+    private val repository: HomeRecipeRepository,
+    private val shoppingCartRepository: ShoppingCartRepository
 ) : ViewModel() {
 
     var state by mutableStateOf(RecipeDetailedState())
@@ -27,84 +29,126 @@ class RecipeDetailedViewModel @Inject constructor(
 
     fun onAction(action: RecipeDetailedAction) {
         when (action) {
+            RecipeDetailedAction.ToggleLike -> {
+                state = state.copy(isRecipeLiked = !state.isRecipeLiked)
+            }
             is RecipeDetailedAction.OnSheetStateChanged -> {
                 state = state.copy(isSheetExpanded = action.isExpanded)
             }
-            RecipeDetailedAction.ToggleLike -> {
-                state = state.copy(isRecipeLiked = !state.isRecipeLiked)
+            RecipeDetailedAction.ShowAddToCartSheet -> openAddToCartSheet()
+            RecipeDetailedAction.HideAddToCartSheet -> {
+                state = state.copy(isAddToCartSheetVisible = false)
+            }
+            RecipeDetailedAction.IncreasePortions -> {
+                val newPortions = (state.portions + 1).coerceAtMost(99)
+                state = state.copy(
+                    portions = newPortions,
+                    cartIngredients = state.cartIngredients.recalculateByPortions(newPortions)
+                )
+            }
+            RecipeDetailedAction.DecreasePortions -> {
+                val newPortions = (state.portions - 1).coerceAtLeast(1)
+                state = state.copy(
+                    portions = newPortions,
+                    cartIngredients = state.cartIngredients.recalculateByPortions(newPortions)
+                )
+            }
+            is RecipeDetailedAction.ToggleCartIngredient -> {
+                state = state.copy(
+                    cartIngredients = state.cartIngredients.map { item ->
+                        if (item.cartKey == action.cartKey) {
+                            item.copy(isSelected = !item.isSelected)
+                        } else {
+                            item
+                        }
+                    }
+                )
+            }
+            RecipeDetailedAction.ConfirmAddSelectedIngredientsToCart -> {
+                addSelectedIngredientsToCart()
+            }
+            RecipeDetailedAction.ConsumeAddToCartResult -> {
+                state = state.copy(addToCartState = UiState.Idle)
             }
             else -> Unit
         }
     }
 
-//    fun loadRecipe(recipeId: Int) {
-//        if (recipeId <= 0) {
-//            state = state.copy(
-//                recipeState = UiState.Error(
-//                    title = "Некорректный ID рецепта",
-//                    text = "Не удалось открыть рецепт."
-//                )
-//            )
-//            return
-//        }
-//        if (loadedRecipeId == recipeId && state.recipeState is UiState.Success) return
-//        loadedRecipeId = recipeId
-//        state = state.copy(recipeState = UiState.Loading)
-//        viewModelScope.launch {
-//            val result = repository.getRecipeById(recipeId).toUiState()
-//            state = state.copy(recipeState = result)
-//        }
-//    }
-
     fun loadRecipe(recipeId: Int) {
-        state = state.copy(recipeState = UiState.Loading)
-
-        viewModelScope.launch {
-            kotlinx.coroutines.delay(500)
-
+        if (recipeId <= 0) {
             state = state.copy(
-                recipeState = UiState.Success(
-                    RecipeDetailed(
-                        id = recipeId,
-                        title = "Паста с курицей и томатами",
-                        description = "Нежная паста с курицей, томатным соусом и базиликом. Подходит для быстрого обеда или ужина.",
-                        estimatedTime = 35,
-                        caloriesBy100Grams = 245,
-                        mealTime = "lunch",
-                        rating = 4.7,
-                        ratingCount = 128,
-                        spicyLevel = 2,
-                        difficultyLevel = 3,
-                        imageUrl = "https://bidlo.taild3ccfe.ts.net/recipes/62.webp",
-                        ingredients = listOf(
-                            Ingredient(
-                                name = "Паста",
-                                count = 200,
-                                unitOfMeasurement = "г"
-                            ),
-                            Ingredient(
-                                name = "Куриное филе",
-                                count = 250,
-                                unitOfMeasurement = "г"
-                            ),
-                            Ingredient(
-                                name = "Томаты",
-                                count = 2,
-                                unitOfMeasurement = "шт"
-                            ),
-                            Ingredient(
-                                name = "Сыр",
-                                count = 50,
-                                unitOfMeasurement = "г"
-                            )
-                        ),
-                        categories = listOf(
-                            "Основные блюда",
-                            "Паста и лапша"
-                        )
-                    )
+                recipeState = UiState.Error(
+                    title = "Некорректный ID рецепта",
+                    text = "Не удалось открыть рецепт."
                 )
             )
+            return
+        }
+        if (loadedRecipeId == recipeId && state.recipeState is UiState.Success) return
+        loadedRecipeId = recipeId
+        state = state.copy(recipeState = UiState.Loading)
+        viewModelScope.launch {
+            val result = repository.getRecipeById(recipeId).toUiState()
+            state = state.copy(recipeState = result)
+        }
+    }
+
+    private fun openAddToCartSheet() {
+        val recipe = (state.recipeState as? UiState.Success)?.data ?: return
+
+        state = state.copy(
+            isAddToCartSheetVisible = true,
+            portions = DEFAULT_RECIPE_PORTIONS,
+            cartIngredients = recipe.toCartIngredientUiItems(
+                portions = DEFAULT_RECIPE_PORTIONS
+            ),
+            addToCartState = UiState.Idle
+        )
+    }
+
+    private fun addSelectedIngredientsToCart() {
+        if (state.addToCartState is UiState.Loading) return
+
+        val selectedIngredients = state.cartIngredients
+            .filter { it.isSelected }
+            .map { item ->
+                CartIngredient(
+                    cartKey = item.cartKey,
+                    ingredientId = item.ingredientId,
+                    title = item.title,
+                    quantity = item.calculatedQuantity,
+                    unitMeasurement = item.unitMeasurement,
+                    sourceRecipeId = (state.recipeState as? UiState.Success)?.data?.id
+                )
+            }
+
+        if (selectedIngredients.isEmpty()) {
+            state = state.copy(
+                addToCartState = UiState.Error(
+                    title = "Ингредиенты не выбраны",
+                    text = "Выберите хотя бы один ингредиент для добавления."
+                )
+            )
+            return
+        }
+
+        state = state.copy(addToCartState = UiState.Loading)
+
+        viewModelScope.launch {
+            val result = shoppingCartRepository.addIngredients(selectedIngredients).toUiState()
+
+            state = when (result) {
+                is UiState.Success -> {
+                    state.copy(
+                        addToCartState = result,
+                        isAddToCartSheetVisible = false
+                    )
+                }
+
+                else -> {
+                    state.copy(addToCartState = result)
+                }
+            }
         }
     }
 }

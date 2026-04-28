@@ -28,7 +28,7 @@ enum class Destinations (
     CART(
         outlinedIcon = R.drawable.cart_ic,
         label = R.string.cart_nav_label,
-        screen = Screens.Cart
+        screen = Screens.ShoppingCart
     ),
     PROFILE(
         outlinedIcon = R.drawable.user_ic,

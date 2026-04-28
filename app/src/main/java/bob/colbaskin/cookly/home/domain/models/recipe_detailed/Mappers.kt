@@ -1,7 +1,9 @@
 package bob.colbaskin.cookly.home.domain.models.recipe_detailed
 
 import bob.colbaskin.cookly.home.data.models.recipe_detailed.RecipeDetailedDto
-import bob.colbaskin.cookly.home.presentation.recipe_detailed.RecipeDetailedState
+import bob.colbaskin.cookly.home.presentation.recipe_detailed.DEFAULT_RECIPE_PORTIONS
+import bob.colbaskin.cookly.home.presentation.recipe_detailed.RecipeCartIngredientUi
+import java.util.Locale
 import kotlin.math.roundToInt
 
 fun RecipeDetailedDto.toDomain(): RecipeDetailed {
@@ -22,6 +24,7 @@ fun RecipeDetailedDto.toDomain(): RecipeDetailed {
         imageUrl = imageUrl,
         ingredients = recipeIngredients.map { item ->
             Ingredient(
+                id = item.ingredient.id,
                 name = item.ingredient.title,
                 count = item.quantity.toIngredientCount(),
                 unitOfMeasurement = item.unitMeasurement
@@ -49,5 +52,35 @@ fun String.toDomainMealTime(isPlural: Boolean): String {
         "lunch" -> if (isPlural) "Обеды" else "Обед"
         "supper" -> if (isPlural) "Ужины" else "Ужин"
         else -> "unknown"
+    }
+}
+
+fun RecipeDetailed.toCartIngredientUiItems(portions: Int): List<RecipeCartIngredientUi> {
+    return ingredients.map { ingredient ->
+        val cartKey = ingredient.id.let { "ingredient_$it" }
+        val calculatedQuantity = ingredient.count * portions / DEFAULT_RECIPE_PORTIONS
+        RecipeCartIngredientUi(
+            cartKey = cartKey,
+            ingredientId = ingredient.id,
+            title = ingredient.name,
+            baseQuantity = ingredient.count.toDouble(),
+            calculatedQuantity = calculatedQuantity.toDouble(),
+            unitMeasurement = ingredient.unitOfMeasurement,
+            isSelected = true
+        )
+    }
+}
+
+fun List<RecipeCartIngredientUi>.recalculateByPortions(portions: Int): List<RecipeCartIngredientUi> {
+    return map { item ->
+        item.copy(calculatedQuantity = item.baseQuantity * portions / DEFAULT_RECIPE_PORTIONS)
+    }
+}
+
+fun Double.formatQuantity(): String {
+    return if (this % 1.0 == 0.0) {
+        toInt().toString()
+    } else {
+        String.format(Locale.US, "%.2f", this).trimEnd('0').trimEnd('.')
     }
 }

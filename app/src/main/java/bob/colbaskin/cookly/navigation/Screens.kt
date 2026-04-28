@@ -14,7 +14,7 @@ sealed interface Screens {
     data object Home: Screens
 
     @Serializable
-    data object Cart: Screens
+    data object ShoppingCart: Screens
 
     @Serializable
     data object Chat: Screens

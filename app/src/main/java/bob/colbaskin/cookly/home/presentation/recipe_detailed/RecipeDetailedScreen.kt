@@ -23,19 +23,26 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -74,8 +81,10 @@ import bob.colbaskin.cookly.common.UiState
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.home.domain.models.old.StartCookSwipeAnchor
 import bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeDetailed
+import bob.colbaskin.cookly.home.domain.models.recipe_detailed.formatQuantity
 import bob.colbaskin.cookly.home.domain.models.recipe_detailed.toDomainMealTime
 import bob.colbaskin.cookly.home.presentation.components.SheetTopBar
+import bob.colbaskin.cookly.navigation.Screens
 import coil3.compose.AsyncImage
 import kotlinx.coroutines.launch
 
@@ -106,12 +115,26 @@ fun RecipeDetailedScreenRoot(
         }
     }
 
+    LaunchedEffect(state.addToCartState) {
+        if (state.addToCartState is UiState.Error) {
+            scope.launch {
+                snackbarHostState.showSnackbar(
+                    message = state.addToCartState.title,
+                    duration = SnackbarDuration.Short
+                )
+            }
+        }
+    }
+
     RecipeDetailedScreen(
         modifier = modifier,
         state = state,
         onAction = { action ->
             when (action) {
                 RecipeDetailedAction.NavigateBack -> navController.popBackStack()
+                RecipeDetailedAction.NavigateMain -> navController.navigate(Screens.Home) {
+                    popUpTo<Screens.RecipeDetailed> { inclusive = true }
+                }
                 RecipeDetailedAction.StartCook -> navController.popBackStack()
                 else -> Unit
             }
@@ -147,6 +170,22 @@ private fun RecipeDetailedScreen(
                 CircularProgressIndicator(color = CustomTheme.colors.accentColor)
             }
         }
+    }
+    if (state.isAddToCartSheetVisible) {
+        AddRecipeIngredientsToCartBottomSheet(
+            portions = state.portions,
+            ingredients = state.cartIngredients,
+            isLoading = state.addToCartState is UiState.Loading,
+            onDismiss = { onAction(RecipeDetailedAction.HideAddToCartSheet) },
+            onIncreasePortions = { onAction(RecipeDetailedAction.IncreasePortions) },
+            onDecreasePortions = { onAction(RecipeDetailedAction.DecreasePortions) },
+            onToggleIngredient = { cartKey ->
+                onAction(RecipeDetailedAction.ToggleCartIngredient(cartKey))
+            },
+            onConfirm = {
+                onAction(RecipeDetailedAction.ConfirmAddSelectedIngredientsToCart)
+            }
+        )
     }
 }
 
@@ -275,7 +314,7 @@ private fun RecipeDetailedContent(
             SheetTopBar(
                 modifier = Modifier,
                 liquidBoxText = recipe.mealTime.toDomainMealTime(isPlural = false),
-                onBackClick = { onAction(RecipeDetailedAction.NavigateBack) },
+                onBackClick = { onAction(RecipeDetailedAction.NavigateMain) },
                 avatarId = R.drawable.user_avatar_mock
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -636,7 +675,7 @@ private fun RecipeSheet(
                         onSwiped = { onAction(RecipeDetailedAction.StartCook) }
                     )
                     Spacer(modifier = Modifier.size(16.dp))
-                    CartBubble(onClick = { onAction(RecipeDetailedAction.AddToCart) })
+                    CartBubble(onClick = { onAction(RecipeDetailedAction.ShowAddToCartSheet) })
                 }
             }
         }
@@ -778,6 +817,192 @@ private fun InfoIconValueBlock(
             color = colors.text
         )
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AddRecipeIngredientsToCartBottomSheet(
+    portions: Int,
+    ingredients: List<RecipeCartIngredientUi>,
+    isLoading: Boolean,
+    onDismiss: () -> Unit,
+    onIncreasePortions: () -> Unit,
+    onDecreasePortions: () -> Unit,
+    onToggleIngredient: (String) -> Unit,
+    onConfirm: () -> Unit
+) {
+    val colors = CustomTheme.colors
+    val typography = CustomTheme.typography
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        modifier = Modifier.fillMaxHeight(),
+        containerColor = colors.secondaryCardBackground,
+        dragHandle = {
+            Box(
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .width(60.dp)
+                    .height(5.dp)
+                    .clip(RoundedCornerShape(999.dp))
+                    .background(colors.tertiaryText.copy(alpha = 0.45f))
+            )
+        }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .imePadding()
+                .padding(horizontal = 24.dp)
+        ) {
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Порции",
+                    style = typography.inter.titleLarge,
+                    color = colors.text,
+                    modifier = Modifier.weight(1f)
+                )
+                PortionButton(text = "−", onClick = onDecreasePortions)
+                Box(
+                    modifier = Modifier
+                        .padding(horizontal = 10.dp)
+                        .size(width = 58.dp, height = 54.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(colors.statsCardBackground),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = portions.toString(),
+                        style = typography.inter.titleLarge,
+                        color = colors.text
+                    )
+                }
+                PortionButton(text = "+", onClick = onIncreasePortions)
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 520.dp),
+                verticalArrangement = Arrangement.spacedBy(0.dp)
+            ) {
+                items(
+                    items = ingredients,
+                    key = { it.cartKey }
+                ) { item ->
+                    CartIngredientSelectRow(
+                        item = item,
+                        onClick = { onToggleIngredient(item.cartKey) }
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            Button(
+                onClick = onConfirm,
+                enabled = !isLoading && ingredients.any { it.isSelected },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(64.dp),
+                shape = RoundedCornerShape(24.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colors.accentColor,
+                    contentColor = colors.invertedText,
+                    disabledContainerColor = colors.accentColor.copy(alpha = 0.45f),
+                    disabledContentColor = colors.invertedText.copy(alpha = 0.7f)
+                )
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = colors.invertedText,
+                        strokeWidth = 2.dp
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
+                Text(
+                    text = "Добавить в список",
+                    style = typography.inter.titleMedium
+                )
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+    }
+}
+
+@Composable
+private fun PortionButton(
+    text: String,
+    onClick: () -> Unit
+) {
+    val colors = CustomTheme.colors
+
+    Box(
+        modifier = Modifier
+            .size(width = 70.dp, height = 54.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(colors.statsCardBackground)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            style = CustomTheme.typography.inter.headlineSmall,
+            color = if (text == "+") colors.secondAccentColor else colors.likeColor
+        )
+    }
+}
+
+@Composable
+private fun CartIngredientSelectRow(
+    item: RecipeCartIngredientUi,
+    onClick: () -> Unit
+) {
+    val colors = CustomTheme.colors
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Checkbox(
+            checked = item.isSelected,
+            onCheckedChange = { onClick() },
+            colors = CheckboxDefaults.colors(
+                checkedColor = colors.accentColor,
+                uncheckedColor = colors.tertiaryText,
+                checkmarkColor = colors.invertedText
+            )
+        )
+
+        Spacer(modifier = Modifier.width(10.dp))
+
+        Text(
+            text = item.title,
+            style = CustomTheme.typography.inter.titleMedium,
+            color = colors.text,
+            modifier = Modifier.weight(1f)
+        )
+
+        Text(
+            text = "${item.baseQuantity.formatQuantity()} ${item.unitMeasurement} = ${item.calculatedQuantity.formatQuantity()} ${item.unitMeasurement}",
+            style = CustomTheme.typography.inter.bodyMedium,
+            color = colors.text.copy(alpha = 0.85f),
+            textAlign = TextAlign.End
+        )
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(1.dp)
+            .background(colors.strokeColor.copy(alpha = 0.5f))
+    )
 }
 
 @Preview
