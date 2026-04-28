@@ -335,6 +335,7 @@ private fun CartBubble(
         contentAlignment = Alignment.Center
     ) {
         Icon(
+            modifier = Modifier.offset(x = 2.dp),
             painter = painterResource(id = R.drawable.add_to_cart),
             contentDescription = null,
             tint = colors.addToCartColor
@@ -479,6 +480,7 @@ private fun StartCookSwipeButton(
             contentAlignment = Alignment.Center
         ) {
             Text(
+                modifier = Modifier.padding(start = 32.dp),
                 text = "Приготовить!",
                 style = MaterialTheme.typography.titleLarge,
                 color = Color(0xFF171717)
@@ -504,10 +506,10 @@ private fun StartCookSwipeButton(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = "≫",
-                style = MaterialTheme.typography.titleLarge,
-                color = Color.White
+            Icon(
+                painter = painterResource(R.drawable.double_right_arrows),
+                contentDescription = null,
+                tint = CustomTheme.colors.invertedText
             )
         }
     }
@@ -634,9 +636,7 @@ private fun RecipeSheet(
                         onSwiped = { onAction(RecipeDetailedAction.StartCook) }
                     )
                     Spacer(modifier = Modifier.size(16.dp))
-                    CartBubble(
-                        onClick = { onAction(RecipeDetailedAction.AddToCart) }
-                    )
+                    CartBubble(onClick = { onAction(RecipeDetailedAction.AddToCart) })
                 }
             }
         }
