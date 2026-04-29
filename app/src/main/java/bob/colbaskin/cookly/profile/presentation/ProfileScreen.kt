@@ -1,7 +1,5 @@
 package bob.colbaskin.cookly.profile.presentation
 
-import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -25,28 +22,22 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import bob.colbaskin.cookly.common.UiState
+import bob.colbaskin.cookly.common.components.ProfileAvatar
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
+import bob.colbaskin.cookly.common.utils.getFirstLetter
 import bob.colbaskin.cookly.navigation.Screens
 import bob.colbaskin.cookly.navigation.graphs.Graphs
-import coil3.compose.AsyncImagePainter
-import coil3.compose.rememberAsyncImagePainter
-import coil3.request.ImageRequest
 import compose.icons.TablerIcons
 import compose.icons.tablericons.ChevronRight
 import compose.icons.tablericons.ClipboardList
@@ -109,7 +100,7 @@ fun ProfileScreenRoot(
                 }
                 ProfileAction.OpenCookingHistory -> {
                     //navController.navigate(Screens.CookingHistory)
-                    navController.navigate(Screens.RecipeDetailed(recipeId = 63))
+                    navController.navigate(Screens.RecipeDetailed(recipeId = 67))
                 }
                 ProfileAction.OpenPreferencesAndAllergies -> {
                     navController.navigate(Graphs.Onboarding)
@@ -276,7 +267,8 @@ private fun ProfileHeader(
         ) {
             ProfileAvatar(
                 avatarUrl = state.avatarUrl,
-                fallbackLetter = state.avatarLetter
+                fallbackLetter = state.email.getFirstLetter(),
+                avatarSize = 80.dp
             )
             Spacer(modifier = Modifier.size(16.dp))
             Column(
@@ -298,59 +290,6 @@ private fun ProfileHeader(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-        }
-    }
-}
-
-@Composable
-private fun ProfileAvatar(
-    avatarUrl: String,
-    fallbackLetter: String
-) {
-    val context = LocalContext.current
-    val painter = rememberAsyncImagePainter(
-        model = ImageRequest.Builder(context)
-            .data(avatarUrl.takeIf { it.isNotBlank() })
-            .build()
-    )
-
-    val painterState by painter.state.collectAsState()
-
-    LaunchedEffect(painterState) {
-        val errorState = painterState as? AsyncImagePainter.State.Error
-        if (avatarUrl.isNotBlank() && errorState != null) {
-            Log.e(
-                "ProfileAvatar",
-                "Avatar loading failed. url=$avatarUrl, throwable=${errorState.result.throwable.message}",
-                errorState.result.throwable
-            )
-        }
-    }
-
-    val shouldShowImage = avatarUrl.isNotBlank() &&
-            painterState !is AsyncImagePainter.State.Error &&
-            painterState !is AsyncImagePainter.State.Empty
-
-    Box(
-        modifier = Modifier
-            .size(80.dp)
-            .clip(CircleShape)
-            .background(CustomTheme.colors.accentColor),
-        contentAlignment = Alignment.Center
-    ) {
-        if (shouldShowImage) {
-            Image(
-                painter = painter,
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
-            )
-        } else {
-            Text(
-                text = fallbackLetter,
-                style = CustomTheme.typography.inter.headlineSmall,
-                color = Color.White
-            )
         }
     }
 }
