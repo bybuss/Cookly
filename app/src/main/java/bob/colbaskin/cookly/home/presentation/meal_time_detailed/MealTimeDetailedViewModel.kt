@@ -1,4 +1,4 @@
-package bob.colbaskin.cookly.home.presentation.meal_detailed
+package bob.colbaskin.cookly.home.presentation.meal_time_detailed
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -8,18 +8,18 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 
 @HiltViewModel
-class MealCategoryDetailedViewModel @Inject constructor(
+class MealTimeDetailedViewModel @Inject constructor(
 
 ) : ViewModel() {
     var state by mutableStateOf(MealDetailedState())
         private set
 
-    fun onAction(action: MealCategoryDetailedAction) {
+    fun onAction(action: MealTimeDetailedAction) {
         when (action) {
-            is MealCategoryDetailedAction.OnPagerPageSettled -> {
+            is MealTimeDetailedAction.OnPagerPageSettled -> {
                 state = state.copy(currentPage = action.page)
             }
-            is MealCategoryDetailedAction.OnSheetStateChanged -> {
+            is MealTimeDetailedAction.OnSheetStateChanged -> {
                 state = state.copy(
                     isSheetExpanded = action.isExpanded,
                     isAutoScrollEnabled = !action.isExpanded

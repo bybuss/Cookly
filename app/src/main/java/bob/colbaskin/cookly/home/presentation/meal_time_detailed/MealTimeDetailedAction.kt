@@ -1,8 +1,8 @@
-package bob.colbaskin.cookly.home.presentation.meal_detailed
+package bob.colbaskin.cookly.home.presentation.meal_time_detailed
 
-interface MealCategoryDetailedAction {
-    data object NavigateBack: MealCategoryDetailedAction
-    data class NavigateToMealRecipe(val id: Int): MealCategoryDetailedAction
-    data class OnPagerPageSettled(val page: Int) : MealCategoryDetailedAction
-    data class OnSheetStateChanged(val isExpanded: Boolean) : MealCategoryDetailedAction
+interface MealTimeDetailedAction {
+    data object NavigateBack: MealTimeDetailedAction
+    data class NavigateToMealRecipe(val id: Int): MealTimeDetailedAction
+    data class OnPagerPageSettled(val page: Int) : MealTimeDetailedAction
+    data class OnSheetStateChanged(val isExpanded: Boolean) : MealTimeDetailedAction
 }

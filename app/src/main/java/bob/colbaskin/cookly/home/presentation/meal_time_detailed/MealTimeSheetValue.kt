@@ -1,6 +1,6 @@
-package bob.colbaskin.cookly.home.presentation.meal_detailed
+package bob.colbaskin.cookly.home.presentation.meal_time_detailed
 
-enum class MealCategorySheetValue {
+enum class MealTimeSheetValue {
     COLLAPSED,
     EXPANDED
 }

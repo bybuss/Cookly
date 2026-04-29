@@ -1,4 +1,4 @@
-package bob.colbaskin.cookly.home.presentation.meal_detailed
+package bob.colbaskin.cookly.home.presentation.meal_time_detailed
 
 import bob.colbaskin.cookly.R
 import bob.colbaskin.cookly.home.domain.models.old.Meal

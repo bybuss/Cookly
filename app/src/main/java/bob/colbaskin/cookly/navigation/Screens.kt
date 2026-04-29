@@ -35,7 +35,7 @@ sealed interface Screens {
     data object TermsOfUse: Screens
 
     @Serializable
-    data class MealCategoryDetailed(val mealCategoryId: Int)
+    data object MealTimeDetailed
 
     @Serializable
     data class RecipeDetailed(val recipeId: Int)

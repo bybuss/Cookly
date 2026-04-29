@@ -17,7 +17,7 @@ import bob.colbaskin.cookly.auth.presentation.AuthScreenRoot
 import bob.colbaskin.cookly.create_recipe.presentation.CreateRecipeScreenRoot
 import bob.colbaskin.cookly.home.presentation.recipe_detailed.RecipeDetailedScreenRoot
 import bob.colbaskin.cookly.home.presentation.main.HomeScreenRoot
-import bob.colbaskin.cookly.home.presentation.meal_detailed.MealCategoryDetailedScreenRoot
+import bob.colbaskin.cookly.home.presentation.meal_time_detailed.MealTimeDetailedScreenRoot
 import bob.colbaskin.cookly.navigation.Screens
 import bob.colbaskin.cookly.onboarding_preferences.presentation.OnboardingScreenRoot
 import bob.colbaskin.cookly.profile.presentation.ProfileScreenRoot
@@ -65,7 +65,7 @@ fun NavGraphBuilder.mainGraph(
         composable<Screens.Home> { HomeScreenRoot(navController = navController) }
         composable<Screens.ShoppingCart> { ShoppingCartScreenRoot() }
         composable<Screens.Chat> {
-            MealCategoryDetailedScreenRoot(navController = navController)
+            MealTimeDetailedScreenRoot(navController = navController)
         }
         composable<Screens.Favourites> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -86,10 +86,10 @@ fun NavGraphBuilder.detailedGraph(
     snackbarHostState: SnackbarHostState
 ) {
     navigation<Graphs.Detailed>(
-        startDestination = Screens.MealCategoryDetailed(-1)
+        startDestination = Screens.MealTimeDetailed
     ) {
-        composable<Screens.MealCategoryDetailed> {
-            MealCategoryDetailedScreenRoot(navController = navController)
+        composable<Screens.MealTimeDetailed> {
+            MealTimeDetailedScreenRoot(navController = navController)
         }
         composable<Screens.RecipeDetailed> {
             RecipeDetailedScreenRoot(
