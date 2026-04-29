@@ -12,6 +12,8 @@ plugins {
     alias(libs.plugins.hilt)
 
     alias(libs.plugins.secretsPlugin)
+
+    id("org.jetbrains.kotlin.plugin.parcelize")
 }
 
 android {
