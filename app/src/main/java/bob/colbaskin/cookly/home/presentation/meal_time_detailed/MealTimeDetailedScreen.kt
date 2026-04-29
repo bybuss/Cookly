@@ -63,8 +63,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import bob.colbaskin.cookly.common.components.SheetTopBar
 import bob.colbaskin.cookly.home.presentation.components.DishCard
-import bob.colbaskin.cookly.home.presentation.components.SheetTopBar
 import bob.colbaskin.cookly.home.presentation.components.recommended_dish.RecommendationBanner
 import bob.colbaskin.cookly.home.presentation.components.recommended_dish.RecommendedDish
 import io.github.fletchmckee.liquid.liquefiable
@@ -232,7 +232,8 @@ private fun MealTimeDetailedScreen(
                 .zIndex(3f),
             liquidBoxText = stringResource(state.mealType.displayNameId),
             onBackClick = { onAction(MealTimeDetailedAction.NavigateBack) },
-            avatarId = R.drawable.user_avatar_mock
+            avatarUrl = state.avatarUrl,
+            fallbackLetter = state.avatarLetter,
         )
         DraggableSheet(
             modifier = Modifier.zIndex(2f),

@@ -10,20 +10,27 @@ import bob.colbaskin.cookly.common.toUiState
 import bob.colbaskin.cookly.home.domain.HomeRecipeRepository
 import bob.colbaskin.cookly.home.domain.models.recipe_detailed.recalculateByPortions
 import bob.colbaskin.cookly.home.domain.models.recipe_detailed.toCartIngredientUiItems
+import bob.colbaskin.cookly.profile.domain.ProfileRepository
 import bob.colbaskin.cookly.shopping_cart.domain.ShoppingCartRepository
 import bob.colbaskin.cookly.shopping_cart.domain.models.CartIngredient
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class RecipeDetailedViewModel @Inject constructor(
-    private val repository: HomeRecipeRepository,
-    private val shoppingCartRepository: ShoppingCartRepository
+    private val homeRecipeRepository: HomeRecipeRepository,
+    private val shoppingCartRepository: ShoppingCartRepository,
+    private val profileRepository: ProfileRepository
 ) : ViewModel() {
 
     var state by mutableStateOf(RecipeDetailedState())
         private set
+
+    init {
+        observeLocalUser()
+    }
 
     private var loadedRecipeId: Int? = null
 
@@ -88,8 +95,19 @@ class RecipeDetailedViewModel @Inject constructor(
         loadedRecipeId = recipeId
         state = state.copy(recipeState = UiState.Loading)
         viewModelScope.launch {
-            val result = repository.getRecipeById(recipeId).toUiState()
+            val result = homeRecipeRepository.getRecipeById(recipeId).toUiState()
             state = state.copy(recipeState = result)
+        }
+    }
+
+    private fun observeLocalUser() {
+        viewModelScope.launch {
+            profileRepository.observeUserPreferences().collectLatest { prefs ->
+                state = state.copy(
+                    email = prefs.email,
+                    avatarUrl = prefs.avatarUrl
+                )
+            }
         }
     }
 

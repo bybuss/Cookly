@@ -13,5 +13,6 @@ data class RecipeDetailed(
     val difficultyLevel: Int,
     val imageUrl: String?,
     val ingredients: List<Ingredient>,
-    val categories: List<String>
+    val steps: List<RecipeStep>,
+    val categories: List<RecipeCategory>
 )

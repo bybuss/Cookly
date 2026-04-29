@@ -78,12 +78,14 @@ import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
 import kotlin.math.roundToInt
 import bob.colbaskin.cookly.R
 import bob.colbaskin.cookly.common.UiState
+import bob.colbaskin.cookly.common.components.SheetTopBar
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
+import bob.colbaskin.cookly.home.domain.models.cook_steps.COOK_STEPS_ARGS_KEY
+import bob.colbaskin.cookly.home.domain.models.cook_steps.toCookStepsNavArgs
 import bob.colbaskin.cookly.home.domain.models.old.StartCookSwipeAnchor
 import bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeDetailed
 import bob.colbaskin.cookly.home.domain.models.recipe_detailed.formatQuantity
 import bob.colbaskin.cookly.home.domain.models.recipe_detailed.toDomainMealTime
-import bob.colbaskin.cookly.home.presentation.components.SheetTopBar
 import bob.colbaskin.cookly.navigation.Screens
 import coil3.compose.AsyncImage
 import kotlinx.coroutines.launch
@@ -135,7 +137,15 @@ fun RecipeDetailedScreenRoot(
                 RecipeDetailedAction.NavigateMain -> navController.navigate(Screens.Home) {
                     popUpTo<Screens.RecipeDetailed> { inclusive = true }
                 }
-                RecipeDetailedAction.StartCook -> navController.popBackStack()
+                RecipeDetailedAction.StartCook -> {
+                    val recipe = (state.recipeState as? UiState.Success)?.data
+                    if (recipe != null) {
+                        navController.currentBackStackEntry
+                            ?.savedStateHandle
+                            ?.set(COOK_STEPS_ARGS_KEY, recipe.toCookStepsNavArgs())
+                        navController.navigate(Screens.CookSteps)
+                    }
+                }
                 else -> Unit
             }
             viewModel.onAction(action)
@@ -269,7 +279,6 @@ private fun RecipeDetailedContent(
                 RecipeDetailedSheetValue.COLLAPSED at collapsedTopPx
             }
         }
-
         LaunchedEffect(anchors) {
             sheetState.updateAnchors(anchors)
         }
@@ -315,7 +324,8 @@ private fun RecipeDetailedContent(
                 modifier = Modifier,
                 liquidBoxText = recipe.mealTime.toDomainMealTime(isPlural = false),
                 onBackClick = { onAction(RecipeDetailedAction.NavigateMain) },
-                avatarId = R.drawable.user_avatar_mock
+                avatarUrl = state.avatarUrl,
+                fallbackLetter = state.avatarLetter
             )
             Spacer(modifier = Modifier.height(16.dp))
             HeartBubble(

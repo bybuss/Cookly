@@ -1,6 +1,8 @@
 package bob.colbaskin.cookly.home.domain.models.recipe_detailed
 
+import bob.colbaskin.cookly.home.data.models.recipe_detailed.RecipeDetailedCategoryDto
 import bob.colbaskin.cookly.home.data.models.recipe_detailed.RecipeDetailedDto
+import bob.colbaskin.cookly.home.data.models.recipe_detailed.RecipeDetailedStepDto
 import bob.colbaskin.cookly.home.presentation.recipe_detailed.DEFAULT_RECIPE_PORTIONS
 import bob.colbaskin.cookly.home.presentation.recipe_detailed.RecipeCartIngredientUi
 import java.util.Locale
@@ -30,7 +32,25 @@ fun RecipeDetailedDto.toDomain(): RecipeDetailed {
                 unitOfMeasurement = item.unitMeasurement
             )
         },
-        categories = recipeCategories.map { it.title }
+        steps = steps.map { it.toDomain() },
+        categories = recipeCategories.map { it.toDomain() }
+    )
+}
+
+fun RecipeDetailedStepDto.toDomain(): RecipeStep {
+    return RecipeStep(
+        id = id,
+        title = title,
+        description = description,
+        number = number,
+        imageUrl = imageUrl
+    )
+}
+
+fun RecipeDetailedCategoryDto.toDomain(): RecipeCategory {
+    return RecipeCategory(
+        id = id,
+        title = title
     )
 }
 

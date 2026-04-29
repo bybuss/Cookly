@@ -6,7 +6,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class RecipeDetailedIngredientItemDto(
     val ingredient: RecipeDetailedIngredientDto,
-    @SerialName("unit_measurement")
-    val unitMeasurement: String,
+    @SerialName("unit_measurement") val unitMeasurement: String,
     val quantity: Double
 )

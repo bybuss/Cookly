@@ -23,9 +23,4 @@ data class ProfileState(
             RoleConfig.USER -> "Пользователь"
         }
 
-    val avatarLetter: String
-        get() = email.firstOrNull()
-            ?.uppercaseChar()
-            ?.toString()
-            ?: "П"
 }
