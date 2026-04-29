@@ -41,6 +41,9 @@ sealed interface Screens {
     data class RecipeDetailed(val recipeId: Int)
 
     @Serializable
+    data object CookSteps
+
+    @Serializable
     data object ApplicationsReview
 
     @Serializable

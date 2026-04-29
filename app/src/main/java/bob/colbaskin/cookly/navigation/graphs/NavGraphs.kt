@@ -15,6 +15,7 @@ import bob.colbaskin.cookly.agreement.presentation.policy.PolicyScreenRoot
 import bob.colbaskin.cookly.agreement.presentation.terms_of_use.TermsOfUseScreenRoot
 import bob.colbaskin.cookly.auth.presentation.AuthScreenRoot
 import bob.colbaskin.cookly.create_recipe.presentation.CreateRecipeScreenRoot
+import bob.colbaskin.cookly.home.presentation.cook_steps.CookStepsScreenRoot
 import bob.colbaskin.cookly.home.presentation.recipe_detailed.RecipeDetailedScreenRoot
 import bob.colbaskin.cookly.home.presentation.main.HomeScreenRoot
 import bob.colbaskin.cookly.home.presentation.meal_time_detailed.MealTimeDetailedScreenRoot
@@ -96,6 +97,9 @@ fun NavGraphBuilder.detailedGraph(
                 navController = navController,
                 snackbarHostState = snackbarHostState
             )
+        }
+        composable<Screens.CookSteps> {
+            CookStepsScreenRoot(navController = navController)
         }
         composable<Screens.CreateRecipe> {
             CreateRecipeScreenRoot(
