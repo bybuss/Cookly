@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -31,6 +32,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -38,12 +40,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import bob.colbaskin.cookly.R
 import bob.colbaskin.cookly.common.components.SheetTopBar
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
+import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
 import bob.colbaskin.cookly.home.domain.models.cook_steps.COOK_STEPS_ARGS_KEY
 import bob.colbaskin.cookly.home.domain.models.cook_steps.CookStepsNavArgs
 import bob.colbaskin.cookly.home.domain.models.recipe_detailed.toDomainMealTime
@@ -95,45 +99,69 @@ private fun CookStepsScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(colors.text)
+            .background(colors.background)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(colors.text)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(0.52f)
-                    .background(colors.text)
-                    .padding(horizontal = 16.dp, vertical = 28.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                SheetTopBar(
-                    modifier = Modifier,
-                    liquidBoxText = state.mealType.toDomainMealTime(isPlural = false),
-                    onBackClick = { onAction(CookStepsAction.BackToHome) },
-                    stepNumber = state.currentStepNumber,
-                )
-                Spacer(modifier = Modifier.height(56.dp))
-                StepRecipeAvatar(
-                    imageUrl = state.recipeImageUrl,
-                    fallbackImageRes = state.fallbackImageRes
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = state.recipeTitle,
-                    style = CustomTheme.typography.inter.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = colors.invertedText,
-                    textAlign = TextAlign.Center
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(0.54f)
+                        .background(colors.text)
+                ) {
+                    AsyncImage(
+                        model = state.recipeImageUrl,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        fallback = painterResource(id = state.fallbackImageRes),
+                        error = painterResource(id = state.fallbackImageRes),
+                        modifier = Modifier
+                            .matchParentSize()
+                            .blur(18.dp)
+                    )
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .background(colors.text.copy(alpha = 0.62f))
+                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 16.dp, vertical = 28.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        SheetTopBar(
+                            modifier = Modifier,
+                            liquidBoxText = state.mealType.toDomainMealTime(isPlural = false),
+                            onBackClick = { onAction(CookStepsAction.BackToHome) },
+                            stepNumber = state.currentStepNumber,
+                        )
+                        Spacer(modifier = Modifier.height(56.dp))
+                        StepRecipeAvatar(
+                            imageUrl = state.recipeImageUrl,
+                            fallbackImageRes = state.fallbackImageRes
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = state.recipeTitle,
+                            style = CustomTheme.typography.inter.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = colors.invertedText,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(0.46f)
                 )
             }
             Column(
                 modifier = Modifier
+                    .align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    .weight(0.48f)
+                    .fillMaxHeight(0.5f)
                     .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
                     .background(colors.background)
                     .padding(horizontal = 24.dp, vertical = 32.dp)
@@ -369,5 +397,16 @@ private fun RatingBottomSheet(
                 )
             }
         }
+    }
+}
+
+@Preview
+@Composable
+fun CookStepsScreenPreview() {
+    UfoodTheme {
+        CookStepsScreen(
+            state = CookStepsState(),
+            onAction = {}
+        )
     }
 }
