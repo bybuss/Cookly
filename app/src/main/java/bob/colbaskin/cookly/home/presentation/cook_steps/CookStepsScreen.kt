@@ -114,7 +114,7 @@ private fun CookStepsScreen(
                 SheetTopBar(
                     modifier = Modifier,
                     liquidBoxText = state.mealType.toDomainMealTime(isPlural = false),
-                    onBackClick = {},
+                    onBackClick = { onAction(CookStepsAction.BackToHome) },
                     stepNumber = state.currentStepNumber,
                 )
                 Spacer(modifier = Modifier.height(56.dp))
