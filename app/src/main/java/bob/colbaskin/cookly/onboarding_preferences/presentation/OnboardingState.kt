@@ -1,10 +1,10 @@
 package bob.colbaskin.cookly.onboarding_preferences.presentation
 
-import bob.colbaskin.cookly.onboarding_preferences.domain.models.AllergyOption
-import bob.colbaskin.cookly.onboarding_preferences.domain.models.DietOption
+import bob.colbaskin.cookly.common.UiState
+import bob.colbaskin.cookly.onboarding_preferences.domain.models.IngredientGroup
 
 data class OnboardingState(
-    val currentPageIndex: Int = 0,
-    val selectedDiets: Set<DietOption> = emptySet(), // FIXME: убрать диеты, оставив только выбор конкретных аллергенов
-    val selectedAllergies: Set<AllergyOption> = emptySet() // FIXME: заменить на data class Allergen
+    val ingredientGroupsState: UiState<List<IngredientGroup>> = UiState.Idle,
+    val selectedIngredientGroupIds: Set<Int> = emptySet(),
+    val isSaving: Boolean = false
 )

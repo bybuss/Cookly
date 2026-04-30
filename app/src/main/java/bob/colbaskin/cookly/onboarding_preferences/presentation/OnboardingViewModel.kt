@@ -1,73 +1,81 @@
 package bob.colbaskin.cookly.onboarding_preferences.presentation
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bob.colbaskin.cookly.common.user_prefs.domain.models.proto_configs.OnboardingConfig
+import bob.colbaskin.cookly.common.ApiResult
+import bob.colbaskin.cookly.common.UiState
+import bob.colbaskin.cookly.common.toUiState
 import bob.colbaskin.cookly.common.user_prefs.domain.UserPreferencesRepository
-import bob.colbaskin.cookly.onboarding_preferences.domain.models.AllergyOption
-import bob.colbaskin.cookly.onboarding_preferences.domain.models.DietOption
+import bob.colbaskin.cookly.common.user_prefs.domain.models.proto_configs.OnboardingConfig
+import bob.colbaskin.cookly.onboarding_preferences.domain.OnboardingPreferencesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 
-private const val TAG = "OnboardingVM"
-
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(
-    private val userPreferencesRepository: UserPreferencesRepository
-): ViewModel() {
+    private val userPreferencesRepository: UserPreferencesRepository,
+    private val onboardingPreferencesRepository: OnboardingPreferencesRepository
+) : ViewModel() {
+
     var state by mutableStateOf(OnboardingState())
         private set
 
     private val _effect = MutableSharedFlow<OnboardingEffect>()
     val effect = _effect
 
+    init {
+        loadIngredientGroups()
+    }
+
     fun onAction(action: OnboardingAction) {
         when (action) {
-            is OnboardingAction.ChangePage -> changePage(action.pageIndex)
-            is OnboardingAction.ToggleDiet -> toggleDiet(action.diet)
-            is OnboardingAction.ToggleAllergy -> toggleAllergy(action.allergy)
-            OnboardingAction.NextPage -> nextPage()
-            OnboardingAction.Skip -> skip()
+            OnboardingAction.LoadIngredientGroups -> loadIngredientGroups()
+            is OnboardingAction.ToggleIngredientGroup -> toggleIngredientGroup(action.id)
             OnboardingAction.Finish -> finish()
+            OnboardingAction.Skip -> skip()
         }
     }
 
-    private fun toggleDiet(diet: DietOption) {
-        val newSet = state.selectedDiets.toMutableSet()
-        if (!newSet.add(diet)) newSet.remove(diet)
-        state = state.copy(selectedDiets = newSet)
-        Log.d(TAG, "Toggled diet: ${diet.name}, new set: ${newSet.map { it.name }}")
-    }
-
-    private fun toggleAllergy(allergy: AllergyOption) {
-        val newSet = state.selectedAllergies.toMutableSet()
-        if (!newSet.add(allergy)) newSet.remove(allergy)
-        state = state.copy(selectedAllergies = newSet)
-        Log.d(TAG, "Toggled allergy: ${allergy.name}, new set: ${newSet.map { it.name }}")
-    }
-
-    private fun changePage(pageIndex: Int) {
-        state = state.copy(currentPageIndex = pageIndex)
-    }
-
-    private fun nextPage() {
+    private fun loadIngredientGroups() {
         viewModelScope.launch {
-            val nextPage = state.currentPageIndex + 1
-            state = state.copy(currentPageIndex = nextPage)
-            _effect.emit(OnboardingEffect.ScrollToPage(nextPage))
+            state = state.copy(ingredientGroupsState = UiState.Loading)
+            val result = onboardingPreferencesRepository.getIngredientGroups()
+            state = state.copy(ingredientGroupsState = result.toUiState())
         }
+    }
+
+    private fun toggleIngredientGroup(id: Int) {
+        val newSet = state.selectedIngredientGroupIds.toMutableSet()
+        if (!newSet.add(id)) { newSet.remove(id) }
+        state = state.copy(selectedIngredientGroupIds = newSet)
     }
 
     private fun finish() {
         viewModelScope.launch {
-            userPreferencesRepository.saveOnboardingStatus(OnboardingConfig.COMPLETED)
-            _effect.emit(OnboardingEffect.CompleteOnboarding)
+            state = state.copy(isSaving = true)
+            val result = onboardingPreferencesRepository.setExcludeIngredientGroups(
+                ingredientGroupIds = state.selectedIngredientGroupIds.toList()
+            )
+            state = state.copy(isSaving = false)
+            when (result) {
+                is ApiResult.Success -> {
+                    userPreferencesRepository.saveOnboardingStatus(OnboardingConfig.COMPLETED)
+                    _effect.emit(OnboardingEffect.CompleteOnboarding)
+                }
+                is ApiResult.Error -> {
+                    state = state.copy(
+                        ingredientGroupsState = UiState.Error(
+                            title = result.title,
+                            text = result.text
+                        )
+                    )
+                }
+            }
         }
     }
 

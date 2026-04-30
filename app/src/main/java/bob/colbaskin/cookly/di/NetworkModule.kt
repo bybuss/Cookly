@@ -5,6 +5,7 @@ import android.util.Log
 import bob.colbaskin.cookly.BuildConfig
 
 import bob.colbaskin.cookly.di.token.TokenAuthenticator
+import bob.colbaskin.cookly.di.token.TokenExpiredInterceptor
 import bob.colbaskin.cookly.di.token.TokenInterceptor
 import com.franmontiel.persistentcookiejar.PersistentCookieJar
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
@@ -83,6 +84,7 @@ object NetworkModule {
         tokenInterceptor: TokenInterceptor,
         tokenAuthenticator: Lazy<TokenAuthenticator>,
         @Named("TimezoneInterceptor") timezoneInterceptor: Interceptor,
+        @Named("TokenExpiredInterceptor") tokenExpiredInterceptor: Interceptor,
         @Named("HttpLogger") httpLogger: HttpLoggingInterceptor
     ): OkHttpClient {
         val cookieJar = PersistentCookieJar(
@@ -98,6 +100,7 @@ object NetworkModule {
                 tokenAuthenticator.get().authenticate(route, response)
             }
             .addInterceptor(tokenInterceptor)
+            .addInterceptor(tokenExpiredInterceptor)
             .addInterceptor { chain ->
                 val request = chain.request()
                 Log.d("Cookies", "Sending cookies in recipe service: ${request.headers["Cookie"]}")
@@ -152,5 +155,12 @@ object NetworkModule {
                 .build()
             chain.proceed(request)
         }
+    }
+
+    @Provides
+    @Singleton
+    @Named("TokenExpiredInterceptor")
+    fun provideTokenExpiredInterceptor(tokenAuthenticator: Lazy<TokenAuthenticator>): Interceptor {
+        return TokenExpiredInterceptor(tokenAuthenticator)
     }
 }

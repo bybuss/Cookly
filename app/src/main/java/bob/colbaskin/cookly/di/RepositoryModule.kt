@@ -14,6 +14,9 @@ import bob.colbaskin.cookly.di.token.TokenDataStore
 import bob.colbaskin.cookly.home.data.HomeRecipeApiService
 import bob.colbaskin.cookly.home.data.HomeRecipeRepositoryImpl
 import bob.colbaskin.cookly.home.domain.HomeRecipeRepository
+import bob.colbaskin.cookly.onboarding_preferences.data.OnboardingPreferencesApiService
+import bob.colbaskin.cookly.onboarding_preferences.data.OnboardingPreferencesRepositoryImpl
+import bob.colbaskin.cookly.onboarding_preferences.domain.OnboardingPreferencesRepository
 import bob.colbaskin.cookly.profile.data.ProfileApiService
 import bob.colbaskin.cookly.profile.data.ProfileRepositoryImpl
 import bob.colbaskin.cookly.profile.domain.ProfileRepository
@@ -72,13 +75,15 @@ object RepositoryModule {
     @Singleton
     fun provideProfileRepository(
         @ApplicationContext context: Context,
-        apiService: ProfileApiService,
+        profileApiService: ProfileApiService,
+        @Named("AuthApiAuthService") authApiAuthService: AuthApiService,
         userPreferencesRepository: UserPreferencesRepository,
         tokenDataStore: TokenDataStore
     ): ProfileRepository {
         return ProfileRepositoryImpl(
             context = context,
-            apiService = apiService,
+            profileApiService = profileApiService,
+            authApiAuthService = authApiAuthService,
             userPreferencesRepository = userPreferencesRepository,
             tokenDataStore = tokenDataStore,
         )
@@ -100,5 +105,17 @@ object RepositoryModule {
     @Singleton
     fun provideShoppingCartRepository(cartDao: CartDao): ShoppingCartRepository {
         return ShoppingCartRepositoryImpl(cartDao = cartDao)
+    }
+
+    @Provides
+    @Singleton
+    fun provideOnboardingPreferencesRepository(
+        @ApplicationContext context: Context,
+        apiService: OnboardingPreferencesApiService
+    ): OnboardingPreferencesRepository {
+        return OnboardingPreferencesRepositoryImpl(
+            context = context,
+            apiService = apiService
+        )
     }
 }

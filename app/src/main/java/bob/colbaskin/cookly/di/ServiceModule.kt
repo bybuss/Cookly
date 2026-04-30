@@ -3,6 +3,7 @@ package bob.colbaskin.cookly.di
 import bob.colbaskin.cookly.auth.data.AuthApiService
 import bob.colbaskin.cookly.create_recipe.data.CreateRecipeApiService
 import bob.colbaskin.cookly.home.data.HomeRecipeApiService
+import bob.colbaskin.cookly.onboarding_preferences.data.OnboardingPreferencesApiService
 import bob.colbaskin.cookly.profile.data.ProfileApiService
 import dagger.Module
 import dagger.Provides
@@ -56,5 +57,13 @@ object ServiceModule {
         @Named("RecipeServiceRetrofit") recipeServiceRetrofit: Retrofit
     ): HomeRecipeApiService {
         return recipeServiceRetrofit.create(HomeRecipeApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideOnboardingPreferencesApiService(
+        @Named("RecipeServiceRetrofit") recipeServiceRetrofit: Retrofit
+    ): OnboardingPreferencesApiService {
+        return recipeServiceRetrofit.create(OnboardingPreferencesApiService::class.java)
     }
 }
