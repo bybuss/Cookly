@@ -435,7 +435,7 @@ private fun DraggableSheet(
                     modifier = Modifier,
                     title = "Fried Shrimp",
                     minutes = 20,
-                    dishImage = R.drawable.fried_egg_backgroiund,
+                    dishImageUrl = "",
                     rating = 4.8,
                     ratingAmount = 168,
                     kcal = 150,

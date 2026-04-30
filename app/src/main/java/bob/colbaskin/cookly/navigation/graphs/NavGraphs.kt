@@ -63,7 +63,12 @@ fun NavGraphBuilder.mainGraph(
     navigation<Graphs.Main> (
         startDestination = Screens.Home
     ) {
-        composable<Screens.Home> { HomeScreenRoot(navController = navController) }
+        composable<Screens.Home> {
+            HomeScreenRoot(
+                navController = navController,
+                snackbarHostState = snackbarHostState
+            )
+        }
         composable<Screens.ShoppingCart> { ShoppingCartScreenRoot() }
         composable<Screens.Chat> {
             MealTimeDetailedScreenRoot(navController = navController)

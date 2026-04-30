@@ -1,7 +1,6 @@
 package bob.colbaskin.cookly.home.presentation.components
 
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -30,17 +29,19 @@ import androidx.compose.ui.unit.sp
 import bob.colbaskin.cookly.R
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
+import coil3.compose.AsyncImage
 
 @Composable
 fun DishCard(
     modifier: Modifier = Modifier,
     title: String,
     minutes: Int,
-    @DrawableRes dishImage: Int, // FIXME: потом будет url и через AsyncImage нужно будет
+    dishImageUrl: String,
+    @DrawableRes fallbackImageRes: Int = R.drawable.fallback_avatar,
     rating: Double,
     ratingAmount: Int,
     kcal: Int,
-    isFlameIconRed: Boolean = false
+    isFlameIconRed: Boolean
 ) {
     Column(
         modifier = modifier
@@ -74,11 +75,13 @@ fun DishCard(
                 dishDataIcon = R.drawable.timer_ic
             )
         }
-        Image(
+        AsyncImage(
             modifier = Modifier
                 .size(131.dp)
                 .clip(CircleShape),
-            painter = painterResource(dishImage),
+            model = dishImageUrl,
+            fallback = painterResource(id = fallbackImageRes),
+            error = painterResource(id = fallbackImageRes),
             contentDescription = null,
             contentScale = ContentScale.FillWidth
         )
@@ -107,7 +110,7 @@ fun DishCardPreview() {
         DishCard(
             title = "Fried Shrimp",
             minutes = 20,
-            dishImage = R.drawable.fried_egg_backgroiund,
+            dishImageUrl = "https://www.image.com/photos/bybus",
             rating = 4.8,
             ratingAmount = 168,
             kcal = 150,
