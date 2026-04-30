@@ -9,7 +9,6 @@ data class ProfileState(
     val avatarUrl: String = "",
 
     val isRefreshing: Boolean = false,
-    val refreshError: String? = null,
 
     val logoutState: UiState<Unit> = UiState.Idle
 ) {

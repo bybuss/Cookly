@@ -58,21 +58,9 @@ fun ProfileScreenRoot(
     val state = viewModel.state
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(state.refreshError) {
-        val error = state.refreshError ?: return@LaunchedEffect
-        scope.launch {
-            snackbarHostState.showSnackbar(
-                message = error,
-                duration = SnackbarDuration.Short
-            )
-        }
-        viewModel.onAction(ProfileAction.DismissError)
-    }
-
     LaunchedEffect(state.logoutState) {
         when (val logoutState = state.logoutState) {
             is UiState.Success -> {
-                viewModel.onAction(ProfileAction.ConsumeLogoutSuccess)
                 navController.navigate(Graphs.Auth) {
                     popUpTo (Screens.Profile) { inclusive = true }
                 }

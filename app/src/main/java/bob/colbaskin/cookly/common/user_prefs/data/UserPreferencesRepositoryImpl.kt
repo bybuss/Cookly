@@ -30,7 +30,7 @@ class UserPreferencesRepositoryImpl @Inject constructor(
     override suspend fun saveUserInfo(user: User)
         = dataStore.saveUserInfo(user)
 
-    override suspend fun clearUserSessionPreservingAgreement() {
-        dataStore.clearUserSessionPreservingAgreement()
+    override suspend fun clearUserSession() {
+        dataStore.clearUserSession()
     }
 }

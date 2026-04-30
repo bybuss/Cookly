@@ -15,5 +15,5 @@ interface UserPreferencesRepository {
     suspend fun saveAuthStatus(status: AuthConfig)
     suspend fun saveOnboardingStatus(status: OnboardingConfig)
     suspend fun saveUserInfo(user: User)
-    suspend fun clearUserSessionPreservingAgreement()
+    suspend fun clearUserSession()
 }

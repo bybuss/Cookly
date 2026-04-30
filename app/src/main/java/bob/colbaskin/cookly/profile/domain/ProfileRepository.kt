@@ -8,5 +8,5 @@ interface ProfileRepository {
 
     fun observeUserPreferences(): Flow<User>
     suspend fun refreshUser(): ApiResult<Unit>
-    suspend fun logout()
+    suspend fun logout(): ApiResult<Unit>
 }

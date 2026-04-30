@@ -74,7 +74,7 @@ class UserDataStore(context: Context) {
         }
     }
 
-    suspend fun clearUserSessionPreservingAgreement() {
+    suspend fun clearUserSession() {
         Log.d(TAG, "Clear user session preserving agreement status")
         dataStore.updateData { prefs ->
             prefs.copy {
@@ -82,7 +82,7 @@ class UserDataStore(context: Context) {
                 email = ""
                 avatarUrl = ""
                 authStatus = AuthConfig.NOT_AUTHENTICATED.toProto()
-                onboardingStatus = OnboardingConfig.NOT_STARTED.toProto()
+                onboardingStatus = OnboardingConfig.COMPLETED.toProto()
                 role = RoleConfig.USER.toProto()
             }
         }

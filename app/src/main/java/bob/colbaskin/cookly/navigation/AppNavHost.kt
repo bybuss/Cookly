@@ -95,6 +95,7 @@ private fun getStartDestination(
     onboardingStatus: OnboardingConfig
 ) =
     when (agreementStatus) {
+        AgreementConfig.NOT_ACCEPTED -> Graphs.Agreement
         AgreementConfig.ACCEPTED -> when (authStatus) {
             AuthConfig.NOT_AUTHENTICATED -> Graphs.Auth
             AuthConfig.AUTHENTICATED -> when (onboardingStatus) {
@@ -102,5 +103,4 @@ private fun getStartDestination(
                 OnboardingConfig.COMPLETED -> Graphs.Main
             }
         }
-        AgreementConfig.NOT_ACCEPTED -> Graphs.Agreement
     }

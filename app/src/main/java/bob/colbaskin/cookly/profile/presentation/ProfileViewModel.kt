@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bob.colbaskin.cookly.common.ApiResult
 import bob.colbaskin.cookly.common.UiState
+import bob.colbaskin.cookly.common.toUiState
 import bob.colbaskin.cookly.profile.domain.ProfileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectLatest
@@ -30,13 +31,7 @@ class ProfileViewModel @Inject constructor(
         when (action) {
             ProfileAction.Refresh -> refreshUser()
             ProfileAction.Logout -> logout()
-            ProfileAction.ConsumeLogoutSuccess -> { state = state.copy(logoutState = UiState.Idle) }
-            ProfileAction.DismissError -> {
-                state = state.copy(
-                    refreshError = null,
-                    logoutState = UiState.Idle
-                )
-            }
+            ProfileAction.DismissError -> { state = state.copy(logoutState = UiState.Idle) }
             else -> Unit
         }
     }
@@ -55,27 +50,9 @@ class ProfileViewModel @Inject constructor(
 
     private fun refreshUser() {
         viewModelScope.launch {
-            state = state.copy(
-                isRefreshing = true,
-                refreshError = null
-            )
-
-            val result = repository.refreshUser()
-
-            state = when (result) {
-                is ApiResult.Success -> {
-                    state.copy(
-                        isRefreshing = false,
-                        refreshError = null
-                    )
-                }
-                is ApiResult.Error -> {
-                    state.copy(
-                        isRefreshing = false,
-                        refreshError = result.title
-                    )
-                }
-            }
+            state = state.copy(isRefreshing = true)
+            repository.refreshUser()
+            state = state.copy(isRefreshing = false)
         }
     }
 
@@ -84,17 +61,8 @@ class ProfileViewModel @Inject constructor(
 
         viewModelScope.launch {
             state = state.copy(logoutState = UiState.Loading)
-
-            runCatching { repository.logout() }
-                .onSuccess { state = state.copy(logoutState = UiState.Success(it)) }
-                .onFailure { error ->
-                    state = state.copy(
-                        logoutState = UiState.Error(
-                            title = "Не удалось выйти",
-                            text = error.message.orEmpty()
-                        )
-                    )
-                }
+            val result = repository.logout()
+            state = state.copy(logoutState = result.toUiState())
         }
     }
 }
