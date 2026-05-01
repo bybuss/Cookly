@@ -128,6 +128,29 @@ fun RecipeDetailedScreenRoot(
         }
     }
 
+    LaunchedEffect(state.startCookingState) {
+        when (val startCookingState = state.startCookingState) {
+            is UiState.Error -> {
+                snackbarHostState.showSnackbar(
+                    message = startCookingState.title,
+                    duration = SnackbarDuration.Short
+                )
+            }
+
+            is UiState.Success<Int> -> {
+                val recipe = (state.recipeState as? UiState.Success)?.data ?: return@LaunchedEffect
+
+                navController.currentBackStackEntry
+                    ?.savedStateHandle
+                    ?.set(COOK_STEPS_ARGS_KEY, recipe.toCookStepsNavArgs())
+
+                navController.navigate(Screens.CookSteps)
+            }
+
+            else -> Unit
+        }
+    }
+
     RecipeDetailedScreen(
         modifier = modifier,
         state = state,
@@ -136,28 +159,6 @@ fun RecipeDetailedScreenRoot(
                 RecipeDetailedAction.NavigateBack -> navController.popBackStack()
                 RecipeDetailedAction.NavigateMain -> navController.navigate(Screens.Home) {
                     popUpTo<Screens.RecipeDetailed> { inclusive = true }
-                }
-                RecipeDetailedAction.StartCook -> {
-                    when (val startCookingState = state.startCookingState) {
-                        is UiState.Error -> {
-                            scope.launch {
-                                snackbarHostState.showSnackbar(
-                                    message = startCookingState.title,
-                                    duration = SnackbarDuration.Short
-                                )
-                            }
-                        }
-                        is UiState.Success<Int> -> {
-                            val recipe = (state.recipeState as? UiState.Success)?.data
-                            if (recipe != null) {
-                                navController.currentBackStackEntry
-                                    ?.savedStateHandle
-                                    ?.set(COOK_STEPS_ARGS_KEY, recipe.toCookStepsNavArgs())
-                                navController.navigate(Screens.CookSteps)
-                            }
-                        }
-                        else -> Unit
-                    }
                 }
                 else -> Unit
             }

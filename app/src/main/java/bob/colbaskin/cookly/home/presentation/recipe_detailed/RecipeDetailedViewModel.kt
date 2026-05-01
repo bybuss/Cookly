@@ -176,6 +176,8 @@ class RecipeDetailedViewModel @Inject constructor(
     private fun startCook() {
         if (state.startCookingState is UiState.Loading) return
 
+        state = state.copy(startCookingState = UiState.Loading)
+
         viewModelScope.launch {
             val cookingSessionId = homeRecipeRepository.startCookingSession(state.id)
             state = state.copy(startCookingState = cookingSessionId.toUiState())
