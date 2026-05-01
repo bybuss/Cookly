@@ -83,16 +83,18 @@ fun DishCard(
             fallback = painterResource(id = fallbackImageRes),
             error = painterResource(id = fallbackImageRes),
             contentDescription = null,
-            contentScale = ContentScale.FillWidth
+            contentScale = ContentScale.Crop
         )
         Row(modifier = Modifier.fillMaxWidth()) {
             DishDataIcon(
+                modifier = Modifier.weight(1f),
                 text = "$rating($ratingAmount)",
                 containerColor = CustomTheme.colors.statsCardBackground,
                 dishDataIcon = R.drawable.star_ic
             )
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.width(8.dp))
             DishDataIcon(
+                modifier = Modifier.weight(1f),
                 text = "$kcal kcal",
                 containerColor = CustomTheme.colors.statsCardBackground,
                 dishDataIcon = R.drawable.flame_ic,

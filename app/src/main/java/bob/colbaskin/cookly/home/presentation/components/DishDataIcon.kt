@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
@@ -39,7 +40,8 @@ fun DishDataIcon(
             .height(27.dp)
             .clip(CircleShape)
             .background(color = containerColor),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -54,6 +56,9 @@ fun DishDataIcon(
             )
             Text(
                 text = text,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                //textAlign = TextAlign.Center,
                 style = CustomTheme.typography.gilroy.labelMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = Color.Black
