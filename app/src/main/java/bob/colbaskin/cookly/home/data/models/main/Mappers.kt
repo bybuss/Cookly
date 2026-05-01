@@ -2,7 +2,6 @@ package bob.colbaskin.cookly.home.data.models.main
 
 import bob.colbaskin.cookly.home.domain.models.main.FeedPage
 import bob.colbaskin.cookly.home.domain.models.main.FeedRecipe
-import kotlin.math.roundToInt
 
 fun FeedResponseDto.toDomain(): FeedPage {
     return FeedPage(
