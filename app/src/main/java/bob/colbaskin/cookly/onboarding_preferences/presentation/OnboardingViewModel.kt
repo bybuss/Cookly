@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bob.colbaskin.cookly.common.ApiResult
 import bob.colbaskin.cookly.common.UiState
-import bob.colbaskin.cookly.common.toUiState
 import bob.colbaskin.cookly.common.user_prefs.domain.UserPreferencesRepository
 import bob.colbaskin.cookly.common.user_prefs.domain.models.proto_configs.OnboardingConfig
 import bob.colbaskin.cookly.onboarding_preferences.domain.OnboardingPreferencesRepository
@@ -44,8 +43,29 @@ class OnboardingViewModel @Inject constructor(
     private fun loadIngredientGroups() {
         viewModelScope.launch {
             state = state.copy(ingredientGroupsState = UiState.Loading)
-            val result = onboardingPreferencesRepository.getIngredientGroups()
-            state = state.copy(ingredientGroupsState = result.toUiState())
+
+            when (val result = onboardingPreferencesRepository.getIngredientGroups()) {
+                is ApiResult.Success -> {
+                    val groups = result.data
+
+                    state = state.copy(
+                        ingredientGroupsState = UiState.Success(groups),
+                        selectedIngredientGroupIds = groups
+                            .filter { it.excludedByUser }
+                            .map { it.id }
+                            .toSet()
+                    )
+                }
+
+                is ApiResult.Error -> {
+                    state = state.copy(
+                        ingredientGroupsState = UiState.Error(
+                            title = result.title,
+                            text = result.text
+                        )
+                    )
+                }
+            }
         }
     }
 
