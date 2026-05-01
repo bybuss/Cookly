@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -22,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -88,6 +90,25 @@ private fun HomeScreen(
 ) {
     val colors = CustomTheme.colors
     val typography = CustomTheme.typography
+    val gridState = rememberLazyGridState()
+
+    LaunchedEffect(gridState, state.recipes.size, state.isEndReached, state.appendState) {
+        snapshotFlow {
+            val lastVisibleItem = gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+            val totalItems = gridState.layoutInfo.totalItemsCount
+            lastVisibleItem to totalItems
+        }.collect { (lastVisibleItem, totalItems) ->
+            if (
+                lastVisibleItem != null &&
+                lastVisibleItem >= totalItems - 5 &&
+                !state.isEndReached &&
+                state.appendState !is UiState.Loading &&
+                state.feedState is UiState.Success
+            ) {
+                onAction(HomeAction.LoadNextFeedPage)
+            }
+        }
+    }
 
 
     Scaffold(
@@ -102,6 +123,7 @@ private fun HomeScreen(
         }
     ) { innerPadding ->
         LazyVerticalGrid(
+            state = gridState,
             modifier = modifier
                 .fillMaxSize()
                 .background(colors.background)
@@ -220,20 +242,6 @@ private fun HomeScreen(
                             key = { index -> state.recipes[index].id }
                         ) { index ->
                             val recipe = state.recipes[index]
-
-                            LaunchedEffect(
-                                key1 = index,
-                                key2 = state.recipes.size,
-                                key3 = state.isEndReached
-                            ) {
-                                if (
-                                    index >= state.recipes.lastIndex - 4 &&
-                                    !state.isEndReached &&
-                                    state.appendState !is UiState.Loading
-                                ) {
-                                    onAction(HomeAction.LoadNextFeedPage)
-                                }
-                            }
 
                             DishCard(
                                 modifier = Modifier

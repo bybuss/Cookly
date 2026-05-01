@@ -69,7 +69,7 @@ class HomeViewModel @Inject constructor(
                         lastRecipeScore = page.lastRecipeScore,
                         lastRecipeId = page.lastRecipeId,
                         paginationKey = page.paginationKey,
-                        isEndReached = page.recipes.isEmpty()
+                        isEndReached = page.paginationKey == null
                     )
                 }
 
@@ -108,7 +108,7 @@ class HomeViewModel @Inject constructor(
                         lastRecipeScore = page.lastRecipeScore,
                         lastRecipeId = page.lastRecipeId,
                         paginationKey = page.paginationKey,
-                        isEndReached = page.recipes.isEmpty()
+                        isEndReached = page.paginationKey == null
                     )
                 }
 
@@ -123,6 +123,7 @@ class HomeViewModel @Inject constructor(
         if (state.isEndReached) return
         if (state.appendState is UiState.Loading) return
         if (state.feedState is UiState.Loading) return
+        if (state.paginationKey == null) return
 
         viewModelScope.launch {
             state = state.copy(appendState = UiState.Loading)
@@ -147,7 +148,7 @@ class HomeViewModel @Inject constructor(
                         lastRecipeScore = page.lastRecipeScore,
                         lastRecipeId = page.lastRecipeId,
                         paginationKey = page.paginationKey,
-                        isEndReached = page.recipes.isEmpty()
+                        isEndReached = page.paginationKey == null
                     )
                 }
 

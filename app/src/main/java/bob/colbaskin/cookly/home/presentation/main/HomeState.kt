@@ -16,7 +16,6 @@ data class HomeState(
         MealType.BREAKFAST,
         MealType.LUNCH,
         MealType.DINNER,
-        MealType.DINNER,
     ),
     val feedState: UiState<List<FeedRecipe>> = UiState.Idle,
     val appendState: UiState<Unit> = UiState.Idle,
