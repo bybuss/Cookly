@@ -77,6 +77,7 @@ class RecipeDetailedViewModel @Inject constructor(
             RecipeDetailedAction.ConsumeAddToCartResult -> {
                 state = state.copy(addToCartState = UiState.Idle)
             }
+            RecipeDetailedAction.StartCook -> startCook()
             else -> Unit
         }
     }
@@ -167,6 +168,15 @@ class RecipeDetailedViewModel @Inject constructor(
                     state.copy(addToCartState = result)
                 }
             }
+        }
+    }
+
+    private fun startCook() {
+        if (state.startCookingState is UiState.Loading) return
+
+        viewModelScope.launch {
+            val cookingSessionId = homeRecipeRepository.startCookingSession(state.id)
+            state = state.copy(startCookingState = cookingSessionId.toUiState())
         }
     }
 }

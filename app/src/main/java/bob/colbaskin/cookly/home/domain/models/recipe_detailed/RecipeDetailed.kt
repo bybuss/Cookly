@@ -15,4 +15,7 @@ data class RecipeDetailed(
     val ingredients: List<Ingredient>,
     val steps: List<RecipeStep>,
     val categories: List<RecipeCategory>
-)
+) {
+    val isFlameIconRed: Boolean
+        get() = caloriesBy100Grams >= 300
+}

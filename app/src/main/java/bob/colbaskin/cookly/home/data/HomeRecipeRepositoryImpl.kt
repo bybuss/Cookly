@@ -6,6 +6,7 @@ import bob.colbaskin.cookly.common.ApiResult
 import bob.colbaskin.cookly.common.utils.safeApiCall
 import bob.colbaskin.cookly.home.data.models.main.FeedResponseDto
 import bob.colbaskin.cookly.home.data.models.main.toDomain
+import bob.colbaskin.cookly.home.data.models.recipe_detailed.CookingSessionDto
 import bob.colbaskin.cookly.home.data.models.recipe_detailed.RecipeDetailedDto
 import bob.colbaskin.cookly.home.domain.HomeRecipeRepository
 import bob.colbaskin.cookly.home.domain.models.main.FeedPage
@@ -37,10 +38,7 @@ class HomeRecipeRepositoryImpl @Inject constructor(
         paginationKey: String?,
         limit: Int
     ): ApiResult<FeedPage> {
-        Log.d(
-            TAG,
-            "Get user feed. lastScore=$lastScore, lastId=$lastId, paginationKey=$paginationKey, limit=$limit"
-        )
+        Log.d(TAG, "Get user feed. lastScore=$lastScore, lastId=$lastId, paginationKey=$paginationKey, limit=$limit")
 
         return safeApiCall<FeedResponseDto, FeedPage>(
             apiCall = {
@@ -52,6 +50,16 @@ class HomeRecipeRepositoryImpl @Inject constructor(
                 )
             },
             successHandler = { response -> response.toDomain() },
+            context = context
+        )
+    }
+
+    override suspend fun startCookingSession(recipeId: Int): ApiResult<Int> {
+        Log.d(TAG, "Start cooking session for recipeId=$recipeId")
+
+        return  safeApiCall<CookingSessionDto, Int>(
+            apiCall = { apiService.startCookingSession(recipeId) },
+            successHandler = { response -> response.cooingSessionId },
             context = context
         )
     }

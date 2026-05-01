@@ -13,4 +13,6 @@ interface HomeRecipeRepository {
         paginationKey: String?,
         limit: Int
     ): ApiResult<FeedPage>
+
+    suspend fun startCookingSession(recipeId: Int): ApiResult<Int>
 }

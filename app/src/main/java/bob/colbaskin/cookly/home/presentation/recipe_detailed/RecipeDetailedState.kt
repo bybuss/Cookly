@@ -9,6 +9,7 @@ import bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeDetailed
 const val DEFAULT_RECIPE_PORTIONS = 1
 
 data class RecipeDetailedState(
+    val id: Int = -1,
     val email: String = "",
     val avatarUrl: String = "",
 
@@ -20,7 +21,9 @@ data class RecipeDetailedState(
     val isAddToCartSheetVisible: Boolean = false,
     val portions: Int = DEFAULT_RECIPE_PORTIONS,
     val cartIngredients: List<RecipeCartIngredientUi> = emptyList(),
-    val addToCartState: UiState<Unit> = UiState.Idle
+    val addToCartState: UiState<Unit> = UiState.Idle,
+
+    val startCookingState: UiState<Int> = UiState.Idle
 ) {
     val avatarLetter: String
         get() = email.getFirstLetter()
