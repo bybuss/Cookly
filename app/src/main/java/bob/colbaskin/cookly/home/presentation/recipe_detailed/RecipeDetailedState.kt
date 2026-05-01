@@ -12,9 +12,11 @@ data class RecipeDetailedState(
     val id: Int = -1,
     val email: String = "",
     val avatarUrl: String = "",
+    val isFavorite: Boolean = false,
+
+    val userRate: Int? = null,
 
     val recipeState: UiState<RecipeDetailed> = UiState.Idle,
-    val isRecipeLiked: Boolean = false,
     val isSheetExpanded: Boolean = false,
     @param:DrawableRes val dishAvatarFallback: Int = R.drawable.fallback_avatar,
 

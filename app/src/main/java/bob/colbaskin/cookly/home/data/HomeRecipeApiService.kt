@@ -2,7 +2,7 @@ package bob.colbaskin.cookly.home.data
 
 import bob.colbaskin.cookly.home.data.models.main.FeedResponseDto
 import bob.colbaskin.cookly.home.data.models.recipe_detailed.CookingSessionDto
-import bob.colbaskin.cookly.home.data.models.recipe_detailed.RecipeDetailedDto
+import bob.colbaskin.cookly.home.data.models.recipe_detailed.RecipeDetailedResponseDto
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -13,7 +13,7 @@ interface HomeRecipeApiService {
     @GET("/recipe/{recipe_id}")
     suspend fun getRecipeById(
         @Path("recipe_id") recipeId: Int
-    ): RecipeDetailedDto
+    ): RecipeDetailedResponseDto
 
     @GET("/user/feed")
     suspend fun getUserFeed(

@@ -8,8 +8,8 @@ import androidx.lifecycle.viewModelScope
 import bob.colbaskin.cookly.common.UiState
 import bob.colbaskin.cookly.common.toUiState
 import bob.colbaskin.cookly.home.domain.HomeRecipeRepository
-import bob.colbaskin.cookly.home.domain.models.recipe_detailed.recalculateByPortions
-import bob.colbaskin.cookly.home.domain.models.recipe_detailed.toCartIngredientUiItems
+import bob.colbaskin.cookly.home.data.models.recipe_detailed.recalculateByPortions
+import bob.colbaskin.cookly.home.data.models.recipe_detailed.toCartIngredientUiItems
 import bob.colbaskin.cookly.profile.domain.ProfileRepository
 import bob.colbaskin.cookly.shopping_cart.domain.ShoppingCartRepository
 import bob.colbaskin.cookly.shopping_cart.domain.models.CartIngredient
@@ -37,7 +37,8 @@ class RecipeDetailedViewModel @Inject constructor(
     fun onAction(action: RecipeDetailedAction) {
         when (action) {
             RecipeDetailedAction.ToggleLike -> {
-                state = state.copy(isRecipeLiked = !state.isRecipeLiked)
+                // TODO: потом делать запрос на добавение в избранное рецепт
+                state = state.copy(isFavorite = !state.isFavorite)
             }
             is RecipeDetailedAction.OnSheetStateChanged -> {
                 state = state.copy(isSheetExpanded = action.isExpanded)

@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bob.colbaskin.cookly.common.UiState
 import bob.colbaskin.cookly.common.toUiState
-import bob.colbaskin.cookly.home.domain.models.recipe_detailed.formatQuantity
+import bob.colbaskin.cookly.home.data.models.recipe_detailed.formatQuantity
 import bob.colbaskin.cookly.shopping_cart.domain.ShoppingCartRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch

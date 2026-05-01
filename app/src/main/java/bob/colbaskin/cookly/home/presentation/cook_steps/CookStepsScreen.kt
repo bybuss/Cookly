@@ -50,7 +50,7 @@ import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
 import bob.colbaskin.cookly.home.domain.models.cook_steps.COOK_STEPS_ARGS_KEY
 import bob.colbaskin.cookly.home.domain.models.cook_steps.CookStepsNavArgs
-import bob.colbaskin.cookly.home.domain.models.recipe_detailed.toDomainMealTime
+import bob.colbaskin.cookly.home.data.models.recipe_detailed.toDomainMealTime
 import bob.colbaskin.cookly.navigation.Screens
 import coil3.compose.AsyncImage
 import kotlinx.coroutines.flow.collectLatest

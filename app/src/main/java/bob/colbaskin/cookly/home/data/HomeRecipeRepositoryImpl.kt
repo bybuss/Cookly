@@ -7,11 +7,11 @@ import bob.colbaskin.cookly.common.utils.safeApiCall
 import bob.colbaskin.cookly.home.data.models.main.FeedResponseDto
 import bob.colbaskin.cookly.home.data.models.main.toDomain
 import bob.colbaskin.cookly.home.data.models.recipe_detailed.CookingSessionDto
-import bob.colbaskin.cookly.home.data.models.recipe_detailed.RecipeDetailedDto
+import bob.colbaskin.cookly.home.data.models.recipe_detailed.RecipeDetailedResponseDto
 import bob.colbaskin.cookly.home.domain.HomeRecipeRepository
 import bob.colbaskin.cookly.home.domain.models.main.FeedPage
 import bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeDetailed
-import bob.colbaskin.cookly.home.domain.models.recipe_detailed.toDomain
+import bob.colbaskin.cookly.home.data.models.recipe_detailed.toDomain
 import javax.inject.Inject
 
 
@@ -25,7 +25,7 @@ class HomeRecipeRepositoryImpl @Inject constructor(
     override suspend fun getRecipeById(recipeId: Int): ApiResult<RecipeDetailed> {
         Log.d(TAG, "Get recipe by id=$recipeId")
 
-        return safeApiCall<RecipeDetailedDto, RecipeDetailed>(
+        return safeApiCall<RecipeDetailedResponseDto, RecipeDetailed>(
             apiCall = { apiService.getRecipeById(recipeId) },
             successHandler = { response -> response.toDomain() },
             context = context

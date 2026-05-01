@@ -1,44 +1,47 @@
-package bob.colbaskin.cookly.home.domain.models.recipe_detailed
+package bob.colbaskin.cookly.home.data.models.recipe_detailed
 
 import bob.colbaskin.cookly.home.data.models.recipe_detailed.RecipeDetailedCategoryDto
 import bob.colbaskin.cookly.home.data.models.recipe_detailed.RecipeDetailedDto
+import bob.colbaskin.cookly.home.data.models.recipe_detailed.RecipeDetailedResponseDto
 import bob.colbaskin.cookly.home.data.models.recipe_detailed.RecipeDetailedStepDto
 import bob.colbaskin.cookly.home.presentation.recipe_detailed.DEFAULT_RECIPE_PORTIONS
 import bob.colbaskin.cookly.home.presentation.recipe_detailed.RecipeCartIngredientUi
 import java.util.Locale
 import kotlin.math.roundToInt
 
-fun RecipeDetailedDto.toDomain(): RecipeDetailed {
-    return RecipeDetailed(
-        id = id,
-        title = title,
-        description = description,
-        estimatedTime = estimatedTime,
-        caloriesBy100Grams = caloriesBy100Grams.roundToInt(),
-        mealTime = mealTime,
+fun RecipeDetailedResponseDto.toDomain(): bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeDetailed {
+    return _root_ide_package_.bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeDetailed(
+        id = recipe.id,
+        title = recipe.title,
+        description = recipe.description,
+        estimatedTime = recipe.estimatedTime,
+        caloriesBy100Grams = recipe.caloriesBy100Grams.roundToInt(),
+        mealTime = recipe.mealTime,
         rating = calculateRating(
-            ratingSum = ratingSum,
-            ratingCount = ratingCount
+            ratingSum = recipe.ratingSum,
+            ratingCount = recipe.ratingCount
         ),
-        ratingCount = ratingCount,
-        spicyLevel = spicyLevel,
-        difficultyLevel = difficultyLevel,
-        imageUrl = imageUrl,
-        ingredients = recipeIngredients.map { item ->
-            Ingredient(
+        ratingCount = recipe.ratingCount,
+        spicyLevel = recipe.spicyLevel,
+        difficultyLevel = recipe.difficultyLevel,
+        imageUrl = recipe.imageUrl,
+        ingredients = recipe.recipeIngredients.map { item ->
+            _root_ide_package_.bob.colbaskin.cookly.home.domain.models.recipe_detailed.Ingredient(
                 id = item.ingredient.id,
                 name = item.ingredient.title,
                 count = item.quantity.toIngredientCount(),
                 unitOfMeasurement = item.unitMeasurement
             )
         },
-        steps = steps.map { it.toDomain() },
-        categories = recipeCategories.map { it.toDomain() }
+        steps = recipe.steps.map { it.toDomain() },
+        categories = recipe.recipeCategories.map { it.toDomain() },
+        isFavorite = isFavorite,
+        userRate = userRate
     )
 }
 
-fun RecipeDetailedStepDto.toDomain(): RecipeStep {
-    return RecipeStep(
+fun RecipeDetailedStepDto.toDomain(): bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeStep {
+    return _root_ide_package_.bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeStep(
         id = id,
         title = title,
         description = description,
@@ -47,8 +50,8 @@ fun RecipeDetailedStepDto.toDomain(): RecipeStep {
     )
 }
 
-fun RecipeDetailedCategoryDto.toDomain(): RecipeCategory {
-    return RecipeCategory(
+fun RecipeDetailedCategoryDto.toDomain(): bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeCategory {
+    return _root_ide_package_.bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeCategory(
         id = id,
         title = title
     )
@@ -75,7 +78,7 @@ fun String.toDomainMealTime(isPlural: Boolean): String {
     }
 }
 
-fun RecipeDetailed.toCartIngredientUiItems(portions: Int): List<RecipeCartIngredientUi> {
+fun bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeDetailed.toCartIngredientUiItems(portions: Int): List<RecipeCartIngredientUi> {
     return ingredients.map { ingredient ->
         val cartKey = ingredient.id.let { "ingredient_$it" }
         val calculatedQuantity = ingredient.count * portions / DEFAULT_RECIPE_PORTIONS

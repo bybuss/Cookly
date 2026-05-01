@@ -40,7 +40,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import bob.colbaskin.cookly.common.UiState
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
-import bob.colbaskin.cookly.home.domain.models.recipe_detailed.formatQuantity
+import bob.colbaskin.cookly.home.data.models.recipe_detailed.formatQuantity
 import bob.colbaskin.cookly.shopping_cart.domain.models.CartIngredient
 import compose.icons.TablerIcons
 import compose.icons.tablericons.Edit

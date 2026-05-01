@@ -84,8 +84,8 @@ import bob.colbaskin.cookly.home.domain.models.cook_steps.COOK_STEPS_ARGS_KEY
 import bob.colbaskin.cookly.home.domain.models.cook_steps.toCookStepsNavArgs
 import bob.colbaskin.cookly.home.domain.models.old.StartCookSwipeAnchor
 import bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeDetailed
-import bob.colbaskin.cookly.home.domain.models.recipe_detailed.formatQuantity
-import bob.colbaskin.cookly.home.domain.models.recipe_detailed.toDomainMealTime
+import bob.colbaskin.cookly.home.data.models.recipe_detailed.formatQuantity
+import bob.colbaskin.cookly.home.data.models.recipe_detailed.toDomainMealTime
 import bob.colbaskin.cookly.navigation.Screens
 import coil3.compose.AsyncImage
 import kotlinx.coroutines.launch
@@ -343,7 +343,7 @@ private fun RecipeDetailedContent(
             Spacer(modifier = Modifier.height(16.dp))
             HeartBubble(
                 modifier = Modifier,
-                isLiked = state.isRecipeLiked,
+                isLiked = state.isFavorite,
                 onClick = { onAction(RecipeDetailedAction.ToggleLike) }
             )
         }
