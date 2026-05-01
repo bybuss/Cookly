@@ -93,6 +93,7 @@ class RecipeDetailedViewModel @Inject constructor(
             )
             return
         }
+        state = state.copy(id = recipeId)
         if (loadedRecipeId == recipeId && state.recipeState is UiState.Success) return
         loadedRecipeId = recipeId
         state = state.copy(recipeState = UiState.Loading)

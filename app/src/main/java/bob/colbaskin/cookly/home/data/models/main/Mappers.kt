@@ -27,7 +27,3 @@ fun FeedRecipeDto.toDomain(): FeedRecipe {
         imageUrl = imageUrl
     )
 }
-
-fun Double.roundToOneDigit(): Double {
-    return (this * 10).roundToInt() / 10.0
-}

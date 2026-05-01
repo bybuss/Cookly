@@ -1,16 +1,16 @@
 package bob.colbaskin.cookly.home.data.models.recipe_detailed
 
-import bob.colbaskin.cookly.home.data.models.recipe_detailed.RecipeDetailedCategoryDto
-import bob.colbaskin.cookly.home.data.models.recipe_detailed.RecipeDetailedDto
-import bob.colbaskin.cookly.home.data.models.recipe_detailed.RecipeDetailedResponseDto
-import bob.colbaskin.cookly.home.data.models.recipe_detailed.RecipeDetailedStepDto
+import bob.colbaskin.cookly.home.domain.models.recipe_detailed.Ingredient
+import bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeCategory
+import bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeDetailed
+import bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeStep
 import bob.colbaskin.cookly.home.presentation.recipe_detailed.DEFAULT_RECIPE_PORTIONS
 import bob.colbaskin.cookly.home.presentation.recipe_detailed.RecipeCartIngredientUi
 import java.util.Locale
 import kotlin.math.roundToInt
 
-fun RecipeDetailedResponseDto.toDomain(): bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeDetailed {
-    return _root_ide_package_.bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeDetailed(
+fun RecipeDetailedResponseDto.toDomain(): RecipeDetailed {
+    return RecipeDetailed(
         id = recipe.id,
         title = recipe.title,
         description = recipe.description,
@@ -26,7 +26,7 @@ fun RecipeDetailedResponseDto.toDomain(): bob.colbaskin.cookly.home.domain.model
         difficultyLevel = recipe.difficultyLevel,
         imageUrl = recipe.imageUrl,
         ingredients = recipe.recipeIngredients.map { item ->
-            _root_ide_package_.bob.colbaskin.cookly.home.domain.models.recipe_detailed.Ingredient(
+            Ingredient(
                 id = item.ingredient.id,
                 name = item.ingredient.title,
                 count = item.quantity.toIngredientCount(),
@@ -40,8 +40,8 @@ fun RecipeDetailedResponseDto.toDomain(): bob.colbaskin.cookly.home.domain.model
     )
 }
 
-fun RecipeDetailedStepDto.toDomain(): bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeStep {
-    return _root_ide_package_.bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeStep(
+fun RecipeDetailedStepDto.toDomain(): RecipeStep {
+    return RecipeStep(
         id = id,
         title = title,
         description = description,
@@ -50,8 +50,8 @@ fun RecipeDetailedStepDto.toDomain(): bob.colbaskin.cookly.home.domain.models.re
     )
 }
 
-fun RecipeDetailedCategoryDto.toDomain(): bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeCategory {
-    return _root_ide_package_.bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeCategory(
+fun RecipeDetailedCategoryDto.toDomain(): RecipeCategory {
+    return RecipeCategory(
         id = id,
         title = title
     )
@@ -78,7 +78,7 @@ fun String.toDomainMealTime(isPlural: Boolean): String {
     }
 }
 
-fun bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeDetailed.toCartIngredientUiItems(portions: Int): List<RecipeCartIngredientUi> {
+fun RecipeDetailed.toCartIngredientUiItems(portions: Int): List<RecipeCartIngredientUi> {
     return ingredients.map { ingredient ->
         val cartKey = ingredient.id.let { "ingredient_$it" }
         val calculatedQuantity = ingredient.count * portions / DEFAULT_RECIPE_PORTIONS
