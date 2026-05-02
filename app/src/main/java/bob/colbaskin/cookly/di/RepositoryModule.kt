@@ -11,6 +11,9 @@ import bob.colbaskin.cookly.create_recipe.data.CreateRecipeApiService
 import bob.colbaskin.cookly.create_recipe.data.CreateRecipeRepositoryImpl
 import bob.colbaskin.cookly.create_recipe.domain.CreateRecipeRepository
 import bob.colbaskin.cookly.di.token.TokenDataStore
+import bob.colbaskin.cookly.favourite.data.FavouritesApiService
+import bob.colbaskin.cookly.favourite.data.FavouritesRepositoryImpl
+import bob.colbaskin.cookly.favourite.domain.FavouritesRepository
 import bob.colbaskin.cookly.home.data.HomeRecipeApiService
 import bob.colbaskin.cookly.home.data.HomeRecipeRepositoryImpl
 import bob.colbaskin.cookly.home.domain.HomeRecipeRepository
@@ -114,6 +117,18 @@ object RepositoryModule {
         apiService: OnboardingPreferencesApiService
     ): OnboardingPreferencesRepository {
         return OnboardingPreferencesRepositoryImpl(
+            context = context,
+            apiService = apiService
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideFavouritesRepository(
+        @ApplicationContext context: Context,
+        apiService: FavouritesApiService
+    ): FavouritesRepository {
+        return FavouritesRepositoryImpl(
             context = context,
             apiService = apiService
         )
