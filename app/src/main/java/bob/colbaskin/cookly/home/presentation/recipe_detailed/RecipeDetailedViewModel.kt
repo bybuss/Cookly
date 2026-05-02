@@ -79,6 +79,7 @@ class RecipeDetailedViewModel @Inject constructor(
                 state = state.copy(addToCartState = UiState.Idle)
             }
             RecipeDetailedAction.StartCook -> startCook()
+            is RecipeDetailedAction.ChangeActiveStep -> changeActiveStep(action.cookingSessionId)
             else -> Unit
         }
     }
@@ -181,6 +182,15 @@ class RecipeDetailedViewModel @Inject constructor(
         viewModelScope.launch {
             val cookingSessionId = homeRecipeRepository.startCookingSession(state.id)
             state = state.copy(startCookingState = cookingSessionId.toUiState())
+        }
+    }
+
+    private fun changeActiveStep(cookingSessionId: Int, stepNumber: Int = 1) {
+        viewModelScope.launch {
+            homeRecipeRepository.changeActiveStep(
+                cookingSessionId = cookingSessionId,
+                stepNumber = stepNumber
+            )
         }
     }
 }

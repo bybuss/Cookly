@@ -4,6 +4,7 @@ interface RecipeDetailedAction {
     data object NavigateBack: RecipeDetailedAction
     data object NavigateMain: RecipeDetailedAction
     data object StartCook: RecipeDetailedAction
+    data class ChangeActiveStep(val cookingSessionId: Int): RecipeDetailedAction
     data object ToggleLike: RecipeDetailedAction
 
     data object ShowAddToCartSheet: RecipeDetailedAction

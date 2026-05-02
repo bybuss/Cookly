@@ -139,15 +139,19 @@ fun RecipeDetailedScreenRoot(
 
             is UiState.Success<Int> -> {
                 val recipe = (state.recipeState as? UiState.Success)?.data ?: return@LaunchedEffect
+                val cookingSessionId = startCookingState.data
                 val args = recipe.toCookStepsNavArgs(
-                    cookingSessionId = startCookingState.data
+                    cookingSessionId = cookingSessionId
                 )
 
                 navController.currentBackStackEntry
                     ?.savedStateHandle
                     ?.set(COOK_STEPS_ARGS_KEY, args)
-
                 navController.navigate(Screens.CookSteps)
+
+                viewModel.onAction(
+                    RecipeDetailedAction.ChangeActiveStep(cookingSessionId = cookingSessionId)
+                )
             }
 
             else -> Unit
