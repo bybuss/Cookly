@@ -73,6 +73,17 @@ fun HomeScreenRoot(
         }
     }
 
+    LaunchedEffect(state.activeCookingSessions) {
+        if (state.activeCookingSessions is UiState.Error) {
+            scope.launch {
+                snackbarHostState.showSnackbar(
+                    message = state.activeCookingSessions.title,
+                    duration = SnackbarDuration.Short
+                )
+            }
+        }
+    }
+
     HomeScreen(
         modifier = modifier,
         state = state,
