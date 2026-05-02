@@ -35,15 +35,34 @@ fun LazyGridScope.paginatedItems(
     bodyMedium: TextStyle
 ) {
     when (state.loadState) {
-        UiState.Loading -> {
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 24.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(color = accentColor)
+        UiState.Loading, UiState.Idle -> {
+            if (state.items.isEmpty()) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 48.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = accentColor)
+                    }
+                }
+            } else {
+                if (state.appendState is UiState.Loading) {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(28.dp),
+                                color = accentColor,
+                                strokeWidth = 2.dp
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -124,6 +143,5 @@ fun LazyGridScope.paginatedItems(
                 }
             }
         }
-        else -> Unit
     }
 }

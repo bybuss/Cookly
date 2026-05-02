@@ -472,6 +472,9 @@ private fun DraggableSheet(
                 titleMedium = typography.inter.titleMedium,
                 bodyMedium = typography.inter.bodyMedium
             )
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                Spacer(modifier = Modifier.height(64.dp))
+            }
         }
     }
 }

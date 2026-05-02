@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bob.colbaskin.cookly.common.UiState
 import bob.colbaskin.cookly.common.components.feed_pagination.FeedPaginator
 import bob.colbaskin.cookly.home.data.models.main.toMealFeedItem
 import bob.colbaskin.cookly.home.domain.HomeRecipeRepository
@@ -49,7 +50,18 @@ class MealTimeDetailedViewModel @Inject constructor(
     }
 
     fun loadMealTimeFeed(mealTimeType: String) {
-        state = state.copy(mealTimeType = mealTimeType)
+        state = state.copy(
+            mealTimeType = mealTimeType,
+            pagination = state.pagination.copy(
+                loadState = UiState.Loading,
+                appendState = UiState.Idle,
+                items = emptyList(),
+                lastScore = null,
+                lastId = null,
+                paginationKey = null,
+                isEndReached = false
+            )
+        )
 
         paginator = FeedPaginator { lastScore, lastId, key ->
             homeRepository.getMealTimeFeed(
@@ -63,7 +75,9 @@ class MealTimeDetailedViewModel @Inject constructor(
 
         viewModelScope.launch {
             val firstPage = paginator.loadFirst()
-            val carousel = firstPage.items.take(CAROUSEL_COUNT).map { it.toMealFeedItem() }
+            val carousel = firstPage.items
+                .take(CAROUSEL_COUNT)
+                .map { it.toMealFeedItem() }
             val rest = firstPage.items.drop(CAROUSEL_COUNT)
 
             state = state.copy(
