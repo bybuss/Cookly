@@ -87,8 +87,7 @@ fun ProfileScreenRoot(
                     navController.navigate(Screens.ApplicationsReview)
                 }
                 ProfileAction.OpenCookingHistory -> {
-                    //navController.navigate(Screens.CookingHistory)
-                    navController.navigate(Screens.RecipeDetailed(recipeId = 67))
+                    navController.navigate(Screens.CookingHistory)
                 }
                 ProfileAction.OpenPreferencesAndAllergies -> {
                     navController.navigate(Graphs.Onboarding)

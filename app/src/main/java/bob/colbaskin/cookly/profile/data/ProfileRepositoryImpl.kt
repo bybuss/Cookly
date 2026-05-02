@@ -5,6 +5,9 @@ import android.util.Log
 import bob.colbaskin.cookly.auth.data.AuthApiService
 import bob.colbaskin.cookly.auth.data.models.RefreshTokenBody
 import bob.colbaskin.cookly.common.ApiResult
+import bob.colbaskin.cookly.common.recipe_preview.data.models.RecipesResponseDto
+import bob.colbaskin.cookly.common.recipe_preview.data.models.toDomain
+import bob.colbaskin.cookly.common.recipe_preview.domain.models.RecipePreview
 import bob.colbaskin.cookly.common.user_prefs.domain.UserPreferencesRepository
 import bob.colbaskin.cookly.common.user_prefs.domain.models.User
 import bob.colbaskin.cookly.common.utils.safeApiCall
@@ -51,6 +54,14 @@ class ProfileRepositoryImpl @Inject constructor(
                 tokenDataStore.clearTokens()
                 userPreferencesRepository.clearUserSession()
             },
+            context = context
+        )
+    }
+
+    override suspend fun getRecipeHistory(): ApiResult<List<RecipePreview>> {
+        return safeApiCall<RecipesResponseDto, List<RecipePreview>>(
+            apiCall = { profileApiService.getRecipeHistory() },
+            successHandler = { response -> response.recipes.map { it.toDomain() } },
             context = context
         )
     }

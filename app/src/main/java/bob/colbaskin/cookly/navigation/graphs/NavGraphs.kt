@@ -22,6 +22,7 @@ import bob.colbaskin.cookly.home.presentation.main.HomeScreenRoot
 import bob.colbaskin.cookly.home.presentation.meal_time_detailed.MealTimeDetailedScreenRoot
 import bob.colbaskin.cookly.navigation.Screens
 import bob.colbaskin.cookly.onboarding_preferences.presentation.OnboardingScreenRoot
+import bob.colbaskin.cookly.profile.presentation.cooking_history.CookingHistoryScreenRoot
 import bob.colbaskin.cookly.profile.presentation.profile.ProfileScreenRoot
 import bob.colbaskin.cookly.shopping_cart.presentation.ShoppingCartScreenRoot
 
@@ -120,9 +121,7 @@ fun NavGraphBuilder.detailedGraph(
             }
         }
         composable<Screens.CookingHistory> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = "Cooking History Screen")
-            }
+            CookingHistoryScreenRoot(navController = navController)
         }
         composable<Screens.RecipeStatuses> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
