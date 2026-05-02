@@ -55,6 +55,30 @@ class HomeRecipeRepositoryImpl @Inject constructor(
         )
     }
 
+    override suspend fun getMealTimeFeed(
+        mealTimeType: String,
+        lastScore: Double?,
+        lastId: Int?,
+        paginationKey: String?,
+        limit: Int
+    ): ApiResult<FeedPage> {
+        Log.d(TAG, "Get meal time feed. mealTimeType=$mealTimeType, lastScore=$lastScore, lastId=$lastId, paginationKey=$paginationKey, limit=$limit")
+
+        return safeApiCall<FeedResponseDto, FeedPage>(
+            apiCall = {
+                apiService.getMealTimeFeed(
+                    mealTimeType = mealTimeType,
+                    lastScore = lastScore,
+                    lastId = lastId,
+                    paginationKey = paginationKey,
+                    limit = limit
+                )
+            },
+            successHandler = { response -> response.toDomain() },
+            context = context
+        )
+    }
+
     override suspend fun startCookingSession(recipeId: Int): ApiResult<Int> {
         Log.d(TAG, "Start cooking session for recipeId=$recipeId")
 

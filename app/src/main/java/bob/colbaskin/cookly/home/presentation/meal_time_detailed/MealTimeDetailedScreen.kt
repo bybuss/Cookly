@@ -2,7 +2,6 @@ package bob.colbaskin.cookly.home.presentation.meal_time_detailed
 
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -36,7 +35,6 @@ import bob.colbaskin.cookly.R
 import bob.colbaskin.cookly.common.components.PagerIndicator
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
-import bob.colbaskin.cookly.home.domain.models.meal.Meal
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.AnchoredDraggableDefaults
 import androidx.compose.foundation.gestures.AnchoredDraggableState
@@ -52,22 +50,27 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import bob.colbaskin.cookly.common.UiState
 import bob.colbaskin.cookly.common.components.SheetTopBar
 import bob.colbaskin.cookly.home.data.models.recipe_detailed.toDomainMealTime
-import bob.colbaskin.cookly.home.presentation.components.DishCard
+import bob.colbaskin.cookly.home.domain.models.meal.MealFeedItem
+import bob.colbaskin.cookly.home.presentation.components.paginatedItems
 import bob.colbaskin.cookly.home.presentation.components.recommended_dish.RecommendationBanner
 import bob.colbaskin.cookly.home.presentation.components.recommended_dish.RecommendedDish
 import bob.colbaskin.cookly.navigation.Screens
+import coil3.compose.AsyncImage
 import io.github.fletchmckee.liquid.liquefiable
 import io.github.fletchmckee.liquid.liquid
 import io.github.fletchmckee.liquid.rememberLiquidState
@@ -111,8 +114,8 @@ private fun MealTimeDetailedScreen(
     state: MealDetailedState,
     onAction: (MealTimeDetailedAction) -> Unit
 ) {
-    val mealsList = state.mealsList
-    val realPageCount = mealsList.size
+    val carouselItems = state.carouselItems
+    val realPageCount = carouselItems.size
     val initialPage = remember(realPageCount) {
         if (realPageCount == 0) {
             0
@@ -209,7 +212,7 @@ private fun MealTimeDetailedScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .liquefiable(liquidState),
-                mealsList = mealsList,
+                carouselItems = state.carouselItems,
                 pagerState = pagerState
             )
             MealPagerOverlay(
@@ -230,7 +233,7 @@ private fun MealTimeDetailedScreen(
                         bottom = overlayBottomGap + sheetOverlap,
                         top = 16.dp
                     ),
-                mealsList = mealsList,
+                carouselItems = state.carouselItems,
                 pagerState = pagerState,
                 onAction = onAction
             )
@@ -248,7 +251,9 @@ private fun MealTimeDetailedScreen(
             modifier = Modifier.zIndex(2f),
             anchoredState = sheetState,
             flingBehavior = flingBehavior,
-            collapsedTopPxFallback = collapsedTopPx
+            collapsedTopPxFallback = collapsedTopPx,
+            state = state,
+            onAction = onAction
         )
     }
 }
@@ -256,15 +261,15 @@ private fun MealTimeDetailedScreen(
 @Composable
 private fun MealPagerOverlay(
     modifier: Modifier = Modifier,
-    mealsList: List<Meal>,
+    carouselItems: List<MealFeedItem>,
     pagerState: PagerState,
     onAction: (MealTimeDetailedAction) -> Unit
 ) {
     val colors = CustomTheme.colors
     val typography = CustomTheme.typography
 
-    if (mealsList.isEmpty()) return
-    val currentMeal = mealsList[pagerState.currentPage % mealsList.size]
+    if (carouselItems.isEmpty()) return
+    val currentMeal = carouselItems[pagerState.currentPage % carouselItems.size]
 
     Box(modifier = modifier.fillMaxWidth()) {
         Row(
@@ -299,8 +304,8 @@ private fun MealPagerOverlay(
                 Spacer(modifier = Modifier.height(20.dp))
 
                 PagerIndicator(
-                    currentPage = pagerState.currentPage % mealsList.size,
-                    pageCount = mealsList.size,
+                    currentPage = pagerState.currentPage % carouselItems.size,
+                    pageCount = carouselItems.size,
                     selectedColor = CustomTheme.colors.accentColor,
                     unselectedColor = CustomTheme.colors.invertedText,
                     spacedByDp = 12.dp
@@ -330,16 +335,16 @@ private fun MealPagerOverlay(
 @Composable
 private fun MealPager(
     modifier: Modifier = Modifier,
-    mealsList: List<Meal>,
+    carouselItems: List<MealFeedItem>,
     pagerState: PagerState
 ) {
-    if (mealsList.isEmpty()) return
+    if (carouselItems.isEmpty()) return
 
     HorizontalPager(
         state = pagerState,
         modifier = modifier.fillMaxSize()
     ) {
-        val item = mealsList[it % mealsList.size]
+        val item = carouselItems[it % carouselItems.size]
         MealPagerItem(
             modifier = Modifier.fillMaxSize(),
             item = item
@@ -350,11 +355,13 @@ private fun MealPager(
 @Composable
 private fun MealPagerItem(
     modifier: Modifier = Modifier,
-    item: Meal
+    item: MealFeedItem
 ) {
     Box(modifier = modifier.fillMaxSize()) {
-        Image(
-            painter = painterResource(id = item.imageId),
+        AsyncImage(
+            model = item.imageUrl,
+            fallback = painterResource(id = R.drawable.fallback_avatar),
+            error = painterResource(id = R.drawable.fallback_avatar),
             contentDescription = item.title,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
@@ -368,9 +375,29 @@ private fun DraggableSheet(
     modifier: Modifier = Modifier,
     anchoredState: AnchoredDraggableState<MealTimeSheetValue>,
     flingBehavior: FlingBehavior,
-    collapsedTopPxFallback: Float
+    collapsedTopPxFallback: Float,
+    state: MealDetailedState,
+    onAction: (MealTimeDetailedAction) -> Unit
 ) {
     val colors = CustomTheme.colors
+    val gridState = rememberLazyGridState()
+
+    LaunchedEffect(gridState, state.pagination.items.size) {
+        snapshotFlow {
+            val lastVisible = gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+            val total = gridState.layoutInfo.totalItemsCount
+            lastVisible to total
+        }.collect { (last, total) ->
+            if (
+                last != null &&
+                last >= total - 5 &&
+                !state.pagination.isEndReached &&
+                state.pagination.appendState !is UiState.Loading
+            ) {
+                onAction(MealTimeDetailedAction.LoadNextPage)
+            }
+        }
+    }
 
     val offsetY =
         if (anchoredState.offset.isNaN()) collapsedTopPxFallback
@@ -399,6 +426,7 @@ private fun DraggableSheet(
             color =  colors.secondaryText.copy(alpha = 0.2f)
         )
         LazyVerticalGrid(
+            state = gridState,
             modifier = modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp)
@@ -440,17 +468,16 @@ private fun DraggableSheet(
                     fontWeight = FontWeight.Normal
                 )
             }
-            items(20) {
-                DishCard(
-                    modifier = Modifier,
-                    title = "Fried Shrimp",
-                    minutes = 20,
-                    dishImageUrl = "",
-                    rating = 4.8,
-                    ratingAmount = 168,
-                    kcal = 150,
-                    isFlameIconRed = false,
-                )
+            paginatedItems(
+                state = state.pagination,
+                onLoadNext = { onAction(MealTimeDetailedAction.LoadNextPage) },
+                onRetry = { onAction(MealTimeDetailedAction.Refresh) },
+                onClick = {
+                    onAction(MealTimeDetailedAction.NavigateToRecipeDetailed(it))
+                }
+            )
+            item (span = { GridItemSpan(maxLineSpan) }) {
+                Spacer(modifier = Modifier.height(32.dp))
             }
         }
     }

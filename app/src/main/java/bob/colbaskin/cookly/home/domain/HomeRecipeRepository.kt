@@ -15,6 +15,14 @@ interface HomeRecipeRepository {
         limit: Int
     ): ApiResult<FeedPage>
 
+    suspend fun getMealTimeFeed(
+        mealTimeType: String,
+        lastScore: Double?,
+        lastId: Int?,
+        paginationKey: String?,
+        limit: Int
+    ): ApiResult<FeedPage>
+
     suspend fun startCookingSession(recipeId: Int): ApiResult<Int>
 
     suspend fun changeActiveStep(cookingSessionId: Int, stepNumber: Int): ApiResult<Unit>
