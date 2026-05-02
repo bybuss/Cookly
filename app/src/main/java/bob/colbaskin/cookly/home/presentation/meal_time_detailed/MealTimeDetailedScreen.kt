@@ -27,7 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -64,6 +63,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import bob.colbaskin.cookly.common.components.SheetTopBar
+import bob.colbaskin.cookly.home.data.models.recipe_detailed.toDomainMealTime
 import bob.colbaskin.cookly.home.presentation.components.DishCard
 import bob.colbaskin.cookly.home.presentation.components.recommended_dish.RecommendationBanner
 import bob.colbaskin.cookly.home.presentation.components.recommended_dish.RecommendedDish
@@ -230,7 +230,7 @@ private fun MealTimeDetailedScreen(
             modifier = Modifier
                 .padding(16.dp)
                 .zIndex(3f),
-            liquidBoxText = stringResource(state.mealType.displayNameId),
+            liquidBoxText = state.mealType.apiValue.toDomainMealTime(isPlural = true),
             onBackClick = { onAction(MealTimeDetailedAction.NavigateBack) },
             avatarUrl = state.avatarUrl,
             fallbackLetter = state.avatarLetter,

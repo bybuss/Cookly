@@ -17,17 +17,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
-import bob.colbaskin.cookly.home.domain.models.old.MealType
+import bob.colbaskin.cookly.home.domain.models.old.MealTimeType
 
 @Composable
 fun MealsCard(
     modifier: Modifier = Modifier,
-    mealType: MealType = MealType.BREAKFAST
+    mealType: MealTimeType = MealTimeType.BREAKFAST
 ) {
     Box(
         modifier = modifier
@@ -50,7 +49,7 @@ fun MealsCard(
                 contentDescription = null,
             )
             Text(
-                text = stringResource(mealType.displayNameId),
+                text = mealType.title,
                 color = CustomTheme.colors.text,
                 style = CustomTheme.typography.nunito.titleMedium,
                 modifier = Modifier.offset(y = (-6).dp)

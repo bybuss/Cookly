@@ -3,14 +3,14 @@ package bob.colbaskin.cookly.home.presentation.meal_time_detailed
 import bob.colbaskin.cookly.R
 import bob.colbaskin.cookly.common.utils.getFirstLetter
 import bob.colbaskin.cookly.home.domain.models.old.Meal
-import bob.colbaskin.cookly.home.domain.models.old.MealType
+import bob.colbaskin.cookly.home.domain.models.old.MealTimeType
 
 data class MealDetailedState(
     val email: String = "",
     val avatarUrl: String = "",
 
     val mealsList: List<Meal> = mealsListMock,
-    val mealType: MealType = MealType.BREAKFAST,
+    val mealType: MealTimeType = MealTimeType.BREAKFAST,
     val currentPage: Int = 0,
     val isSheetExpanded: Boolean = false,
     val isAutoScrollEnabled: Boolean = true

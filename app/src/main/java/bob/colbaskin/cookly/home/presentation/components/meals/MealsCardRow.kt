@@ -9,10 +9,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
-import bob.colbaskin.cookly.home.domain.models.old.MealType
+import bob.colbaskin.cookly.home.domain.models.old.MealTimeType
 
 @Composable
-fun MealsCardRow(modifier: Modifier = Modifier, mealsList: List<MealType>) {
+fun MealsCardRow(modifier: Modifier = Modifier, mealsList: List<MealTimeType>) {
     LazyRow (
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -30,10 +30,9 @@ fun MealsCardRow(modifier: Modifier = Modifier, mealsList: List<MealType>) {
 @Composable
 private fun MealsCardRowPreview() {
     val mealsList = listOf(
-        MealType.BREAKFAST,
-        MealType.LUNCH,
-        MealType.DINNER,
-        MealType.DINNER,
+        MealTimeType.BREAKFAST,
+        MealTimeType.LUNCH,
+        MealTimeType.SUPPER
     )
 
     UfoodTheme {
