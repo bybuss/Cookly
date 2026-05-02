@@ -75,7 +75,7 @@ private fun RecipesDisplayModeChip(
         modifier = Modifier
             .clip(RoundedCornerShape(50))
             .background(
-                if (selected) colors.secondAccentColor
+                if (selected) colors.accentColor
                 else colors.secondaryCardBackground
             )
             .clickable { onClick() }
