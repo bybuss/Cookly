@@ -2,7 +2,7 @@ package bob.colbaskin.cookly.home.domain.models.cook_steps
 
 import bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeDetailed
 
-fun RecipeDetailed.toCookStepsNavArgs(): CookStepsNavArgs {
+fun RecipeDetailed.toCookStepsNavArgs(cookingSessionId: Int): CookStepsNavArgs {
     return CookStepsNavArgs(
         recipeId = id,
         recipeTitle = title,
@@ -18,6 +18,7 @@ fun RecipeDetailed.toCookStepsNavArgs(): CookStepsNavArgs {
                     number = it.number,
                     imageUrl = it.imageUrl
                 )
-            }
+            },
+        cookingSessionId = cookingSessionId
     )
 }

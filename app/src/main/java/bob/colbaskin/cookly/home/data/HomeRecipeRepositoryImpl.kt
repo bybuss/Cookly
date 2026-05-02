@@ -14,7 +14,6 @@ import bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeDetailed
 import bob.colbaskin.cookly.home.data.models.recipe_detailed.toDomain
 import javax.inject.Inject
 
-
 private const val TAG = "HomeRecipeRepository"
 
 class HomeRecipeRepositoryImpl @Inject constructor(
@@ -60,6 +59,39 @@ class HomeRecipeRepositoryImpl @Inject constructor(
         return  safeApiCall<CookingSessionDto, Int>(
             apiCall = { apiService.startCookingSession(recipeId) },
             successHandler = { response -> response.cooingSessionId },
+            context = context
+        )
+    }
+
+    override suspend fun changeActiveStep(
+        cookingSessionId: Int,
+        stepNumber: Int
+    ): ApiResult<Unit> {
+        Log.d(TAG, "Change active step to $stepNumber for cooking session $cookingSessionId")
+
+        return safeApiCall<Unit, Unit>(
+            apiCall = { apiService.changeActiveStep(cookingSessionId, stepNumber) },
+            successHandler = { response -> response },
+            context = context
+        )
+    }
+
+    override suspend fun cancelCookingSession(cookingSessionId: Int): ApiResult<Unit> {
+        Log.d(TAG, "Cancel cooking session with id=$cookingSessionId")
+
+        return safeApiCall<Unit, Unit>(
+            apiCall = { apiService.cancelCookingSession(cookingSessionId) },
+            successHandler = { response -> response },
+            context = context
+        )
+    }
+
+    override suspend fun finishCookingSession(cookingSessionId: Int): ApiResult<Unit> {
+        Log.d(TAG, "Finish cooking session with id=$cookingSessionId")
+
+        return safeApiCall<Unit, Unit>(
+            apiCall = { apiService.finishCookingSession(cookingSessionId) },
+            successHandler = { response -> response },
             context = context
         )
     }

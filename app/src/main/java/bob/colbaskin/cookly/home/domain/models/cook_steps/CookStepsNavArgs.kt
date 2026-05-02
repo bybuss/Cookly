@@ -11,5 +11,6 @@ data class CookStepsNavArgs(
     val recipeTitle: String,
     val mealType: String,
     val recipeImageUrl: String?,
-    val steps: List<CookStep>
+    val steps: List<CookStep>,
+    val cookingSessionId: Int
 ): Parcelable

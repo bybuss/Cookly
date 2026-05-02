@@ -139,10 +139,13 @@ fun RecipeDetailedScreenRoot(
 
             is UiState.Success<Int> -> {
                 val recipe = (state.recipeState as? UiState.Success)?.data ?: return@LaunchedEffect
+                val args = recipe.toCookStepsNavArgs(
+                    cookingSessionId = startCookingState.data
+                )
 
                 navController.currentBackStackEntry
                     ?.savedStateHandle
-                    ?.set(COOK_STEPS_ARGS_KEY, recipe.toCookStepsNavArgs())
+                    ?.set(COOK_STEPS_ARGS_KEY, args)
 
                 navController.navigate(Screens.CookSteps)
             }

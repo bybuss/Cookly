@@ -3,6 +3,7 @@ package bob.colbaskin.cookly.home.data
 import bob.colbaskin.cookly.home.data.models.main.FeedResponseDto
 import bob.colbaskin.cookly.home.data.models.recipe_detailed.CookingSessionDto
 import bob.colbaskin.cookly.home.data.models.recipe_detailed.RecipeDetailedResponseDto
+import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -27,4 +28,20 @@ interface HomeRecipeApiService {
     suspend fun startCookingSession(
         @Path("recipe_id") recipeId: Int
     ): CookingSessionDto
+
+    @POST("/cooking-sessions/{cooking_session_id}/change-active-step")
+    suspend fun changeActiveStep(
+        @Path("cooking_session_id") cookingSessionId: Int,
+        @Body stepNumber: Int
+    )
+
+    @POST("/cooking-sessions/{cooking_session_id}/cancel")
+    suspend fun cancelCookingSession(
+        @Path("cooking_session_id") cookingSessionId: Int
+    )
+
+    @POST("/cooking-sessions/{cooking_session_id}/finish")
+    suspend fun finishCookingSession(
+        @Path("cooking_session_id") cookingSessionId: Int
+    )
 }

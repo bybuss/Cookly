@@ -16,7 +16,8 @@ data class RecipeDetailed(
     val steps: List<RecipeStep>,
     val categories: List<RecipeCategory>,
     val isFavorite: Boolean,
-    val userRate: Int? = null
+    val userRate: Int? = null,
+    val cookingSessionId: Int? = null
 ) {
     val isFlameIconRed: Boolean
         get() = caloriesBy100Grams >= 300

@@ -15,4 +15,10 @@ interface HomeRecipeRepository {
     ): ApiResult<FeedPage>
 
     suspend fun startCookingSession(recipeId: Int): ApiResult<Int>
+
+    suspend fun changeActiveStep(cookingSessionId: Int, stepNumber: Int): ApiResult<Unit>
+
+    suspend fun cancelCookingSession(cookingSessionId: Int): ApiResult<Unit>
+
+    suspend fun finishCookingSession(cookingSessionId: Int): ApiResult<Unit>
 }
