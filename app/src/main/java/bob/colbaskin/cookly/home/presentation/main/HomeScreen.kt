@@ -3,12 +3,10 @@ package bob.colbaskin.cookly.home.presentation.main
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -16,8 +14,6 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -26,7 +22,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -39,17 +34,13 @@ import androidx.navigation.NavHostController
 import bob.colbaskin.cookly.R
 import bob.colbaskin.cookly.common.UiState
 import bob.colbaskin.cookly.common.components.feed_pagination.PaginationEffect
-import bob.colbaskin.cookly.common.components.feed_pagination.PaginationState
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
-import bob.colbaskin.cookly.common.utils.clickableWithoutRipple
 import bob.colbaskin.cookly.home.domain.models.main.ActiveCookingSession
 import bob.colbaskin.cookly.home.presentation.components.ActiveSessionBanner
-import bob.colbaskin.cookly.home.presentation.components.DishCard
 import bob.colbaskin.cookly.home.presentation.components.TopBarWithSearch
 import bob.colbaskin.cookly.home.presentation.components.meals.MealsCardRow
 import bob.colbaskin.cookly.home.presentation.components.paginatedItems
-import bob.colbaskin.cookly.home.presentation.components.quick_card.QuickCategoryCardRow
 import bob.colbaskin.cookly.home.presentation.components.recommended_dish.RecommendationBanner
 import bob.colbaskin.cookly.home.presentation.components.recommended_dish.RecommendedDish
 import bob.colbaskin.cookly.navigation.Screens
@@ -149,13 +140,6 @@ private fun HomeScreen(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(bottom = 16.dp)
         ) {
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                QuickCategoryCardRow(
-                    modifier = Modifier,
-                    quickCardsList = state.quickCardsList
-                )
-            }
-
             item(span = { GridItemSpan(maxLineSpan) }) {
                 MealsCardRow(
                     modifier = Modifier,
