@@ -1,5 +1,6 @@
 package bob.colbaskin.cookly.home.data.models.main
 
+import bob.colbaskin.cookly.home.domain.models.main.ActiveCookingSession
 import bob.colbaskin.cookly.home.domain.models.main.FeedPage
 import bob.colbaskin.cookly.home.domain.models.main.FeedRecipe
 
@@ -24,5 +25,16 @@ fun FeedRecipeDto.toDomain(): FeedRecipe {
         spicyLevel = spicyLevel,
         difficultyLevel = difficultyLevel,
         imageUrl = imageUrl
+    )
+}
+
+fun ActiveSessionDto.toDomain(): ActiveCookingSession {
+    return ActiveCookingSession(
+        sessionId = session.id,
+        recipeId = recipeId,
+        recipeTitle = recipeTitle,
+        recipeImageUrl = recipeImageUrl,
+        currentStepNumber = session.currentStep,
+        stepTitle = stepTitle
     )
 }

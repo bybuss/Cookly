@@ -9,10 +9,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -26,6 +29,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,6 +41,8 @@ import bob.colbaskin.cookly.common.UiState
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
 import bob.colbaskin.cookly.common.utils.clickableWithoutRipple
+import bob.colbaskin.cookly.home.domain.models.main.ActiveCookingSession
+import bob.colbaskin.cookly.home.presentation.components.ActiveSessionBanner
 import bob.colbaskin.cookly.home.presentation.components.DishCard
 import bob.colbaskin.cookly.home.presentation.components.TopBarWithSearch
 import bob.colbaskin.cookly.home.presentation.components.meals.MealsCardRow
@@ -149,6 +155,25 @@ private fun HomeScreen(
             }
 
             item(span = { GridItemSpan(maxLineSpan) }) {
+                when (val sessionsState = state.activeCookingSessions) {
+                    is UiState.Success -> {
+                        sessionsState.data?.let {
+                            ActiveSessionsRow(
+                                sessions = it,
+                                onCancelClick = { sessionId ->
+                                    onAction(HomeAction.CancelActiveSession(sessionId))
+                                },
+                                onOpenClick = { recipeId ->
+                                    onAction(HomeAction.OpenRecipe(recipeId))
+                                }
+                            )
+                        }
+                    }
+                    else -> Unit
+                }
+            }
+
+            item(span = { GridItemSpan(maxLineSpan) }) {
                 RecommendedDish(
                     modifier = Modifier,
                     title = "Блюдо от Шефа",
@@ -157,7 +182,7 @@ private fun HomeScreen(
                         RecommendationBanner(
                             modifier = Modifier,
                             cardTitle = "Fried Shrimp",
-                            backgroundImage = R.drawable.shrimp_soup_image,
+                            recipeImageUrl = "",
                             rating = 4.8,
                             ratingAmount = 163,
                             minutes = 20,
@@ -165,7 +190,8 @@ private fun HomeScreen(
                             isFlameIconRed = false,
                             border = false,
                             backgroundHexColor = "#B9480D",
-                            isLeftCard = false
+                            isLeftCard = false,
+                            onOpenClick = {}
                         )
                     }
                 )
@@ -277,6 +303,26 @@ private fun HomeScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun ActiveSessionsRow(
+    sessions: List<ActiveCookingSession>,
+    onCancelClick: (Int) -> Unit,
+    onOpenClick: (Int) -> Unit
+) {
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+
+    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        items(sessions, key = { it.sessionId }) { session ->
+            ActiveSessionBanner(
+                session = session,
+                onCancelClick = onCancelClick,
+                onOpenClick = onOpenClick,
+                modifier = Modifier.width(screenWidth - 32.dp)
+            )
         }
     }
 }

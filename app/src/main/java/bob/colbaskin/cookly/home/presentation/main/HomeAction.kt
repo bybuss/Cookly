@@ -5,4 +5,7 @@ interface HomeAction {
     data object RefreshFeed : HomeAction
     data object LoadNextFeedPage : HomeAction
     data class OpenRecipe(val recipeId: Int) : HomeAction
+
+    data class CancelActiveSession(val sessionId: Int): HomeAction
+
 }

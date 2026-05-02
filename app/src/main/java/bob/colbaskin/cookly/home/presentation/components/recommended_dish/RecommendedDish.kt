@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
@@ -74,7 +73,7 @@ private fun FilledRecommendedDishPreview() {
                 RecommendationBanner(
                     modifier = Modifier,
                     cardTitle = "Fried Shrimp",
-                    backgroundImage = R.drawable.shrimp_soup_image,
+                    recipeImageUrl = "",
                     rating = 4.8,
                     ratingAmount = 163,
                     minutes = 20,
@@ -82,7 +81,8 @@ private fun FilledRecommendedDishPreview() {
                     isFlameIconRed = true,
                     border = false,
                     backgroundHexColor = "#B9480D",
-                    isLeftCard = false
+                    isLeftCard = false,
+                    onOpenClick = {}
                 )
             }
         )
@@ -100,7 +100,7 @@ private fun FilledRecommendedDishPreview2() {
                 RecommendationBanner(
                     modifier = Modifier,
                     cardTitle = "Fried Shrimp",
-                    backgroundImage = R.drawable.muesli_background,
+                    recipeImageUrl = "",
                     rating = 4.8,
                     ratingAmount = 163,
                     minutes = 20,
@@ -109,7 +109,8 @@ private fun FilledRecommendedDishPreview2() {
                     border = false,
                     backgroundHexColor = "#F4F4F4",
                     isLeftCard = false,
-                    isSecondFilled = true
+                    isSecondFilled = true,
+                    onOpenClick = {}
                 )
             }
         )
@@ -127,7 +128,7 @@ private fun RightOutlinedRecommendedDishPreview() {
                 RecommendationBanner(
                     modifier = Modifier,
                     cardTitle = "Fried Shrimp",
-                    backgroundImage = R.drawable.fried_egg_backgroiund,
+                    recipeImageUrl = "",
                     rating = 4.8,
                     ratingAmount = 163,
                     minutes = 20,
@@ -135,7 +136,8 @@ private fun RightOutlinedRecommendedDishPreview() {
                     isFlameIconRed = true,
                     containerColor = Color.Transparent,
                     border = true,
-                    isLeftCard = false
+                    isLeftCard = false,
+                    onOpenClick = {}
                 )
             }
         )
@@ -153,7 +155,7 @@ private fun LeftOutlinedRecommendedDishPreview() {
                 RecommendationBanner(
                     modifier = Modifier,
                     cardTitle = "Fried Shrimp",
-                    backgroundImage = R.drawable.smoothie_background,
+                    recipeImageUrl = "",
                     rating = 4.8,
                     ratingAmount = 163,
                     minutes = 20,
@@ -161,7 +163,8 @@ private fun LeftOutlinedRecommendedDishPreview() {
                     isFlameIconRed = true,
                     containerColor = Color.Transparent,
                     border = true,
-                    isLeftCard = true
+                    isLeftCard = true,
+                    onOpenClick = {}
                 )
             }
         )

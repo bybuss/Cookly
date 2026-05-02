@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import bob.colbaskin.cookly.common.ApiResult
 import bob.colbaskin.cookly.common.utils.safeApiCall
+import bob.colbaskin.cookly.home.data.models.main.ActiveSessionDto
 import bob.colbaskin.cookly.home.data.models.main.FeedResponseDto
 import bob.colbaskin.cookly.home.data.models.main.toDomain
 import bob.colbaskin.cookly.home.data.models.recipe_detailed.CookingSessionDto
@@ -12,6 +13,7 @@ import bob.colbaskin.cookly.home.domain.HomeRecipeRepository
 import bob.colbaskin.cookly.home.domain.models.main.FeedPage
 import bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeDetailed
 import bob.colbaskin.cookly.home.data.models.recipe_detailed.toDomain
+import bob.colbaskin.cookly.home.domain.models.main.ActiveCookingSession
 import javax.inject.Inject
 
 private const val TAG = "HomeRecipeRepository"
@@ -92,6 +94,16 @@ class HomeRecipeRepositoryImpl @Inject constructor(
         return safeApiCall<Unit, Unit>(
             apiCall = { apiService.finishCookingSession(cookingSessionId) },
             successHandler = { response -> response },
+            context = context
+        )
+    }
+
+    override suspend fun getActiveSessions(): ApiResult<List<ActiveCookingSession>> {
+        Log.d(TAG, "Get active cooking sessions")
+
+        return safeApiCall<List<ActiveSessionDto>, List<ActiveCookingSession>>(
+            apiCall = { apiService.getActiveSessions() },
+            successHandler = { response -> response.map { it.toDomain() } },
             context = context
         )
     }

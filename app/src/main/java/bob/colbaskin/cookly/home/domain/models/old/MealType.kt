@@ -22,7 +22,7 @@ enum class MealType(
     ),
     DINNER(
         displayNameId = R.string.dinner_card_text,
-        logoId = R.drawable.dinner_logo
+        logoId = R.drawable.supper_logo
     ),
     SNACK(
         displayNameId = R.string.snack_card_text,

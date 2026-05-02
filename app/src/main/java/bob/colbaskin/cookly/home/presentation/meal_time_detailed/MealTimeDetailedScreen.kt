@@ -408,7 +408,7 @@ private fun DraggableSheet(
                         RecommendationBanner(
                             modifier = Modifier,
                             cardTitle = "Fried Shrimp",
-                            backgroundImage = R.drawable.shrimp_soup_image,
+                            recipeImageUrl = "",
                             rating = 4.8,
                             ratingAmount = 163,
                             minutes = 20,
@@ -416,7 +416,8 @@ private fun DraggableSheet(
                             isFlameIconRed = false,
                             border = false,
                             backgroundHexColor = "#B9480D",
-                            isLeftCard = false
+                            isLeftCard = false,
+                            onOpenClick = {}
                         )
                     }
                 )

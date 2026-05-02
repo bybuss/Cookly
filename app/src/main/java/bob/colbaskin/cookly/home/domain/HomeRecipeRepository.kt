@@ -1,6 +1,7 @@
 package bob.colbaskin.cookly.home.domain
 
 import bob.colbaskin.cookly.common.ApiResult
+import bob.colbaskin.cookly.home.domain.models.main.ActiveCookingSession
 import bob.colbaskin.cookly.home.domain.models.main.FeedPage
 import bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeDetailed
 
@@ -21,4 +22,6 @@ interface HomeRecipeRepository {
     suspend fun cancelCookingSession(cookingSessionId: Int): ApiResult<Unit>
 
     suspend fun finishCookingSession(cookingSessionId: Int): ApiResult<Unit>
+
+    suspend fun getActiveSessions(): ApiResult<List<ActiveCookingSession>>
 }

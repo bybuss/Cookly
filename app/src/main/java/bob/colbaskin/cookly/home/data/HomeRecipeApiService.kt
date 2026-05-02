@@ -1,5 +1,6 @@
 package bob.colbaskin.cookly.home.data
 
+import bob.colbaskin.cookly.home.data.models.main.ActiveSessionDto
 import bob.colbaskin.cookly.home.data.models.main.FeedResponseDto
 import bob.colbaskin.cookly.home.data.models.recipe_detailed.CookingSessionDto
 import bob.colbaskin.cookly.home.data.models.recipe_detailed.RecipeDetailedResponseDto
@@ -44,4 +45,7 @@ interface HomeRecipeApiService {
     suspend fun finishCookingSession(
         @Path("cooking_session_id") cookingSessionId: Int
     )
+
+    @GET("/cooking-sessions/active")
+    suspend fun getActiveSessions(): List<ActiveSessionDto>
 }

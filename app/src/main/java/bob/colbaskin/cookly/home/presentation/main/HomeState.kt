@@ -1,6 +1,7 @@
 package bob.colbaskin.cookly.home.presentation.main
 
 import bob.colbaskin.cookly.common.UiState
+import bob.colbaskin.cookly.home.domain.models.main.ActiveCookingSession
 import bob.colbaskin.cookly.home.domain.models.main.FeedRecipe
 import bob.colbaskin.cookly.home.domain.models.old.MealType
 import bob.colbaskin.cookly.home.domain.models.old.QuickCategoryType
@@ -23,5 +24,7 @@ data class HomeState(
     val lastRecipeScore: Double? = null,
     val lastRecipeId: Int? = null,
     val paginationKey: String? = null,
-    val isEndReached: Boolean = false
+    val isEndReached: Boolean = false,
+
+    val activeCookingSessions: UiState<List<ActiveCookingSession>?> = UiState.Idle
 )
