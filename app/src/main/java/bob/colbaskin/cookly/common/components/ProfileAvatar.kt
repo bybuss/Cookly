@@ -26,6 +26,7 @@ import coil3.request.ImageRequest
 
 @Composable
 fun ProfileAvatar(
+    modifier: Modifier = Modifier,
     avatarUrl: String?,
     fallbackLetter: String,
     avatarSize: Dp
@@ -53,7 +54,7 @@ fun ProfileAvatar(
             painterState !is AsyncImagePainter.State.Empty
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .size(avatarSize)
             .clip(CircleShape)
             .background(colors.accentColor),

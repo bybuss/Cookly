@@ -100,6 +100,7 @@ fun MealTimeDetailedScreenRoot(
                 is MealTimeDetailedAction.NavigateToRecipeDetailed -> {
                     navController.navigate(Screens.RecipeDetailed(action.recipeId))
                 }
+                MealTimeDetailedAction.NavigateProfile -> navController.navigate(Screens.Profile)
                 else -> Unit
             }
             viewModel.onAction(action)
@@ -244,6 +245,7 @@ private fun MealTimeDetailedScreen(
                 .zIndex(3f),
             liquidBoxText = state.mealTimeType.toDomainMealTime(isPlural = true),
             onBackClick = { onAction(MealTimeDetailedAction.NavigateBack) },
+            onAvatarClick = { onAction(MealTimeDetailedAction.NavigateProfile) },
             avatarUrl = state.avatarUrl,
             fallbackLetter = state.avatarLetter,
         )

@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import bob.colbaskin.cookly.R
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
+import bob.colbaskin.cookly.common.utils.clickableWithoutRipple
 import bob.colbaskin.cookly.home.presentation.components.LiquidBox
 
 @Composable
@@ -31,6 +32,7 @@ fun SheetTopBar(
     modifier: Modifier = Modifier,
     liquidBoxText: String,
     onBackClick: () -> Unit,
+    onAvatarClick: () -> Unit,
     avatarUrl: String?,
     fallbackLetter: String,
 ) {
@@ -86,6 +88,7 @@ fun SheetTopBar(
         )
         Spacer(modifier = Modifier.weight(1f))
         ProfileAvatar(
+            modifier = Modifier.clickableWithoutRipple(onClick = onAvatarClick),
             avatarUrl = avatarUrl,
             fallbackLetter = fallbackLetter,
             avatarSize = 40.dp
@@ -177,6 +180,7 @@ fun SheetTopBarPreview() {
         SheetTopBar(
             liquidBoxText = "Завтраки",
             onBackClick = {},
+            onAvatarClick = {},
             avatarUrl = null,
             fallbackLetter = "42"
         )
