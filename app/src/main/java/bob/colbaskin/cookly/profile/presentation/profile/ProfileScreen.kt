@@ -1,4 +1,4 @@
-package bob.colbaskin.cookly.profile.presentation
+package bob.colbaskin.cookly.profile.presentation.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

@@ -1,4 +1,4 @@
-package bob.colbaskin.cookly.profile.presentation
+package bob.colbaskin.cookly.profile.presentation.profile
 
 import bob.colbaskin.cookly.common.UiState
 import bob.colbaskin.cookly.common.user_prefs.domain.models.proto_configs.RoleConfig

@@ -1,11 +1,10 @@
-package bob.colbaskin.cookly.profile.presentation
+package bob.colbaskin.cookly.profile.presentation.profile
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bob.colbaskin.cookly.common.ApiResult
 import bob.colbaskin.cookly.common.UiState
 import bob.colbaskin.cookly.common.toUiState
 import bob.colbaskin.cookly.profile.domain.ProfileRepository

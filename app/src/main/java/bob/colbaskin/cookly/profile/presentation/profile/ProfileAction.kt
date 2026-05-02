@@ -1,4 +1,4 @@
-package bob.colbaskin.cookly.profile.presentation
+package bob.colbaskin.cookly.profile.presentation.profile
 
 
 sealed interface ProfileAction {
