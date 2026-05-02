@@ -3,8 +3,8 @@ package bob.colbaskin.cookly.home.presentation.main
 import bob.colbaskin.cookly.common.UiState
 import bob.colbaskin.cookly.home.domain.models.main.ActiveCookingSession
 import bob.colbaskin.cookly.home.domain.models.main.FeedRecipe
-import bob.colbaskin.cookly.home.domain.models.old.MealTimeType
-import bob.colbaskin.cookly.home.domain.models.old.QuickCategoryType
+import bob.colbaskin.cookly.home.domain.models.meal.MealTimeType
+import bob.colbaskin.cookly.home.domain.models.main.QuickCategoryType
 
 data class HomeState(
     val quickCardsList: List<QuickCategoryType> = listOf(

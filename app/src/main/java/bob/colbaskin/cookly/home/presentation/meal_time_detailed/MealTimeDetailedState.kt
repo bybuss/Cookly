@@ -2,8 +2,8 @@ package bob.colbaskin.cookly.home.presentation.meal_time_detailed
 
 import bob.colbaskin.cookly.R
 import bob.colbaskin.cookly.common.utils.getFirstLetter
-import bob.colbaskin.cookly.home.domain.models.old.Meal
-import bob.colbaskin.cookly.home.domain.models.old.MealTimeType
+import bob.colbaskin.cookly.home.domain.models.meal.Meal
+import bob.colbaskin.cookly.home.domain.models.meal.MealTimeType
 
 data class MealDetailedState(
     val email: String = "",

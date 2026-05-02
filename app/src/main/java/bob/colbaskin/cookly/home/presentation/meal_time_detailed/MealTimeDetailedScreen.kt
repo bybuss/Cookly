@@ -36,7 +36,7 @@ import bob.colbaskin.cookly.R
 import bob.colbaskin.cookly.common.components.PagerIndicator
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
-import bob.colbaskin.cookly.home.domain.models.old.Meal
+import bob.colbaskin.cookly.home.domain.models.meal.Meal
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.AnchoredDraggableDefaults
 import androidx.compose.foundation.gestures.AnchoredDraggableState

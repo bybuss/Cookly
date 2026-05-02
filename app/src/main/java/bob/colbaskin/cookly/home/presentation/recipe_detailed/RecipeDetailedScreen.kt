@@ -82,7 +82,7 @@ import bob.colbaskin.cookly.common.components.SheetTopBar
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.home.domain.models.cook_steps.COOK_STEPS_ARGS_KEY
 import bob.colbaskin.cookly.home.domain.models.cook_steps.toCookStepsNavArgs
-import bob.colbaskin.cookly.home.domain.models.old.StartCookSwipeAnchor
+import bob.colbaskin.cookly.home.domain.models.recipe_detailed.StartCookSwipeAnchor
 import bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeDetailed
 import bob.colbaskin.cookly.home.data.models.recipe_detailed.formatQuantity
 import bob.colbaskin.cookly.home.data.models.recipe_detailed.toDomainMealTime

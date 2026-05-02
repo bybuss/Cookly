@@ -5,7 +5,7 @@ import bob.colbaskin.cookly.create_recipe.domain.models.CreateRecipeCategory
 import bob.colbaskin.cookly.create_recipe.domain.models.CreateRecipeIngredient
 import bob.colbaskin.cookly.create_recipe.domain.models.CreateRecipeStep
 import bob.colbaskin.cookly.create_recipe.domain.models.LocalImage
-import bob.colbaskin.cookly.home.domain.models.old.MealTimeType
+import bob.colbaskin.cookly.home.domain.models.meal.MealTimeType
 
 data class CreateRecipeState(
     val title: String = "",
