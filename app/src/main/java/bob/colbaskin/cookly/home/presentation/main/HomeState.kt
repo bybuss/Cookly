@@ -4,7 +4,7 @@ import bob.colbaskin.cookly.common.UiState
 import bob.colbaskin.cookly.common.components.feed_pagination.PaginationState
 import bob.colbaskin.cookly.home.domain.models.main.ActiveCookingSession
 import bob.colbaskin.cookly.home.domain.models.main.FeedRecipe
-import bob.colbaskin.cookly.home.domain.models.meal.MealTimeType
+import bob.colbaskin.cookly.common.recipe_preview.domain.models.MealTimeType
 import bob.colbaskin.cookly.home.domain.models.main.QuickCategoryType
 
 data class HomeState(

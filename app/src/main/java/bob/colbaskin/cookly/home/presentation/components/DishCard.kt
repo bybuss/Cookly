@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import bob.colbaskin.cookly.R
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
+import bob.colbaskin.cookly.common.utils.clickableWithoutRipple
 import coil3.compose.AsyncImage
 
 @Composable
@@ -43,12 +44,16 @@ fun DishCard(
     rating: Double,
     ratingAmount: Int,
     kcal: Int,
-    isFlameIconRed: Boolean
+    spicyLevel: Int,
+    difficultyLevel: Int,
+    isFlameIconRed: Boolean,
+    onClick: () -> Unit = {}
 ) {
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(21.dp))
             .background(CustomTheme.colors.dishCardBackground)
+            .clickableWithoutRipple { onClick() }
             .width(193.dp)
             .padding(horizontal = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -56,8 +61,7 @@ fun DishCard(
     ) {
         Spacer(modifier = Modifier.height(2.dp))
         Text(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             text = title,
             color = CustomTheme.colors.text,
             style = CustomTheme.typography.helvetica.titleLarge,
@@ -68,13 +72,20 @@ fun DishCard(
             overflow = TextOverflow.Ellipsis
         )
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             DishDataIcon(
+                modifier = Modifier.weight(1f),
                 text = "$minutes min",
                 containerColor = CustomTheme.colors.statsCardBackground,
                 dishDataIcon = R.drawable.timer_ic
+            )
+            DishDataIcon(
+                modifier = Modifier.weight(1f),
+                text = "$difficultyLevel lvl",
+                containerColor = CustomTheme.colors.statsCardBackground,
+                dishDataIcon = R.drawable.chef_hat_ai
             )
         }
         Box(
@@ -107,6 +118,16 @@ fun DishCard(
                 isFlameIconRed = isFlameIconRed
             )
         }
+        if (spicyLevel > 1) {
+            Row(modifier = Modifier.fillMaxWidth()) {
+                DishDataIcon(
+                    text = "$spicyLevel spicy",
+                    containerColor = CustomTheme.colors.statsCardBackground,
+                    dishDataIcon = R.drawable.hot_pepper_ic,
+                    isFlameIconRed = true
+                )
+            }
+        }
         Spacer(modifier = Modifier.height(8.dp))
     }
 }
@@ -123,6 +144,9 @@ fun DishCardPreview() {
             ratingAmount = 168,
             kcal = 150,
             isFlameIconRed = false,
+            spicyLevel = 1,
+            difficultyLevel = 2,
+            onClick = {}
         )
     }
 }

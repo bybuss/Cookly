@@ -3,7 +3,7 @@ package bob.colbaskin.cookly.create_recipe.presentation
 import bob.colbaskin.cookly.create_recipe.domain.models.CreateRecipeCategory
 import bob.colbaskin.cookly.create_recipe.domain.models.CreateRecipeIngredient
 import bob.colbaskin.cookly.create_recipe.domain.models.LocalImage
-import bob.colbaskin.cookly.home.domain.models.meal.MealTimeType
+import bob.colbaskin.cookly.common.recipe_preview.domain.models.MealTimeType
 
 sealed interface CreateRecipeAction {
     data object Back : CreateRecipeAction

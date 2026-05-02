@@ -1,4 +1,4 @@
-package bob.colbaskin.cookly.home.domain.models.meal
+package bob.colbaskin.cookly.common.recipe_preview.domain.models
 
 import androidx.annotation.DrawableRes
 import bob.colbaskin.cookly.R

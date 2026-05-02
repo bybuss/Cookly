@@ -18,9 +18,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import bob.colbaskin.cookly.R
 import bob.colbaskin.cookly.common.UiState
 import bob.colbaskin.cookly.common.components.feed_pagination.PaginationState
-import bob.colbaskin.cookly.common.utils.clickableWithoutRipple
 import bob.colbaskin.cookly.home.domain.models.main.FeedRecipe
 
 fun LazyGridScope.paginatedItems(
@@ -113,16 +113,17 @@ fun LazyGridScope.paginatedItems(
                 ) { index ->
                     val recipe = state.items[index]
                     DishCard(
-                        modifier = Modifier.clickableWithoutRipple {
-                            onClick(recipe.id)
-                        },
                         title = recipe.title,
                         minutes = recipe.estimatedTime,
                         dishImageUrl = recipe.imageUrl,
                         rating = recipe.rating,
                         ratingAmount = recipe.ratingCount,
                         kcal = recipe.caloriesBy100Grams.toInt(),
-                        isFlameIconRed = recipe.isFlameIconRed
+                        isFlameIconRed = recipe.isFlameIconRed,
+                        fallbackImageRes = R.drawable.fallback_avatar,
+                        spicyLevel = recipe.spicyLevel,
+                        difficultyLevel = recipe.difficultyLevel,
+                        onClick = { onClick(recipe.id) },
                     )
                 }
                 if (state.appendState is UiState.Loading) {

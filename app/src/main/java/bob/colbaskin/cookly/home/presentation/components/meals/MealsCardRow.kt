@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
-import bob.colbaskin.cookly.home.domain.models.meal.MealTimeType
+import bob.colbaskin.cookly.common.recipe_preview.domain.models.MealTimeType
 
 @Composable
 fun MealsCardRow(

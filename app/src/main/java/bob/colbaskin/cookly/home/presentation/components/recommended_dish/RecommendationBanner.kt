@@ -55,7 +55,9 @@ fun RecommendationBanner(
     isLeftCard: Boolean = false,
     backgroundHexColor: String? = null,
     isSecondFilled: Boolean = false,
-    onOpenClick: () -> Unit
+    onOpenClick: () -> Unit,
+    spicyLevel: Int = 0,
+    difficultyLevel: Int = 0,
 ) {
     Card(
         modifier = modifier

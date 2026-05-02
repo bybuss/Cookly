@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
 import bob.colbaskin.cookly.common.utils.clickableWithoutRipple
-import bob.colbaskin.cookly.home.domain.models.meal.MealTimeType
+import bob.colbaskin.cookly.common.recipe_preview.domain.models.MealTimeType
 
 @Composable
 fun MealsCard(

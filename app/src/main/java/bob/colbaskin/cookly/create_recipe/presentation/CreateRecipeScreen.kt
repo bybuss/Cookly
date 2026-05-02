@@ -92,7 +92,7 @@ import bob.colbaskin.cookly.create_recipe.domain.models.CreateRecipeIngredient
 import bob.colbaskin.cookly.create_recipe.domain.models.CreateRecipeStep
 import bob.colbaskin.cookly.create_recipe.domain.models.LocalImage
 import bob.colbaskin.cookly.create_recipe.domain.models.PhotoTarget
-import bob.colbaskin.cookly.home.domain.models.meal.MealTimeType
+import bob.colbaskin.cookly.common.recipe_preview.domain.models.MealTimeType
 import coil3.compose.rememberAsyncImagePainter
 import compose.icons.TablerIcons
 import compose.icons.tablericons.ChevronDown
