@@ -10,9 +10,7 @@ data class MealDetailedState(
     val avatarUrl: String = "",
 
     val carouselItems: List<MealFeedItem> = emptyList(),
-
     val pagination: PaginationState<FeedRecipe> = PaginationState(),
-
     val mealTimeType: String = "",
     val currentPage: Int = 0,
     val isSheetExpanded: Boolean = false,

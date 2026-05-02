@@ -42,12 +42,8 @@ class MealTimeDetailedViewModel @Inject constructor(
                     isAutoScrollEnabled = !action.isExpanded
                 )
             }
-            MealTimeDetailedAction.LoadNextPage -> {
-                loadNextPage()
-            }
-            MealTimeDetailedAction.Refresh -> {
-                loadMealTimeFeed(state.mealTimeType)
-            }
+            MealTimeDetailedAction.LoadNextPage -> loadNextPage()
+            MealTimeDetailedAction.Refresh -> loadMealTimeFeed(state.mealTimeType)
             else -> Unit
         }
     }

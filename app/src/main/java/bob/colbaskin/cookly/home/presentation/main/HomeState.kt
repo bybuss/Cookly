@@ -1,6 +1,7 @@
 package bob.colbaskin.cookly.home.presentation.main
 
 import bob.colbaskin.cookly.common.UiState
+import bob.colbaskin.cookly.common.components.feed_pagination.PaginationState
 import bob.colbaskin.cookly.home.domain.models.main.ActiveCookingSession
 import bob.colbaskin.cookly.home.domain.models.main.FeedRecipe
 import bob.colbaskin.cookly.home.domain.models.meal.MealTimeType
@@ -18,13 +19,8 @@ data class HomeState(
         MealTimeType.LUNCH,
         MealTimeType.SUPPER,
     ),
-    val feedState: UiState<List<FeedRecipe>> = UiState.Idle,
-    val appendState: UiState<Unit> = UiState.Idle,
-    val recipes: List<FeedRecipe> = emptyList(),
-    val lastRecipeScore: Double? = null,
-    val lastRecipeId: Int? = null,
-    val paginationKey: String? = null,
-    val isEndReached: Boolean = false,
+
+    val feedPagination: PaginationState<FeedRecipe> = PaginationState(),
 
     val activeCookingSessions: UiState<List<ActiveCookingSession>?> = UiState.Idle
 )

@@ -5,8 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bob.colbaskin.cookly.common.ApiResult
 import bob.colbaskin.cookly.common.UiState
+import bob.colbaskin.cookly.common.components.feed_pagination.FeedPaginator
 import bob.colbaskin.cookly.common.toUiState
 import bob.colbaskin.cookly.home.domain.HomeRecipeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,6 +23,8 @@ class HomeViewModel @Inject constructor(
     var state by mutableStateOf(HomeState())
         private set
 
+    private lateinit var paginator: FeedPaginator
+
     init {
         loadInitialFeed()
         loadActiveSessions()
@@ -31,54 +33,44 @@ class HomeViewModel @Inject constructor(
     fun onAction(action: HomeAction) {
         when (action) {
             HomeAction.LoadInitialFeed -> loadInitialFeed()
-            HomeAction.RefreshFeed -> refreshFeed()
+            HomeAction.RefreshFeed -> loadInitialFeed()
             HomeAction.LoadNextFeedPage -> loadNextFeedPage()
             is HomeAction.CancelActiveSession -> cancelSession(action.sessionId)
             else -> Unit
         }
     }
 
-    private fun loadInitialFeed() {
-        if (state.feedState is UiState.Loading) return
-
-        state = state.copy(feedState = UiState.Loading)
-
-        viewModelScope.launch {
-            state = state.copy(
-                feedState = UiState.Loading,
-                appendState = UiState.Idle,
-                recipes = emptyList(),
-                lastRecipeScore = null,
-                lastRecipeId = null,
-                paginationKey = null,
-                isEndReached = false
+    private fun buildPaginator() {
+        paginator = FeedPaginator { lastScore, lastId, key ->
+            repository.getUserFeed(
+                lastScore = lastScore,
+                lastId = lastId,
+                paginationKey = key,
+                limit = FEED_LIMIT
             )
+        }
+    }
 
-            val result = repository.getUserFeed(
+    private fun loadInitialFeed() {
+        if (state.feedPagination.loadState is UiState.Loading) return
+
+        buildPaginator()
+
+        state = state.copy(
+            feedPagination = state.feedPagination.copy(
+                loadState = UiState.Loading,
+                appendState = UiState.Idle,
+                items = emptyList(),
                 lastScore = null,
                 lastId = null,
                 paginationKey = null,
-                limit = FEED_LIMIT
+                isEndReached = false
             )
+        )
 
-            when (result) {
-                is ApiResult.Success -> {
-                    val page = result.data
-
-                    state = state.copy(
-                        feedState = UiState.Success(page.recipes),
-                        recipes = page.recipes,
-                        lastRecipeScore = page.lastRecipeScore,
-                        lastRecipeId = page.lastRecipeId,
-                        paginationKey = page.paginationKey,
-                        isEndReached = page.paginationKey == null
-                    )
-                }
-
-                is ApiResult.Error -> {
-                    state = state.copy(feedState = result.toUiState())
-                }
-            }
+        viewModelScope.launch {
+            val result = paginator.loadFirst()
+            state = state.copy(feedPagination = result)
         }
     }
 
@@ -93,82 +85,18 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun refreshFeed() {
-        viewModelScope.launch {
-            state = state.copy(
-                feedState = UiState.Loading,
-                appendState = UiState.Idle,
-                lastRecipeScore = null,
-                lastRecipeId = null,
-                paginationKey = null,
-                isEndReached = false
-            )
-
-            val result = repository.getUserFeed(
-                lastScore = null,
-                lastId = null,
-                paginationKey = null,
-                limit = FEED_LIMIT
-            )
-
-            when (result) {
-                is ApiResult.Success -> {
-                    val page = result.data
-
-                    state = state.copy(
-                        feedState = UiState.Success(page.recipes),
-                        recipes = page.recipes,
-                        lastRecipeScore = page.lastRecipeScore,
-                        lastRecipeId = page.lastRecipeId,
-                        paginationKey = page.paginationKey,
-                        isEndReached = page.paginationKey == null
-                    )
-                }
-
-                is ApiResult.Error -> {
-                    state = state.copy(feedState = result.toUiState())
-                }
-            }
-        }
-    }
-
     private fun loadNextFeedPage() {
-        if (state.isEndReached) return
-        if (state.appendState is UiState.Loading) return
-        if (state.feedState is UiState.Loading) return
-        if (state.paginationKey == null) return
+        if (!::paginator.isInitialized) return
+
+        val current = state.feedPagination
+        if (current.isEndReached) return
+        if (current.appendState is UiState.Loading) return
+        if (current.loadState is UiState.Loading) return
+        if (current.paginationKey == null) return
 
         viewModelScope.launch {
-            state = state.copy(appendState = UiState.Loading)
-
-            val result = repository.getUserFeed(
-                lastScore = state.lastRecipeScore,
-                lastId = state.lastRecipeId,
-                paginationKey = state.paginationKey,
-                limit = FEED_LIMIT
-            )
-
-            when (result) {
-                is ApiResult.Success -> {
-                    val page = result.data
-                    val mergedRecipes = (state.recipes + page.recipes)
-                        .distinctBy { it.id }
-
-                    state = state.copy(
-                        recipes = mergedRecipes,
-                        feedState = UiState.Success(mergedRecipes),
-                        appendState = UiState.Success(Unit),
-                        lastRecipeScore = page.lastRecipeScore,
-                        lastRecipeId = page.lastRecipeId,
-                        paginationKey = page.paginationKey,
-                        isEndReached = page.paginationKey == null
-                    )
-                }
-
-                is ApiResult.Error -> {
-                    state = state.copy(appendState = result.toUiState())
-                }
-            }
+            val updated = paginator.loadNext(current)
+            state = state.copy(feedPagination = updated)
         }
     }
 

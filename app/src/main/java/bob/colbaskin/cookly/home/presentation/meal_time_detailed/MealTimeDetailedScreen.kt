@@ -55,7 +55,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
@@ -64,6 +63,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import bob.colbaskin.cookly.common.UiState
 import bob.colbaskin.cookly.common.components.SheetTopBar
+import bob.colbaskin.cookly.common.components.feed_pagination.PaginationEffect
 import bob.colbaskin.cookly.home.data.models.recipe_detailed.toDomainMealTime
 import bob.colbaskin.cookly.home.domain.models.meal.MealFeedItem
 import bob.colbaskin.cookly.home.presentation.components.paginatedItems
@@ -380,24 +380,17 @@ private fun DraggableSheet(
     onAction: (MealTimeDetailedAction) -> Unit
 ) {
     val colors = CustomTheme.colors
+    val typography = CustomTheme.typography
     val gridState = rememberLazyGridState()
 
-    LaunchedEffect(gridState, state.pagination.items.size) {
-        snapshotFlow {
-            val lastVisible = gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
-            val total = gridState.layoutInfo.totalItemsCount
-            lastVisible to total
-        }.collect { (last, total) ->
-            if (
-                last != null &&
-                last >= total - 5 &&
-                !state.pagination.isEndReached &&
-                state.pagination.appendState !is UiState.Loading
-            ) {
-                onAction(MealTimeDetailedAction.LoadNextPage)
-            }
-        }
-    }
+    PaginationEffect(
+        gridState = gridState,
+        itemCount = state.pagination.items.size,
+        appendState = state.pagination.appendState,
+        isEndReached = state.pagination.isEndReached,
+        enabled = state.pagination.loadState is UiState.Success,
+        onLoadNext = { onAction(MealTimeDetailedAction.LoadNextPage) }
+    )
 
     val offsetY =
         if (anchoredState.offset.isNaN()) collapsedTopPxFallback
@@ -423,7 +416,7 @@ private fun DraggableSheet(
                 .clip(CircleShape)
                 .padding(top = 8.dp),
             thickness = 5.dp,
-            color =  colors.secondaryText.copy(alpha = 0.2f)
+            color = colors.secondaryText.copy(alpha = 0.2f)
         )
         LazyVerticalGrid(
             state = gridState,
@@ -462,23 +455,23 @@ private fun DraggableSheet(
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Text(
                     text = "Рецепты",
-                    color = CustomTheme.colors.text,
-                    style = CustomTheme.typography.madeInfinity.headlineSmall,
+                    color = colors.text,
+                    style = typography.madeInfinity.headlineSmall,
                     textAlign = TextAlign.Start,
                     fontWeight = FontWeight.Normal
                 )
             }
             paginatedItems(
                 state = state.pagination,
-                onLoadNext = { onAction(MealTimeDetailedAction.LoadNextPage) },
                 onRetry = { onAction(MealTimeDetailedAction.Refresh) },
-                onClick = {
-                    onAction(MealTimeDetailedAction.NavigateToRecipeDetailed(it))
-                }
+                onClick = { onAction(MealTimeDetailedAction.NavigateToRecipeDetailed(it)) },
+                accentColor = colors.accentColor,
+                textColor = colors.text,
+                invertedTextColor = colors.invertedText,
+                secondaryTextColor = colors.secondaryText,
+                titleMedium = typography.inter.titleMedium,
+                bodyMedium = typography.inter.bodyMedium
             )
-            item (span = { GridItemSpan(maxLineSpan) }) {
-                Spacer(modifier = Modifier.height(32.dp))
-            }
         }
     }
 }

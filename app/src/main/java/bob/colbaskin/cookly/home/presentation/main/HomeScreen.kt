@@ -38,6 +38,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import bob.colbaskin.cookly.R
 import bob.colbaskin.cookly.common.UiState
+import bob.colbaskin.cookly.common.components.feed_pagination.PaginationEffect
+import bob.colbaskin.cookly.common.components.feed_pagination.PaginationState
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
 import bob.colbaskin.cookly.common.utils.clickableWithoutRipple
@@ -46,6 +48,7 @@ import bob.colbaskin.cookly.home.presentation.components.ActiveSessionBanner
 import bob.colbaskin.cookly.home.presentation.components.DishCard
 import bob.colbaskin.cookly.home.presentation.components.TopBarWithSearch
 import bob.colbaskin.cookly.home.presentation.components.meals.MealsCardRow
+import bob.colbaskin.cookly.home.presentation.components.paginatedItems
 import bob.colbaskin.cookly.home.presentation.components.quick_card.QuickCategoryCardRow
 import bob.colbaskin.cookly.home.presentation.components.recommended_dish.RecommendationBanner
 import bob.colbaskin.cookly.home.presentation.components.recommended_dish.RecommendedDish
@@ -62,11 +65,11 @@ fun HomeScreenRoot(
     val state = viewModel.state
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(state.feedState) {
-        if (state.feedState is UiState.Error) {
+    LaunchedEffect(state.feedPagination.loadState) {
+        if (state.feedPagination.loadState is UiState.Error) {
             scope.launch {
                 snackbarHostState.showSnackbar(
-                    message = state.feedState.title,
+                    message = state.feedPagination.loadState.title,
                     duration = SnackbarDuration.Short
                 )
             }
@@ -92,9 +95,11 @@ fun HomeScreenRoot(
                 is HomeAction.OpenRecipe -> {
                     navController.navigate(Screens.RecipeDetailed(action.recipeId))
                 }
+
                 is HomeAction.OpenMealTimeDetailed -> {
                     navController.navigate(Screens.MealTimeDetailed(action.mealTimeType))
                 }
+
                 else -> Unit
             }
             viewModel.onAction(action)
@@ -112,24 +117,14 @@ private fun HomeScreen(
     val typography = CustomTheme.typography
     val gridState = rememberLazyGridState()
 
-    LaunchedEffect(gridState, state.recipes.size, state.isEndReached, state.appendState) {
-        snapshotFlow {
-            val lastVisibleItem = gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
-            val totalItems = gridState.layoutInfo.totalItemsCount
-            lastVisibleItem to totalItems
-        }.collect { (lastVisibleItem, totalItems) ->
-            if (
-                lastVisibleItem != null &&
-                lastVisibleItem >= totalItems - 5 &&
-                !state.isEndReached &&
-                state.appendState !is UiState.Loading &&
-                state.feedState is UiState.Success
-            ) {
-                onAction(HomeAction.LoadNextFeedPage)
-            }
-        }
-    }
-
+    PaginationEffect(
+        gridState = gridState,
+        itemCount = state.feedPagination.items.size,
+        appendState = state.feedPagination.appendState,
+        isEndReached = state.feedPagination.isEndReached,
+        enabled = state.feedPagination.loadState is UiState.Success,
+        onLoadNext = { onAction(HomeAction.LoadNextFeedPage) }
+    )
 
     Scaffold(
         containerColor = colors.background,
@@ -166,7 +161,7 @@ private fun HomeScreen(
                     modifier = Modifier,
                     mealsList = state.mealsList,
                     onClick = { mealTimeType ->
-                        onAction(HomeAction.OpenMealTimeDetailed(mealTimeType = mealTimeType))
+                        onAction(HomeAction.OpenMealTimeDetailed(mealTimeType))
                     }
                 )
             }
@@ -183,6 +178,7 @@ private fun HomeScreen(
                             CircularProgressIndicator(color = colors.accentColor)
                         }
                     }
+
                     is UiState.Success -> {
                         sessionsState.data?.let {
                             ActiveSessionsRow(
@@ -196,6 +192,7 @@ private fun HomeScreen(
                             )
                         }
                     }
+
                     else -> Unit
                 }
             }
@@ -234,100 +231,19 @@ private fun HomeScreen(
                 )
             }
 
-            when (state.feedState) {
-                UiState.Idle, UiState.Loading -> {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 32.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(color = colors.accentColor)
-                        }
-                    }
-                }
-                is UiState.Error -> {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 32.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            Text(
-                                text = state.feedState.title,
-                                style = typography.inter.titleMedium,
-                                color = colors.text,
-                                textAlign = TextAlign.Center
-                            )
-                            Button(
-                                onClick = { onAction(HomeAction.RefreshFeed) },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = colors.accentColor,
-                                    contentColor = colors.invertedText
-                                )
-                            ) {
-                                Text(text = "Повторить")
-                            }
-                        }
-                    }
-                }
-                is UiState.Success -> {
-                    if (state.recipes.isEmpty()) {
-                        item(span = { GridItemSpan(maxLineSpan) }) {
-                            Text(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 32.dp),
-                                text = "Рецепты не найдены",
-                                style = typography.inter.bodyMedium,
-                                color = colors.secondaryText,
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                    } else {
-                        items(
-                            count = state.recipes.size,
-                            key = { index -> state.recipes[index].id }
-                        ) { index ->
-                            val recipe = state.recipes[index]
-
-                            DishCard(
-                                modifier = Modifier
-                                    .clickableWithoutRipple {
-                                        onAction(HomeAction.OpenRecipe(recipe.id))
-                                    },
-                                title = recipe.title,
-                                minutes = recipe.estimatedTime,
-                                dishImageUrl = recipe.imageUrl,
-                                rating = recipe.rating,
-                                ratingAmount = recipe.ratingCount,
-                                kcal = recipe.caloriesBy100Grams.toInt(),
-                                isFlameIconRed = recipe.isFlameIconRed
-                            )
-                        }
-
-                        if (state.appendState is UiState.Loading) {
-                            item(span = { GridItemSpan(maxLineSpan) }) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 16.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(28.dp),
-                                        color = colors.accentColor,
-                                        strokeWidth = 2.dp
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            paginatedItems(
+                state = state.feedPagination,
+                onRetry = { onAction(HomeAction.RefreshFeed) },
+                onClick = { recipeId ->
+                    onAction(HomeAction.OpenRecipe(recipeId))
+                },
+                accentColor = colors.accentColor,
+                textColor = colors.text,
+                invertedTextColor = colors.invertedText,
+                secondaryTextColor = colors.secondaryText,
+                titleMedium = typography.inter.titleMedium,
+                bodyMedium = typography.inter.bodyMedium
+            )
         }
     }
 }
