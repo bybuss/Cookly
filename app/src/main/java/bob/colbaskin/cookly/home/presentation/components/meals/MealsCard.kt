@@ -21,12 +21,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
+import bob.colbaskin.cookly.common.utils.clickableWithoutRipple
 import bob.colbaskin.cookly.home.domain.models.meal.MealTimeType
 
 @Composable
 fun MealsCard(
     modifier: Modifier = Modifier,
-    mealType: MealTimeType = MealTimeType.BREAKFAST
+    mealType: MealTimeType = MealTimeType.BREAKFAST,
+    onClick: (String) -> Unit
 ) {
     Box(
         modifier = modifier
@@ -36,7 +38,10 @@ fun MealsCard(
             .border(
                 border = BorderStroke(1.dp, CustomTheme.colors.mealCardBorder),
                 shape = RoundedCornerShape(21.dp)
-            ),
+            )
+            .clickableWithoutRipple {
+                onClick(mealType.apiValue)
+            },
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -62,6 +67,9 @@ fun MealsCard(
 @Composable
 private fun MealsCardPreview() {
     UfoodTheme {
-        MealsCard(modifier = Modifier.padding(16.dp))
+        MealsCard(
+            modifier = Modifier.padding(16.dp),
+            onClick = {}
+        )
     }
 }

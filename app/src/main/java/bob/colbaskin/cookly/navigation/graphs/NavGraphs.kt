@@ -71,7 +71,9 @@ fun NavGraphBuilder.mainGraph(
         }
         composable<Screens.ShoppingCart> { ShoppingCartScreenRoot() }
         composable<Screens.Chat> {
-            MealTimeDetailedScreenRoot(navController = navController)
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(text = "Chat Screen")
+            }
         }
         composable<Screens.Favourites> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -92,7 +94,7 @@ fun NavGraphBuilder.detailedGraph(
     snackbarHostState: SnackbarHostState
 ) {
     navigation<Graphs.Detailed>(
-        startDestination = Screens.MealTimeDetailed
+        startDestination = Screens.MealTimeDetailed("unknown")
     ) {
         composable<Screens.MealTimeDetailed> {
             MealTimeDetailedScreenRoot(navController = navController)

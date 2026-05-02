@@ -12,7 +12,11 @@ import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
 import bob.colbaskin.cookly.home.domain.models.meal.MealTimeType
 
 @Composable
-fun MealsCardRow(modifier: Modifier = Modifier, mealsList: List<MealTimeType>) {
+fun MealsCardRow(
+    modifier: Modifier = Modifier,
+    mealsList: List<MealTimeType>,
+    onClick: (String) -> Unit
+) {
     LazyRow (
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -20,7 +24,7 @@ fun MealsCardRow(modifier: Modifier = Modifier, mealsList: List<MealTimeType>) {
     ) {
         mealsList.forEach { mealType ->
             item {
-                MealsCard(mealType = mealType)
+                MealsCard(mealType = mealType, onClick = onClick)
             }
         }
     }
@@ -36,6 +40,6 @@ private fun MealsCardRowPreview() {
     )
 
     UfoodTheme {
-        MealsCardRow(mealsList = mealsList)
+        MealsCardRow(mealsList = mealsList, onClick = {})
     }
 }

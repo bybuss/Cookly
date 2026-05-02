@@ -47,4 +47,9 @@ class MealTimeDetailedViewModel @Inject constructor(
             }
         }
     }
+
+    fun loadMealTimeFeed(mealTimeType: String) {
+        state = state.copy(mealTimeType = mealTimeType)
+        // TODO: тут уже делать запрос и получать все данные для ленты, перве n(пока 4) элементов брать в карусель рецептов, взятые рецепты исключать из списка для показа ниже и дальше уже по пагинации как в HomeScreen получать дальше элементы
+    }
 }

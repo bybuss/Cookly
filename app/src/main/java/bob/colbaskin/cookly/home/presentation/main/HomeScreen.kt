@@ -90,7 +90,10 @@ fun HomeScreenRoot(
         onAction = { action ->
             when (action) {
                 is HomeAction.OpenRecipe -> {
-                    navController.navigate(Screens.RecipeDetailed(recipeId = action.recipeId))
+                    navController.navigate(Screens.RecipeDetailed(action.recipeId))
+                }
+                is HomeAction.OpenMealTimeDetailed -> {
+                    navController.navigate(Screens.MealTimeDetailed(action.mealTimeType))
                 }
                 else -> Unit
             }
@@ -161,12 +164,25 @@ private fun HomeScreen(
             item(span = { GridItemSpan(maxLineSpan) }) {
                 MealsCardRow(
                     modifier = Modifier,
-                    mealsList = state.mealsList
+                    mealsList = state.mealsList,
+                    onClick = { mealTimeType ->
+                        onAction(HomeAction.OpenMealTimeDetailed(mealTimeType = mealTimeType))
+                    }
                 )
             }
 
             item(span = { GridItemSpan(maxLineSpan) }) {
                 when (val sessionsState = state.activeCookingSessions) {
+                    UiState.Idle, UiState.Loading -> {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 32.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(color = colors.accentColor)
+                        }
+                    }
                     is UiState.Success -> {
                         sessionsState.data?.let {
                             ActiveSessionsRow(
@@ -231,7 +247,6 @@ private fun HomeScreen(
                         }
                     }
                 }
-
                 is UiState.Error -> {
                     item(span = { GridItemSpan(maxLineSpan) }) {
                         Column(
@@ -259,7 +274,6 @@ private fun HomeScreen(
                         }
                     }
                 }
-
                 is UiState.Success -> {
                     if (state.recipes.isEmpty()) {
                         item(span = { GridItemSpan(maxLineSpan) }) {

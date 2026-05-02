@@ -67,6 +67,7 @@ import bob.colbaskin.cookly.home.data.models.recipe_detailed.toDomainMealTime
 import bob.colbaskin.cookly.home.presentation.components.DishCard
 import bob.colbaskin.cookly.home.presentation.components.recommended_dish.RecommendationBanner
 import bob.colbaskin.cookly.home.presentation.components.recommended_dish.RecommendedDish
+import bob.colbaskin.cookly.navigation.Screens
 import io.github.fletchmckee.liquid.liquefiable
 import io.github.fletchmckee.liquid.liquid
 import io.github.fletchmckee.liquid.rememberLiquidState
@@ -79,7 +80,13 @@ fun MealTimeDetailedScreenRoot(
     navController: NavHostController,
     viewModel: MealTimeDetailedViewModel = hiltViewModel()
 ) {
+    val mealTimeType: String =
+        navController.currentBackStackEntry?.arguments?.getString("mealTimeType") ?: "unknown"
     val state = viewModel.state
+
+    LaunchedEffect(mealTimeType) {
+        viewModel.loadMealTimeFeed(mealTimeType)
+    }
 
     MealTimeDetailedScreen(
         modifier = modifier,
@@ -87,7 +94,9 @@ fun MealTimeDetailedScreenRoot(
         onAction = { action ->
             when (action) {
                 MealTimeDetailedAction.NavigateBack -> navController.popBackStack()
-                is MealTimeDetailedAction.NavigateToMealRecipe -> { /*navController.navigate(...)*/ }
+                is MealTimeDetailedAction.NavigateToRecipeDetailed -> {
+                    navController.navigate(Screens.RecipeDetailed(action.recipeId))
+                }
                 else -> Unit
             }
             viewModel.onAction(action)
@@ -230,7 +239,7 @@ private fun MealTimeDetailedScreen(
             modifier = Modifier
                 .padding(16.dp)
                 .zIndex(3f),
-            liquidBoxText = state.mealType.apiValue.toDomainMealTime(isPlural = true),
+            liquidBoxText = state.mealTimeType.toDomainMealTime(isPlural = true),
             onBackClick = { onAction(MealTimeDetailedAction.NavigateBack) },
             avatarUrl = state.avatarUrl,
             fallbackLetter = state.avatarLetter,
@@ -304,7 +313,7 @@ private fun MealPagerOverlay(
                     .clip(CircleShape)
                     .background(colors.background.copy(alpha = 0.92f))
                     .clickable {
-                        onAction(MealTimeDetailedAction.NavigateToMealRecipe(currentMeal.id))
+                        onAction(MealTimeDetailedAction.NavigateToRecipeDetailed(currentMeal.id))
                     },
                 contentAlignment = Alignment.Center
             ) {
