@@ -3,9 +3,11 @@ package bob.colbaskin.cookly.home.presentation.components
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -75,16 +77,20 @@ fun DishCard(
                 dishDataIcon = R.drawable.timer_ic
             )
         }
-        AsyncImage(
+        Box(
             modifier = Modifier
                 .size(131.dp)
-                .clip(CircleShape),
-            model = dishImageUrl,
-            fallback = painterResource(id = fallbackImageRes),
-            error = painterResource(id = fallbackImageRes),
-            contentDescription = null,
-            contentScale = ContentScale.Crop
-        )
+                .clip(CircleShape)
+        ) {
+            AsyncImage(
+                modifier = Modifier.fillMaxSize(),
+                model = dishImageUrl,
+                fallback = painterResource(id = fallbackImageRes),
+                error = painterResource(id = fallbackImageRes),
+                contentDescription = null,
+                contentScale = ContentScale.FillBounds
+            )
+        }
         Row(modifier = Modifier.fillMaxWidth()) {
             DishDataIcon(
                 modifier = Modifier.weight(1f),

@@ -1,5 +1,6 @@
 package bob.colbaskin.cookly.home.presentation.cook_steps
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -220,7 +221,7 @@ private fun StepRecipeAvatar(
         AsyncImage(
             model = imageUrl,
             contentDescription = null,
-            contentScale = ContentScale.Crop,
+            contentScale = ContentScale.FillBounds,
             fallback = painterResource(id = fallbackImageRes),
             error = painterResource(id = fallbackImageRes),
             modifier = Modifier
@@ -247,9 +248,13 @@ private fun StepBottomButtons(
                 modifier = Modifier
                     .weight(0.8f)
                     .height(64.dp),
-                shape = RoundedCornerShape(24.dp),
+                shape = RoundedCornerShape(42.dp),
                 colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = CustomTheme.colors.text
+                    contentColor = CustomTheme.colors.text,
+                ),
+                border = BorderStroke(
+                    width = 1.dp,
+                    color = CustomTheme.colors.accentColor
                 )
             ) {
                 Text("Назад")
@@ -260,7 +265,7 @@ private fun StepBottomButtons(
             modifier = Modifier
                 .weight(1.4f)
                 .height(64.dp),
-            shape = RoundedCornerShape(24.dp),
+            shape = RoundedCornerShape(42.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = CustomTheme.colors.accentColor,
                 contentColor = CustomTheme.colors.invertedText
