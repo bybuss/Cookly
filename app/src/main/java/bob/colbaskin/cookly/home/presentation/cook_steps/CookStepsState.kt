@@ -11,7 +11,6 @@ data class CookStepsState(
     val currentStepIndex: Int = 0,
     val isRatingSheetVisible: Boolean = false,
     val rating: Int = 0,
-    val reviewText: String = "",
     @param:DrawableRes val fallbackImageRes: Int = R.drawable.fallback_avatar
 ) {
     val steps: List<CookStep>

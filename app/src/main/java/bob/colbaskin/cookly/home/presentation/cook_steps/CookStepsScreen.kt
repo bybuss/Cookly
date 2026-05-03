@@ -19,14 +19,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -39,7 +36,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -111,7 +107,7 @@ private fun CookStepsScreen(
                         .background(colors.text)
                 ) {
                     AsyncImage(
-                        model = state.recipeImageUrl,
+                        model = step?.imageUrl,
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         fallback = painterResource(id = state.fallbackImageRes),
@@ -139,7 +135,7 @@ private fun CookStepsScreen(
                         )
                         Spacer(modifier = Modifier.height(56.dp))
                         StepRecipeAvatar(
-                            imageUrl = state.recipeImageUrl,
+                            imageUrl = step?.imageUrl,
                             fallbackImageRes = state.fallbackImageRes
                         )
                         Spacer(modifier = Modifier.height(8.dp))
@@ -196,9 +192,7 @@ private fun CookStepsScreen(
         if (state.isRatingSheetVisible) {
             RatingBottomSheet(
                 rating = state.rating,
-                reviewText = state.reviewText,
                 onRatingClick = { onAction(CookStepsAction.UpdateRating(it)) },
-                onReviewTextChange = { onAction(CookStepsAction.UpdateReviewText(it)) },
                 onSubmit = { onAction(CookStepsAction.SubmitRating) },
                 onDismiss = { onAction(CookStepsAction.DismissRating) }
             )
@@ -280,9 +274,7 @@ private fun StepBottomButtons(
 @Composable
 private fun RatingBottomSheet(
     rating: Int,
-    reviewText: String,
     onRatingClick: (Int) -> Unit,
-    onReviewTextChange: (String) -> Unit,
     onSubmit: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -345,42 +337,6 @@ private fun RatingBottomSheet(
                 }
             }
             Spacer(modifier = Modifier.height(40.dp))
-            OutlinedTextField(
-                value = reviewText,
-                onValueChange = onReviewTextChange,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(144.dp),
-                placeholder = {
-                    Text(
-                        text = "Ваш отзыв",
-                        color = colors.tertiaryText.copy(alpha = 0.65f)
-                    )
-                },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                shape = RoundedCornerShape(16.dp),
-                textStyle = CustomTheme.typography.inter.bodyLarge.copy(
-                    color = colors.text
-                ),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = colors.text,
-                    unfocusedTextColor = colors.text,
-                    focusedContainerColor = colors.background,
-                    unfocusedContainerColor = colors.background,
-                    focusedBorderColor = colors.accentColor,
-                    unfocusedBorderColor = colors.strokeColor,
-                    focusedLabelColor = colors.accentColor,
-                    unfocusedLabelColor = colors.tertiaryText,
-                    cursorColor = colors.accentColor
-                )
-            )
-            Text(
-                text = "${reviewText.length} / 300",
-                style = CustomTheme.typography.inter.bodyMedium,
-                color = colors.tertiaryText,
-                modifier = Modifier.align(Alignment.End)
-            )
-            Spacer(modifier = Modifier.height(14.dp))
             Button(
                 onClick = onSubmit,
                 modifier = Modifier

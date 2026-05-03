@@ -44,11 +44,6 @@ class CookStepsViewModel @Inject constructor(
             is CookStepsAction.UpdateRating -> {
                 state = state.copy(rating = action.value.coerceIn(1, 5))
             }
-            is CookStepsAction.UpdateReviewText -> {
-                state = state.copy(
-                    reviewText = action.value.take(300)
-                )
-            }
             CookStepsAction.SubmitRating -> {
                 state = state.copy(isRatingSheetVisible = false)
                 // TODO: потом добавить запрос на оценку рецепта еще
