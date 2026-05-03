@@ -36,7 +36,7 @@ fun ProfileAvatar(
     val context = LocalContext.current
     val painter = rememberAsyncImagePainter(
         model = ImageRequest.Builder(context)
-            .data(avatarUrl.takeIf { it.isNullOrBlank() })
+            .data(avatarUrl.takeIf { !it.isNullOrBlank() })
             .build()
     )
 
@@ -49,9 +49,9 @@ fun ProfileAvatar(
         }
     }
 
-    val shouldShowImage = avatarUrl.isNullOrBlank() &&
-            painterState !is AsyncImagePainter.State.Error &&
-            painterState !is AsyncImagePainter.State.Empty
+    val shouldShowImage = !avatarUrl.isNullOrBlank() &&
+                painterState !is AsyncImagePainter.State.Error &&
+                painterState !is AsyncImagePainter.State.Empty
 
     Box(
         modifier = modifier

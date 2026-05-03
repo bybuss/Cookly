@@ -1,5 +1,6 @@
 package bob.colbaskin.cookly.profile.presentation.profile
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -43,6 +44,7 @@ class ProfileViewModel @Inject constructor(
                     role = prefs.role,
                     avatarUrl = prefs.avatarUrl
                 )
+                Log.e("PROFILE_AVATAR", prefs.avatarUrl)
             }
         }
     }
