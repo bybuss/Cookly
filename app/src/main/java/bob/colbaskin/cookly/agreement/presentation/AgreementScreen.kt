@@ -136,6 +136,7 @@ private fun AgreementScreen(
             ) {
                 Text(text = "СОГЛАСЕН")
             }
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
