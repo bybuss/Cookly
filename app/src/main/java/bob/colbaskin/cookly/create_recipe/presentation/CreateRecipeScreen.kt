@@ -1089,7 +1089,7 @@ private fun MealTimeCard(
             modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp),
             text = title,
             style = typography.nunito.bodyMedium,
-            color = colors.text
+            color = colors.invertedText
         )
     }
 }
