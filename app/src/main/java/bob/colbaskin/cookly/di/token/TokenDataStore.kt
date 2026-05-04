@@ -17,7 +17,10 @@ private val Context.tokenDataStore by preferencesDataStore(name = TOKEN_DATA_STO
 private const val TAG = "Token"
 
 @Singleton
-class TokenDataStore @Inject constructor(context: Context) {
+class TokenDataStore @Inject constructor(
+    context: Context,
+    private val cryptoManager: TokenCryptoManager
+) {
     private val dataStore = context.tokenDataStore
     companion object {
         private val ACCESS_TOKEN = stringPreferencesKey("access_token")
@@ -25,27 +28,39 @@ class TokenDataStore @Inject constructor(context: Context) {
     }
 
     suspend fun saveAccessToken(accessToken: String) {
-        Log.d(TAG, "saving access_token: $accessToken")
-        dataStore.edit {  preferences ->
-            preferences[ACCESS_TOKEN] = accessToken
+        Log.d(TAG, "Saving access token")
+        val encryptedToken = cryptoManager.encrypt(accessToken)
+        dataStore.edit { preferences ->
+            preferences[ACCESS_TOKEN] = encryptedToken
         }
     }
 
     suspend fun saveRefreshToken(refreshToken: String) {
-        Log.d(TAG, "saving refresh_token: $refreshToken")
-        dataStore.edit {  preferences ->
-            preferences[REFRESH_TOKEN] = refreshToken
+        Log.d(TAG, "Saving refresh token")
+        val encryptedToken = cryptoManager.encrypt(refreshToken)
+        dataStore.edit { preferences ->
+            preferences[REFRESH_TOKEN] = encryptedToken
         }
     }
 
-    private val accessToken: Flow<String?> = dataStore.data.map { it[ACCESS_TOKEN] }
+    private val accessToken: Flow<String?> = dataStore.data.map { preferences ->
+        preferences[ACCESS_TOKEN]?.let { encryptedToken ->
+            cryptoManager.decrypt(encryptedToken)
+        }
+    }
     fun getAccessToken(): String? = runBlocking { accessToken.first() }
 
-    private val refreshToken: Flow<String?> = dataStore.data.map { it[REFRESH_TOKEN] }
+    private val refreshToken: Flow<String?> = dataStore.data.map { preferences ->
+        preferences[REFRESH_TOKEN]?.let { encryptedToken ->
+            cryptoManager.decrypt(encryptedToken)
+        }
+    }
     fun getRefreshToken(): String? = runBlocking { refreshToken.first() }
 
     suspend fun clearTokens() {
         Log.d(TAG, "Clearing tokens")
-        dataStore.edit { it.clear() }
+        dataStore.edit { preferences ->
+            preferences.clear()
+        }
     }
 }

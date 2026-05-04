@@ -3,6 +3,7 @@ package bob.colbaskin.cookly.di
 import android.content.Context
 import androidx.room.Room
 import bob.colbaskin.cookly.common.user_prefs.data.data_store.UserDataStore
+import bob.colbaskin.cookly.di.token.TokenCryptoManager
 import bob.colbaskin.cookly.di.token.TokenDataStore
 import bob.colbaskin.cookly.shopping_cart.data.CartDao
 import bob.colbaskin.cookly.shopping_cart.data.CooklyDatabase
@@ -25,8 +26,20 @@ object LocalModule {
 
     @Provides
     @Singleton
-    fun provideTokenDataStore(@ApplicationContext context: Context): TokenDataStore {
-        return TokenDataStore(context = context)
+    fun provideTokenCryptoManager(): TokenCryptoManager {
+        return TokenCryptoManager()
+    }
+
+    @Provides
+    @Singleton
+    fun provideTokenDataStore(
+        @ApplicationContext context: Context,
+        tokenCryptoManager: TokenCryptoManager
+    ): TokenDataStore {
+        return TokenDataStore(
+            context = context,
+            cryptoManager = tokenCryptoManager
+        )
     }
 
     @Provides
