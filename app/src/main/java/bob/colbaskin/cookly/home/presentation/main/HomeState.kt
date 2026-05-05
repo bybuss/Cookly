@@ -5,15 +5,8 @@ import bob.colbaskin.cookly.common.components.feed_pagination.PaginationState
 import bob.colbaskin.cookly.home.domain.models.main.ActiveCookingSession
 import bob.colbaskin.cookly.home.domain.models.main.FeedRecipe
 import bob.colbaskin.cookly.common.recipe_preview.domain.models.MealTimeType
-import bob.colbaskin.cookly.home.domain.models.main.QuickCategoryType
 
 data class HomeState(
-    val quickCardsList: List<QuickCategoryType> = listOf(
-        QuickCategoryType.QUICK_COOK,
-        QuickCategoryType.DIETARY,
-        QuickCategoryType.HIGH_CALORIE,
-        QuickCategoryType.ON_TREND,
-    ),
     val mealsList: List<MealTimeType> = listOf(
         MealTimeType.BREAKFAST,
         MealTimeType.LUNCH,
