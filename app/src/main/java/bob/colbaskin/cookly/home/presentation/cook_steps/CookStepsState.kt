@@ -2,6 +2,7 @@ package bob.colbaskin.cookly.home.presentation.cook_steps
 
 import androidx.annotation.DrawableRes
 import bob.colbaskin.cookly.R
+import bob.colbaskin.cookly.common.UiState
 import bob.colbaskin.cookly.home.domain.models.cook_steps.CookStep
 import bob.colbaskin.cookly.home.domain.models.cook_steps.CookStepsNavArgs
 import kotlin.collections.orEmpty
@@ -11,6 +12,7 @@ data class CookStepsState(
     val currentStepIndex: Int = 0,
     val isRatingSheetVisible: Boolean = false,
     val rating: Int = 0,
+    val setRateState: UiState<Unit> = UiState.Idle,
     @param:DrawableRes val fallbackImageRes: Int = R.drawable.fallback_avatar
 ) {
     val steps: List<CookStep>

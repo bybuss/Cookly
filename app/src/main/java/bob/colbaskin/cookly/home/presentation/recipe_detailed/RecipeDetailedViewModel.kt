@@ -241,7 +241,6 @@ class RecipeDetailedViewModel @Inject constructor(
     private fun submitRating() {
         if (state.setRateState is UiState.Loading) return
         val rating = state.selectedRating
-        if (rating <= 0) return
 
         state = state.copy(setRateState = UiState.Loading)
 

@@ -5,6 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bob.colbaskin.cookly.common.UiState
+import bob.colbaskin.cookly.common.toUiState
 import bob.colbaskin.cookly.home.domain.HomeRecipeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -75,11 +77,17 @@ class CookStepsViewModel @Inject constructor(
     }
 
     private fun sendRating() {
+        if (state.setRateState is UiState.Loading) return
+
+        state = state.copy(setRateState = UiState.Loading)
+
         viewModelScope.launch {
-            state.args?.recipeId?.let { recipeId ->
-                repository.setRate(recipeId, state.rating)
-            }
-            state = state.copy(isRatingSheetVisible = false)
+            val recipeId = state.args?.recipeId ?: return@launch
+            val result = repository.setRate(
+                recipeId = recipeId,
+                rating = state.rating
+            ).toUiState()
+            state = state.copy(setRateState = result, isRatingSheetVisible = false)
             eventChannel.trySend(CookStepsEvent.NavigateHome)
         }
     }

@@ -33,6 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import bob.colbaskin.cookly.common.UiState
 import bob.colbaskin.cookly.common.components.SheetTopBar
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
@@ -184,7 +185,7 @@ private fun CookStepsScreen(
         if (state.isRatingSheetVisible) {
             RatingBottomSheet(
                 rating = state.rating,
-                isLoading = false, // FIXME: заменить на апи результ отправки рейтинга
+                isLoading = state.setRateState is UiState.Loading,
                 onRatingClick = { onAction(CookStepsAction.SetRating(it)) },
                 onSubmit = { onAction(CookStepsAction.SubmitRating) },
                 onDismiss = { onAction(CookStepsAction.DismissRating) }
