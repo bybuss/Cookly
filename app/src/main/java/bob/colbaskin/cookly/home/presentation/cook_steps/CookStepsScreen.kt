@@ -192,7 +192,7 @@ private fun CookStepsScreen(
         if (state.isRatingSheetVisible) {
             RatingBottomSheet(
                 rating = state.rating,
-                onRatingClick = { onAction(CookStepsAction.UpdateRating(it)) },
+                onRatingClick = { onAction(CookStepsAction.SetRating(it)) },
                 onSubmit = { onAction(CookStepsAction.SubmitRating) },
                 onDismiss = { onAction(CookStepsAction.DismissRating) }
             )

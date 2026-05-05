@@ -32,4 +32,8 @@ interface HomeRecipeRepository {
     suspend fun finishCookingSession(cookingSessionId: Int): ApiResult<Unit>
 
     suspend fun getActiveSessions(): ApiResult<List<ActiveCookingSession>>
+
+    suspend fun addToFavorites(recipeId: Int): ApiResult<Unit>
+
+    suspend fun setRate(recipeId: Int, rating: Int): ApiResult<Unit>
 }

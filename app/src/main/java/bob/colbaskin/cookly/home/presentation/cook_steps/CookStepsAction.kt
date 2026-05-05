@@ -9,7 +9,7 @@ sealed interface CookStepsAction {
     data object NextStep: CookStepsAction
     data object PreviousStep: CookStepsAction
     data object FinishCooking: CookStepsAction
-    data class UpdateRating(val value: Int): CookStepsAction
+    data class SetRating(val rating: Int): CookStepsAction
     data object SubmitRating: CookStepsAction
     data object DismissRating: CookStepsAction
 }

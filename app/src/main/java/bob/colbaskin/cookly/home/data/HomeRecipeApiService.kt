@@ -57,4 +57,15 @@ interface HomeRecipeApiService {
 
     @GET("/cooking-sessions/active")
     suspend fun getActiveSessions(): List<ActiveSessionDto>
+
+    @POST("/recipe/{recipe_id}/add-to-favorites")
+    suspend fun addToFavorites(
+        @Path("recipe_id") recipeId: Int
+    )
+
+    @POST("/recipe/{recipe_id}/set-rate")
+    suspend fun setRate(
+        @Path("recipe_id") recipeId: Int,
+        @Body rating: Int
+    )
 }

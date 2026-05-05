@@ -36,10 +36,7 @@ class RecipeDetailedViewModel @Inject constructor(
 
     fun onAction(action: RecipeDetailedAction) {
         when (action) {
-            RecipeDetailedAction.ToggleLike -> {
-                // TODO: потом делать запрос на добавение в избранное рецепт
-                state = state.copy(isFavorite = !state.isFavorite)
-            }
+            RecipeDetailedAction.ToggleLike -> toggleLike()
             is RecipeDetailedAction.OnSheetStateChanged -> {
                 state = state.copy(isSheetExpanded = action.isExpanded)
             }
@@ -191,6 +188,13 @@ class RecipeDetailedViewModel @Inject constructor(
                 cookingSessionId = cookingSessionId,
                 stepNumber = stepNumber
             )
+        }
+    }
+
+    private fun toggleLike() {
+        state = state.copy(isFavorite = !state.isFavorite)
+        viewModelScope.launch {
+            homeRecipeRepository.addToFavorites(recipeId = state.id)
         }
     }
 }

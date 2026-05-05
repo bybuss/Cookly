@@ -41,14 +41,10 @@ class CookStepsViewModel @Inject constructor(
                 }
             }
             CookStepsAction.FinishCooking -> finishCooking()
-            is CookStepsAction.UpdateRating -> {
-                state = state.copy(rating = action.value.coerceIn(1, 5))
+            is CookStepsAction.SetRating -> {
+                state = state.copy(rating = action.rating.coerceIn(1, 5))
             }
-            CookStepsAction.SubmitRating -> {
-                state = state.copy(isRatingSheetVisible = false)
-                // TODO: потом добавить запрос на оценку рецепта еще
-                eventChannel.trySend(CookStepsEvent.NavigateHome)
-            }
+            CookStepsAction.SubmitRating -> sendRating()
             CookStepsAction.DismissRating -> {
                 state = state.copy(isRatingSheetVisible = false)
                 eventChannel.trySend(CookStepsEvent.NavigateHome)
@@ -75,6 +71,16 @@ class CookStepsViewModel @Inject constructor(
         state = state.copy(isRatingSheetVisible = true)
         viewModelScope.launch {
             repository.finishCookingSession(cookingSessionId = state.args?.cookingSessionId ?: -1)
+        }
+    }
+
+    private fun sendRating() {
+        viewModelScope.launch {
+            state.args?.recipeId?.let { recipeId ->
+                repository.setRate(recipeId, state.rating)
+            }
+            state = state.copy(isRatingSheetVisible = false)
+            eventChannel.trySend(CookStepsEvent.NavigateHome)
         }
     }
 }
