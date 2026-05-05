@@ -68,4 +68,9 @@ interface HomeRecipeApiService {
         @Path("recipe_id") recipeId: Int,
         @Body rating: Int
     )
+
+    @POST("/pub-recipe-request/{pub_recipe_request_id}/approve")
+    suspend fun approveRecipeRequest(
+        @Path("pub_recipe_request_id") pubRecipeRequestId: Int
+    )
 }

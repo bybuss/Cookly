@@ -25,7 +25,14 @@ data class RecipeDetailedState(
     val cartIngredients: List<RecipeCartIngredientUi> = emptyList(),
     val addToCartState: UiState<Unit> = UiState.Idle,
 
-    val startCookingState: UiState<Int> = UiState.Idle
+    val startCookingState: UiState<Int> = UiState.Idle,
+
+    val isModeratorReviewSheetVisible: Boolean = false,
+
+    val isRatingSheetVisible: Boolean = false,
+    val selectedRating: Int = userRate ?: 0,
+    val setRateState: UiState<Unit> = UiState.Idle,
+    val publicateRecipeState: UiState<Unit> = UiState.Idle,
 ) {
     val avatarLetter: String
         get() = email.getFirstLetter()

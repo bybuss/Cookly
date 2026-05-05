@@ -16,5 +16,16 @@ interface RecipeDetailedAction {
     data object ConfirmAddSelectedIngredientsToCart: RecipeDetailedAction
     data object ConsumeAddToCartResult: RecipeDetailedAction
 
-    data class OnSheetStateChanged(val isExpanded: Boolean) : RecipeDetailedAction
+    data class OnSheetStateChanged(val isExpanded: Boolean): RecipeDetailedAction
+
+    data object ShowModeratorReviewSheet: RecipeDetailedAction
+    data object HideModeratorReviewSheet: RecipeDetailedAction
+
+    data object PublishRecipe: RecipeDetailedAction
+
+    data object ShowRatingSheet: RecipeDetailedAction
+    data object HideRatingSheet: RecipeDetailedAction
+    data class ChangeRating(val rating: Int): RecipeDetailedAction
+    data object SubmitRating: RecipeDetailedAction
+    data object ConsumeRatingResult: RecipeDetailedAction
 }

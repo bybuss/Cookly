@@ -1,5 +1,7 @@
 package bob.colbaskin.cookly.home.domain.models.recipe_detailed
 
+import java.time.Instant
+
 data class RecipeDetailed(
     val id: Int,
     val title: String,
@@ -15,15 +17,18 @@ data class RecipeDetailed(
     val ingredients: List<Ingredient>,
     val steps: List<RecipeStep>,
     val categories: List<RecipeCategory>,
+
     val isFavorite: Boolean,
     val userRate: Int? = null,
+
     val cookingSessionId: Int? = null,
 
-    val pubRecipeRequestId: Int,
-    val feedback: String?,
-    val status: PubRecipeRequestStatus,
-
-
+    val pubRecipeRequestId: Int? = null,
+    val feedback: String? = null,
+    val status: PubRecipeRequestStatus? = null,
+    val reviewedAt: Instant? = null,
+    val createdAt: Instant? = null,
+    val existedCookingSession: Boolean = false,
 ) {
     val isFlameIconRed: Boolean
         get() = caloriesBy100Grams >= 300

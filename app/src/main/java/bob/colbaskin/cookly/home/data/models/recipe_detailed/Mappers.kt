@@ -1,11 +1,16 @@
 package bob.colbaskin.cookly.home.data.models.recipe_detailed
 
 import bob.colbaskin.cookly.home.domain.models.recipe_detailed.Ingredient
+import bob.colbaskin.cookly.home.domain.models.recipe_detailed.PubRecipeRequestStatus
 import bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeCategory
 import bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeDetailed
 import bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeStep
 import bob.colbaskin.cookly.home.presentation.recipe_detailed.DEFAULT_RECIPE_PORTIONS
 import bob.colbaskin.cookly.home.presentation.recipe_detailed.RecipeCartIngredientUi
+import java.time.Instant
+import java.time.OffsetDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.roundToInt
 
@@ -35,8 +40,17 @@ fun RecipeDetailedResponseDto.toDomain(): RecipeDetailed {
         },
         steps = recipe.steps.map { it.toDomain() },
         categories = recipe.recipeCategories.map { it.toDomain() },
+
         isFavorite = isFavorite,
-        userRate = userRate
+        userRate = userRate?.takeIf { it > 0 },
+
+        pubRecipeRequestId = pubRecipeRequest?.id,
+        feedback = pubRecipeRequest?.feedback,
+        status = pubRecipeRequest?.status?.toPubRecipeRequestDomain(),
+        reviewedAt = pubRecipeRequest?.reviewedAt?.toInstant(),
+        createdAt = pubRecipeRequest?.createdAt?.toInstant(),
+
+        existedCookingSession = existedCookingSession,
     )
 }
 
@@ -106,4 +120,24 @@ fun Double.formatQuantity(): String {
     } else {
         String.format(Locale.US, "%.2f", this).trimEnd('0').trimEnd('.')
     }
+}
+
+fun String.toPubRecipeRequestDomain(): PubRecipeRequestStatus {
+    return when (this) {
+        "pending" -> PubRecipeRequestStatus.PENDING
+        "approved" -> PubRecipeRequestStatus.APPROVED
+        "rejected" -> PubRecipeRequestStatus.REJECTED
+        else -> PubRecipeRequestStatus.PENDING
+    }
+}
+
+fun String.toInstant(): Instant {
+    return OffsetDateTime.parse(this).toInstant()
+}
+
+fun Instant.toReviewDateText(): String {
+    return DateTimeFormatter
+        .ofPattern("dd.MM.yyyy HH:mm")
+        .withZone(ZoneId.systemDefault())
+        .format(this)
 }

@@ -154,4 +154,14 @@ class HomeRecipeRepositoryImpl @Inject constructor(
             context = context
         )
     }
+
+    override suspend fun approveRecipeRequest(pubRecipeRequestId: Int): ApiResult<Unit> {
+        Log.d(TAG, "Approve recipe request with id=$pubRecipeRequestId")
+
+        return safeApiCall<Unit, Unit>(
+            apiCall = { apiService.approveRecipeRequest(pubRecipeRequestId) },
+            successHandler = { response -> response },
+            context = context
+        )
+    }
 }

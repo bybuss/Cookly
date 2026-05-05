@@ -36,4 +36,6 @@ interface HomeRecipeRepository {
     suspend fun addToFavorites(recipeId: Int): ApiResult<Unit>
 
     suspend fun setRate(recipeId: Int, rating: Int): ApiResult<Unit>
+
+    suspend fun approveRecipeRequest(pubRecipeRequestId: Int): ApiResult<Unit>
 }

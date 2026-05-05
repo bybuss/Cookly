@@ -32,8 +32,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -86,8 +88,13 @@ import bob.colbaskin.cookly.home.domain.models.recipe_detailed.StartCookSwipeAnc
 import bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeDetailed
 import bob.colbaskin.cookly.home.data.models.recipe_detailed.formatQuantity
 import bob.colbaskin.cookly.home.data.models.recipe_detailed.toDomainMealTime
+import bob.colbaskin.cookly.home.data.models.recipe_detailed.toReviewDateText
+import bob.colbaskin.cookly.home.domain.models.recipe_detailed.PubRecipeRequestStatus
+import bob.colbaskin.cookly.home.presentation.components.RatingBottomSheet
 import bob.colbaskin.cookly.navigation.Screens
 import coil3.compose.AsyncImage
+import compose.icons.TablerIcons
+import compose.icons.tablericons.Edit
 import kotlinx.coroutines.launch
 
 @Composable
@@ -125,6 +132,24 @@ fun RecipeDetailedScreenRoot(
                     duration = SnackbarDuration.Short
                 )
             }
+        }
+    }
+
+    LaunchedEffect(state.setRateState) {
+        if (state.setRateState is UiState.Error) {
+            snackbarHostState.showSnackbar(
+                message = state.setRateState.title,
+                duration = SnackbarDuration.Short
+            )
+        }
+    }
+
+    LaunchedEffect(state.publicateRecipeState) {
+        if (state.publicateRecipeState is UiState.Error) {
+            snackbarHostState.showSnackbar(
+                message = state.publicateRecipeState.title,
+                duration = SnackbarDuration.Short
+            )
         }
     }
 
@@ -355,6 +380,27 @@ private fun RecipeDetailedContent(
                 modifier = Modifier,
                 isLiked = state.isFavorite,
                 onClick = { onAction(RecipeDetailedAction.ToggleLike) }
+            )
+        }
+        if (state.isModeratorReviewSheetVisible) {
+            val recipe = (state.recipeState as? UiState.Success)?.data
+
+            recipe?.let {
+                ModeratorReviewBottomSheet(
+                    recipe = it,
+                    onDismiss = {
+                        onAction(RecipeDetailedAction.HideModeratorReviewSheet)
+                    }
+                )
+            }
+        }
+        if (state.isRatingSheetVisible) {
+            RatingBottomSheet(
+                rating = state.selectedRating,
+                isLoading = state.setRateState is UiState.Loading,
+                onRatingClick = { rating -> onAction(RecipeDetailedAction.ChangeRating(rating)) },
+                onSubmit = { onAction(RecipeDetailedAction.SubmitRating) },
+                onDismiss = { onAction(RecipeDetailedAction.HideRatingSheet) }
             )
         }
     }
@@ -660,6 +706,20 @@ private fun RecipeSheet(
                             style = CustomTheme.typography.helvetica.titleMedium,
                             fontWeight = FontWeight.Light,
                             color = colors.tertiaryText
+                        )
+                        Spacer(modifier = Modifier.height(14.dp))
+                        RecipePublicationBlock(
+                            recipe = recipe,
+                            onShowModeratorReview = {
+                                onAction(RecipeDetailedAction.ShowModeratorReviewSheet)
+                            },
+                            onPublishRecipe = { onAction(RecipeDetailedAction.PublishRecipe) }
+                        )
+                        RecipeRatingBlock(
+                            modifier = Modifier.padding(top = 12.dp),
+                            existedCookingSession = recipe.existedCookingSession,
+                            userRate = state.userRate,
+                            onRateClick = { onAction(RecipeDetailedAction.ShowRatingSheet) }
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
@@ -1036,6 +1096,237 @@ private fun CartIngredientSelectRow(
             .height(1.dp)
             .background(colors.strokeColor.copy(alpha = 0.5f))
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ModeratorReviewBottomSheet(
+    recipe: RecipeDetailed,
+    onDismiss: () -> Unit
+) {
+    val colors = CustomTheme.colors
+    val typography = CustomTheme.typography
+    val scrollState = rememberScrollState()
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = colors.background,
+        dragHandle = {
+            Box(
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .width(60.dp)
+                    .height(5.dp)
+                    .clip(RoundedCornerShape(999.dp))
+                    .background(colors.tertiaryText.copy(alpha = 0.35f))
+            )
+        }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .imePadding()
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 28.dp)
+        ) {
+            Text(
+                text = when (recipe.status) {
+                    PubRecipeRequestStatus.APPROVED -> "Ваш рецепт был одобрен"
+                    PubRecipeRequestStatus.REJECTED -> "Ваш рецепт был отклонён"
+                    PubRecipeRequestStatus.PENDING -> "Рецепт находится на модерации"
+                    null -> "Ответ модератора"
+                },
+                style = typography.inter.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = colors.text
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            recipe.reviewedAt?.let {
+                Text(
+                    text = "Дата ревью: ${it.toReviewDateText()}",
+                    style = typography.nunito.bodyLarge,
+                    color = colors.tertiaryText
+                )
+
+                Spacer(modifier = Modifier.height(18.dp))
+            }
+            Text(
+                text = "Фидбэк",
+                style = typography.inter.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = colors.text
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 120.dp, max = 320.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(colors.secondaryCardBackground)
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = recipe.feedback?.takeIf { it.isNotBlank() }
+                        ?: "Модератор не оставил дополнительный комментарий.",
+                    style = typography.nunito.bodyLarge,
+                    color = colors.text,
+                    modifier = Modifier.verticalScroll(scrollState)
+                )
+            }
+            Spacer(modifier = Modifier.height(20.dp))
+            Button(
+                onClick = onDismiss,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(58.dp),
+                shape = RoundedCornerShape(18.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colors.accentColor,
+                    contentColor = colors.invertedText
+                )
+            ) {
+                Text(
+                    text = "Понятно",
+                    style = typography.inter.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun RecipePublicationBlock(
+    modifier: Modifier = Modifier,
+    recipe: RecipeDetailed,
+    onShowModeratorReview: () -> Unit,
+    onPublishRecipe: () -> Unit
+) {
+    val colors = CustomTheme.colors
+
+    when (recipe.status) {
+        // FIXME: проверка еще дополнительно потом по параметру is_author
+        null -> {
+            Button(
+                onClick = onPublishRecipe,
+                modifier = modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(18.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colors.accentColor,
+                    contentColor = colors.invertedText
+                )
+            ) {
+                Text(
+                    text = "Опубликовать рецепт",
+                    style = CustomTheme.typography.inter.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+        PubRecipeRequestStatus.PENDING -> {
+            Box(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(colors.statsCardBackground)
+                    .padding(horizontal = 16.dp, vertical = 14.dp)
+            ) {
+                Text(
+                    text = "Рецепт находится на модерации",
+                    style = CustomTheme.typography.inter.titleMedium,
+                    color = colors.text
+                )
+            }
+        }
+        PubRecipeRequestStatus.REJECTED -> {
+            Button(
+                onClick = onShowModeratorReview,
+                modifier = modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(18.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colors.statsCardBackground,
+                    contentColor = colors.text
+                )
+            ) {
+                Text(
+                    text = "Посмотреть ответ модератора",
+                    style = CustomTheme.typography.inter.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+        else -> Unit
+    }
+}
+
+@Composable
+private fun RecipeRatingBlock(
+    modifier: Modifier = Modifier,
+    existedCookingSession: Boolean,
+    userRate: Int?,
+    onRateClick: () -> Unit
+) {
+    if (!existedCookingSession) return
+    val colors = CustomTheme.colors
+    if (userRate == null || userRate <= 0) {
+        Button(
+            onClick = onRateClick,
+            modifier = modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            shape = RoundedCornerShape(18.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = colors.accentSecondSurface,
+                contentColor = colors.text
+            )
+        ) {
+            Text(
+                text = "Оценить рецепт",
+                style = CustomTheme.typography.inter.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    } else {
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(18.dp))
+                .background(colors.statsCardBackground)
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = "Ваша оценка:",
+                    style = CustomTheme.typography.inter.titleMedium,
+                    color = colors.text
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                repeat(5) { index ->
+                    Icon(
+                        painter = painterResource(id = R.drawable.rating_star_ic),
+                        contentDescription = null,
+                        tint = if (index < userRate) colors.accentColor else colors.secondaryText,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+            }
+            Icon(
+                imageVector = TablerIcons.Edit,
+                contentDescription = null,
+                tint = colors.text,
+                modifier = Modifier.clickable(onClick = onRateClick)
+            )
+        }
+    }
 }
 
 @Preview

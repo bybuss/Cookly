@@ -77,6 +77,30 @@ class RecipeDetailedViewModel @Inject constructor(
             }
             RecipeDetailedAction.StartCook -> startCook()
             is RecipeDetailedAction.ChangeActiveStep -> changeActiveStep(action.cookingSessionId)
+            RecipeDetailedAction.ShowModeratorReviewSheet -> {
+                state = state.copy(isModeratorReviewSheetVisible = true)
+            }
+            RecipeDetailedAction.HideModeratorReviewSheet -> {
+                state = state.copy(isModeratorReviewSheetVisible = false)
+            }
+            RecipeDetailedAction.PublishRecipe -> publishRecipe()
+            RecipeDetailedAction.ShowRatingSheet -> {
+                state = state.copy(
+                    isRatingSheetVisible = true,
+                    selectedRating = state.userRate ?: 0,
+                    setRateState = UiState.Idle
+                )
+            }
+            RecipeDetailedAction.HideRatingSheet -> {
+                state = state.copy(isRatingSheetVisible = false)
+            }
+            is RecipeDetailedAction.ChangeRating -> {
+                state = state.copy(selectedRating = action.rating)
+            }
+            RecipeDetailedAction.SubmitRating -> submitRating()
+            RecipeDetailedAction.ConsumeRatingResult -> {
+                state = state.copy(setRateState = UiState.Idle)
+            }
             else -> Unit
         }
     }
@@ -95,9 +119,25 @@ class RecipeDetailedViewModel @Inject constructor(
         if (loadedRecipeId == recipeId && state.recipeState is UiState.Success) return
         loadedRecipeId = recipeId
         state = state.copy(recipeState = UiState.Loading)
+
         viewModelScope.launch {
             val result = homeRecipeRepository.getRecipeById(recipeId).toUiState()
-            state = state.copy(recipeState = result)
+
+            state = when (result) {
+                is UiState.Success -> {
+                    val recipe = result.data
+                    state.copy(
+                        recipeState = result,
+                        isFavorite = recipe.isFavorite,
+                        userRate = recipe.userRate,
+                        selectedRating = recipe.userRate ?: 0
+                    )
+                }
+
+                else -> {
+                    state.copy(recipeState = result)
+                }
+            }
         }
     }
 
@@ -195,6 +235,47 @@ class RecipeDetailedViewModel @Inject constructor(
         state = state.copy(isFavorite = !state.isFavorite)
         viewModelScope.launch {
             homeRecipeRepository.addToFavorites(recipeId = state.id)
+        }
+    }
+
+    private fun submitRating() {
+        if (state.setRateState is UiState.Loading) return
+        val rating = state.selectedRating
+        if (rating <= 0) return
+
+        state = state.copy(setRateState = UiState.Loading)
+
+        viewModelScope.launch {
+            val result = homeRecipeRepository.setRate(recipeId = state.id, rating = rating).toUiState()
+
+            state = when (result) {
+                is UiState.Success -> {
+                    val currentRecipe = (state.recipeState as? UiState.Success)?.data
+                    state.copy(
+                        setRateState = result,
+                        isRatingSheetVisible = false,
+                        userRate = rating,
+                        recipeState = if (currentRecipe != null) {
+                            UiState.Success(currentRecipe.copy(userRate = rating))
+                        } else {
+                            state.recipeState
+                        }
+                    )
+                }
+                else -> state.copy(setRateState = result)
+            }
+        }
+    }
+
+    private fun publishRecipe() {
+        viewModelScope.launch {
+            val pubRecipeRequestId
+                = (state.recipeState as? UiState.Success)?.data?.pubRecipeRequestId ?: return@launch
+            state = state.copy(publicateRecipeState = UiState.Loading)
+            val result = homeRecipeRepository.approveRecipeRequest(
+                pubRecipeRequestId = pubRecipeRequestId
+            ).toUiState()
+            state = state.copy(publicateRecipeState = result)
         }
     }
 }
