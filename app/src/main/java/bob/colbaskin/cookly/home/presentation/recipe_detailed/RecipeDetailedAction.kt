@@ -2,7 +2,6 @@ package bob.colbaskin.cookly.home.presentation.recipe_detailed
 
 interface RecipeDetailedAction {
     data object NavigateBack: RecipeDetailedAction
-    data object NavigateMain: RecipeDetailedAction
     data object NavigateProfile: RecipeDetailedAction
     data object StartCook: RecipeDetailedAction
     data class ChangeActiveStep(val cookingSessionId: Int): RecipeDetailedAction

@@ -123,6 +123,7 @@ private fun CookStepsScreen(
                         SheetTopBar(
                             modifier = Modifier,
                             liquidBoxText = state.mealType.toDomainMealTime(isPlural = false),
+                            backTitle = "На главную",
                             onBackClick = { onAction(CookStepsAction.BackToHome) },
                             stepNumber = state.currentStepNumber,
                         )

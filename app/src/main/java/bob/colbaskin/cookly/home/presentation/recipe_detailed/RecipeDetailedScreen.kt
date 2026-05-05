@@ -189,9 +189,6 @@ fun RecipeDetailedScreenRoot(
         onAction = { action ->
             when (action) {
                 RecipeDetailedAction.NavigateBack -> navController.popBackStack()
-                RecipeDetailedAction.NavigateMain -> navController.navigate(Screens.Home) {
-                    popUpTo<Screens.RecipeDetailed> { inclusive = true }
-                }
                 RecipeDetailedAction.NavigateProfile -> navController.navigate(Screens.Profile)
                 else -> Unit
             }
@@ -370,7 +367,7 @@ private fun RecipeDetailedContent(
             SheetTopBar(
                 modifier = Modifier,
                 liquidBoxText = recipe.mealTime.toDomainMealTime(isPlural = false),
-                onBackClick = { onAction(RecipeDetailedAction.NavigateMain) },
+                onBackClick = { onAction(RecipeDetailedAction.NavigateBack) },
                 onAvatarClick = { onAction(RecipeDetailedAction.NavigateProfile) },
                 avatarUrl = state.avatarUrl,
                 fallbackLetter = state.avatarLetter

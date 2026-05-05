@@ -31,6 +31,7 @@ import bob.colbaskin.cookly.home.presentation.components.LiquidBox
 fun SheetTopBar(
     modifier: Modifier = Modifier,
     liquidBoxText: String,
+    backTitle: String = "Назад",
     onBackClick: () -> Unit,
     onAvatarClick: () -> Unit,
     avatarUrl: String?,
@@ -74,7 +75,7 @@ fun SheetTopBar(
                 Text(
                     modifier = Modifier
                         .padding(horizontal = 16.dp, vertical = 12.dp),
-                    text = "На главную",
+                    text = backTitle,
                     style = CustomTheme.typography.inter.bodyMedium,
                     fontWeight = FontWeight.Normal,
                     color = colors.text
@@ -100,6 +101,7 @@ fun SheetTopBar(
 fun SheetTopBar(
     modifier: Modifier = Modifier,
     liquidBoxText: String,
+    backTitle: String = "Назад",
     onBackClick: () -> Unit,
     stepNumber: Int,
 ) {
@@ -141,7 +143,7 @@ fun SheetTopBar(
                 Text(
                     modifier = Modifier
                         .padding(horizontal = 16.dp, vertical = 12.dp),
-                    text = "На главную",
+                    text = backTitle,
                     style = CustomTheme.typography.inter.bodyMedium,
                     fontWeight = FontWeight.Normal,
                     color = colors.text
