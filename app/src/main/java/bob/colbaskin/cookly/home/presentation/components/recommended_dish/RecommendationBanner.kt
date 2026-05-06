@@ -4,6 +4,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -114,47 +116,32 @@ fun RecommendationBanner(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-
-            Row(
+            RecipeBannerStatsBlock(
                 modifier = Modifier
-                    .align(alignment =
-                        if (isLeftCard) Alignment.BottomEnd
-                        else Alignment.BottomStart
+                    .align(
+                        alignment =
+                            if (isLeftCard) Alignment.BottomEnd
+                            else Alignment.BottomStart
                     )
                     .padding(
                         start = if (isLeftCard) 0.dp else 17.dp,
                         end = if (isLeftCard) 17.dp else 0.dp,
                         bottom = 12.dp
                     ),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                DishDataIcon(
-                    text = "$rating($ratingAmount)",
-                    containerColor =
-                        if (backgroundHexColor != null && !isSecondFilled) {
-                            CustomTheme.colors.filledStatsSurface
-                        } else CustomTheme.colors.outlinedStatsSurface,
-                    dishDataIcon = R.drawable.star_ic
-                )
-                DishDataIcon(
-                    text = "$minutes min",
-                    containerColor =
-                        if (backgroundHexColor != null && !isSecondFilled) {
-                            CustomTheme.colors.filledStatsSurface
-                        } else CustomTheme.colors.outlinedStatsSurface,
-                    dishDataIcon = R.drawable.timer_ic
-                )
-                DishDataIcon(
-                    text = "$kcal kcal",
-                    containerColor =
-                        if (backgroundHexColor != null && !isSecondFilled) {
-                            CustomTheme.colors.filledStatsSurface
-                        } else CustomTheme.colors.outlinedStatsSurface,
-                    dishDataIcon = R.drawable.flame_ic,
-                    isFlameIconRed = isFlameIconRed
-                )
-            }
+                rating = rating,
+                ratingAmount = ratingAmount,
+                minutes = minutes,
+                kcal = kcal,
+                spicyLevel = spicyLevel,
+                difficultyLevel = difficultyLevel,
+                isFlameIconRed = isFlameIconRed,
+                statsContainerColor =
+                    if (backgroundHexColor != null && !isSecondFilled) {
+                        CustomTheme.colors.filledStatsSurface
+                    } else {
+                        CustomTheme.colors.outlinedStatsSurface
+                    }
+            )
             IconButton(
                 onClick = onOpenClick,
                 modifier = Modifier
@@ -172,6 +159,70 @@ fun RecommendationBanner(
     }
 }
 
+@Composable
+private fun RecipeBannerStatsBlock(
+    modifier: Modifier = Modifier,
+    rating: Double,
+    ratingAmount: Int,
+    minutes: Int,
+    kcal: Int,
+    spicyLevel: Int,
+    difficultyLevel: Int,
+    isFlameIconRed: Boolean,
+    statsContainerColor: Color
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+        horizontalAlignment = Alignment.Start
+    ) {
+        if (difficultyLevel > 0 || spicyLevel > 1) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                if (difficultyLevel > 0) {
+                    DishDataIcon(
+                        text = "$difficultyLevel ур.",
+                        tint = CustomTheme.colors.accentColor,
+                        containerColor = statsContainerColor,
+                        dishDataIcon = R.drawable.chef_hat_outlined
+                    )
+                }
+                if (spicyLevel > 1) {
+                    DishDataIcon(
+                        text = "$spicyLevel остр.",
+                        containerColor = statsContainerColor,
+                        dishDataIcon = R.drawable.hot_pepper_ic,
+                        isFlameIconRed = true
+                    )
+                }
+            }
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            DishDataIcon(
+                text = "$rating($ratingAmount)",
+                containerColor = statsContainerColor,
+                dishDataIcon = R.drawable.star_ic
+            )
+            DishDataIcon(
+                text = "$minutes min",
+                containerColor = statsContainerColor,
+                dishDataIcon = R.drawable.timer_ic
+            )
+            DishDataIcon(
+                text = "$kcal kcal",
+                containerColor = statsContainerColor,
+                dishDataIcon = R.drawable.flame_ic,
+                isFlameIconRed = isFlameIconRed
+            )
+        }
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun RightOutlinedRecommendationCardPreview(modifier: Modifier = Modifier) {
@@ -184,6 +235,8 @@ private fun RightOutlinedRecommendationCardPreview(modifier: Modifier = Modifier
             ratingAmount = 163,
             minutes = 20,
             kcal = 150,
+            spicyLevel = 3,
+            difficultyLevel = 2,
             isFlameIconRed = true,
             containerColor = Color.Transparent,
             border = true,
@@ -205,6 +258,8 @@ private fun LeftOutlinedRecommendationCardPreview(modifier: Modifier = Modifier)
             ratingAmount = 163,
             minutes = 20,
             kcal = 150,
+            spicyLevel = 3,
+            difficultyLevel = 2,
             isFlameIconRed = true,
             containerColor = Color.Transparent,
             border = true,
@@ -226,6 +281,8 @@ private fun FilledRecommendationCardPreview(modifier: Modifier = Modifier) {
             ratingAmount = 163,
             minutes = 20,
             kcal = 150,
+            spicyLevel = 3,
+            difficultyLevel = 2,
             isFlameIconRed = true,
             border = false,
             backgroundHexColor = "#B9480D",
@@ -247,6 +304,8 @@ private fun FilledRecommendationCardPreview2(modifier: Modifier = Modifier) {
             ratingAmount = 163,
             minutes = 20,
             kcal = 150,
+            spicyLevel = 3,
+            difficultyLevel = 2,
             isFlameIconRed = true,
             border = false,
             backgroundHexColor = "#F4F4F4",

@@ -28,12 +28,14 @@ fun DishDataIcon(
     modifier: Modifier = Modifier,
     text: String,
     containerColor: Color,
+    tint: Color? = null,
     isFlameIconRed: Boolean = false,
     @DrawableRes dishDataIcon: Int
 ) {
-    val iConColor: Color =
+    val iconColor = tint?.let {
         if (isFlameIconRed) CustomTheme.colors.flameColor
-        else Color.Black
+        else it
+    } ?: if (isFlameIconRed) CustomTheme.colors.flameColor else Color.Black
 
     Row(
         modifier = modifier
@@ -51,14 +53,13 @@ fun DishDataIcon(
             Icon(
                 painter = painterResource(dishDataIcon),
                 contentDescription = null,
-                tint = iConColor,
+                tint = iconColor,
                 modifier = Modifier.size(16.dp)
             )
             Text(
                 text = text,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                //textAlign = TextAlign.Center,
                 style = CustomTheme.typography.gilroy.labelMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = Color.Black

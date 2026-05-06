@@ -83,24 +83,34 @@ fun DishCard(
             )
             DishDataIcon(
                 modifier = Modifier.weight(1f),
-                text = "$difficultyLevel lvl",
+                text = "$difficultyLevel ур.",
+                tint = CustomTheme.colors.accentColor,
                 containerColor = CustomTheme.colors.statsCardBackground,
-                dishDataIcon = R.drawable.chef_hat_ai
+                dishDataIcon = R.drawable.chef_hat_outlined
             )
         }
         Box(
-            modifier = Modifier
-                .size(131.dp)
-                .clip(CircleShape)
+            modifier = Modifier.size(131.dp),
+            contentAlignment = Alignment.BottomEnd
         ) {
             AsyncImage(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(CircleShape),
                 model = dishImageUrl,
                 fallback = painterResource(id = fallbackImageRes),
                 error = painterResource(id = fallbackImageRes),
                 contentDescription = null,
                 contentScale = ContentScale.FillBounds
             )
+            if (spicyLevel > 1) {
+                DishDataIcon(
+                    text = "$spicyLevel",
+                    containerColor = CustomTheme.colors.statsCardBackground,
+                    dishDataIcon = R.drawable.hot_pepper_ic,
+                    isFlameIconRed = true
+                )
+            }
         }
         Row(modifier = Modifier.fillMaxWidth()) {
             DishDataIcon(
@@ -118,16 +128,6 @@ fun DishCard(
                 isFlameIconRed = isFlameIconRed
             )
         }
-        if (spicyLevel > 1) {
-            Row(modifier = Modifier.fillMaxWidth()) {
-                DishDataIcon(
-                    text = "$spicyLevel spicy",
-                    containerColor = CustomTheme.colors.statsCardBackground,
-                    dishDataIcon = R.drawable.hot_pepper_ic,
-                    isFlameIconRed = true
-                )
-            }
-        }
         Spacer(modifier = Modifier.height(8.dp))
     }
 }
@@ -144,7 +144,7 @@ fun DishCardPreview() {
             ratingAmount = 168,
             kcal = 150,
             isFlameIconRed = false,
-            spicyLevel = 1,
+            spicyLevel = 3,
             difficultyLevel = 2,
             onClick = {}
         )
