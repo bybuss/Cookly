@@ -342,25 +342,26 @@ class CreateRecipeViewModel @Inject constructor(
         val calories = state.caloriesBy100Grams.toIntOrNull()
 
         return when {
-            state.mainPhoto == null -> "Добавьте изображение к вашему рецепту."
-            state.title.isBlank() -> "Укажите название рецепта."
-            state.description.isBlank() -> "Укажите описание рецепта."
-            state.estimatedHour == 0 && state.estimatedMinute == 0 -> "Укажите время приготовления."
+            state.mainPhoto == null -> "Добавьте изображение к вашему рецепту"
+            state.title.isBlank() -> "Укажите название рецепта"
+            state.description.isBlank() -> "Укажите описание рецепта"
+            state.estimatedHour == 0 && state.estimatedMinute == 0 -> "Укажите время приготовления"
             state.caloriesBy100Grams.isNotBlank() && calories == null -> {
                 "Укажите корректную калорийность."
             }
             calories != null && calories !in 0..9999 -> {
-                "Калорийность на 100 грамм должна быть от 0 до 9999."
+                "Калорийность на 100 грамм должна быть от 0 до 9999"
             }
-            state.ingredients.isEmpty() -> "Добавьте хотя бы один ингредиент."
+            state.mealTimeType == null -> "Укажите тип блюда"
+            state.ingredients.isEmpty() -> "Добавьте хотя бы один ингредиент"
             state.ingredients.any {
                 val quantity = it.quantity.replace(",", ".").toDoubleOrNull()
                 quantity == null || quantity <= 0.0 || quantity > 100_000.0
             } -> {
-                "Калорийность ингредиента должна быть больше не больше 100000 и неменьше 0."
+                "Калорийность ингредиента должна быть больше не больше 100000 и неменьше 0"
             }
             state.steps.any { it.title.isBlank() || it.description.isBlank() } -> {
-                "Заполните заголовок и описание каждого шага."
+                "Заполните заголовок и описание каждого шага"
             }
             else -> null
         }

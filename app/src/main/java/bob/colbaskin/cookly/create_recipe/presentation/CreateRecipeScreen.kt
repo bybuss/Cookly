@@ -1076,20 +1076,22 @@ private fun MealTimeCard(
     val colors = CustomTheme.colors
     val typography = CustomTheme.typography
 
-    val backgroundColor =
-        if (isSelected) colors.secondAccentColor else colors.secondaryCardBackground
-
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(backgroundColor)
+            .background(
+                if (isSelected) colors.accentColor
+                else colors.secondaryCardBackground
+            )
             .clickable(onClick = onClick)
     ) {
         Text(
             modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp),
             text = title,
             style = typography.nunito.bodyMedium,
-            color = colors.invertedText
+            color =
+                if (isSelected) colors.invertedText
+                else colors.text
         )
     }
 }

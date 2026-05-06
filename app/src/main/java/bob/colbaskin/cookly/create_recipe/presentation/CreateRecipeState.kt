@@ -11,7 +11,7 @@ data class CreateRecipeState(
     val title: String = "",
     val description: String = "",
     val caloriesBy100Grams: String = "",
-    val mealTimeType: MealTimeType = MealTimeType.BREAKFAST,
+    val mealTimeType: MealTimeType? = null,
     val estimatedHour: Int = 0,
     val estimatedMinute: Int = 0,
 
