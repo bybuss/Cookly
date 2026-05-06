@@ -44,6 +44,7 @@ import bob.colbaskin.cookly.home.presentation.components.paginatedItems
 import bob.colbaskin.cookly.home.presentation.components.recommended_dish.RecommendationBanner
 import bob.colbaskin.cookly.home.presentation.components.recommended_dish.RecommendedDish
 import bob.colbaskin.cookly.navigation.Screens
+import bob.colbaskin.cookly.search_result.presentation.components.SearchFiltersBottomSheet
 import kotlinx.coroutines.launch
 
 @Composable
@@ -86,11 +87,29 @@ fun HomeScreenRoot(
                 is HomeAction.OpenRecipe -> {
                     navController.navigate(Screens.RecipeDetailed(action.recipeId))
                 }
-
                 is HomeAction.OpenMealTimeDetailed -> {
                     navController.navigate(Screens.MealTimeDetailed(action.mealTimeType))
                 }
-
+                HomeAction.Search -> {
+                    navController.navigate(
+                        Screens.SearchResult(query = state.searchText, mealTimeType = null)
+                    )
+                }
+                HomeAction.ApplyDraftSearchFilters -> {
+                    val filters = state.draftSearchFilters.copy(query = state.searchText)
+                    navController.navigate(
+                        Screens.SearchResult(
+                            query = filters.query,
+                            mealTimeType = filters.mealTimeType?.apiValue,
+                            includeIngredientGroupIds = filters.includeIngredientGroupIds,
+                            maxSpicy = filters.maxSpicy,
+                            maxDifficulty = filters.maxDifficulty,
+                            maxCaloriesBy100Grams = filters.maxCaloriesBy100Grams,
+                            minAvgRating = filters.minAvgRating,
+                            maxEstimatedCookingTime = filters.maxEstimatedCookingTime
+                        )
+                    )
+                }
                 else -> Unit
             }
             viewModel.onAction(action)
@@ -117,116 +136,141 @@ private fun HomeScreen(
         onLoadNext = { onAction(HomeAction.LoadNextFeedPage) }
     )
 
-    Scaffold(
-        containerColor = colors.background,
-        contentColor = colors.text,
-        topBar = {
-            TopBarWithSearch(
-                modifier = Modifier.padding(16.dp),
-                value = "",
-                onValueChange = {}
-            )
-        }
-    ) { innerPadding ->
-        LazyVerticalGrid(
-            state = gridState,
-            modifier = modifier
-                .fillMaxSize()
-                .background(colors.background)
-                .padding(horizontal = 16.dp)
-                .padding(innerPadding),
-            columns = GridCells.Fixed(2),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(bottom = 16.dp)
-        ) {
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                MealsCardRow(
-                    modifier = Modifier,
-                    mealsList = state.mealsList,
-                    onClick = { mealTimeType ->
-                        onAction(HomeAction.OpenMealTimeDetailed(mealTimeType))
-                    }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colors.background)
+    ) {
+        Scaffold(
+            containerColor = colors.background,
+            contentColor = colors.text,
+            topBar = {
+                TopBarWithSearch(
+                    modifier = Modifier.padding(16.dp),
+                    value = state.searchText,
+                    onValueChange = { onAction(HomeAction.ChangeSearchText(it)) },
+                    onSearchClick = { onAction(HomeAction.Search) },
+                    onFiltersClick = { onAction(HomeAction.OpenFiltersSheet) }
                 )
             }
-
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                when (val sessionsState = state.activeCookingSessions) {
-                    UiState.Idle, UiState.Loading -> {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 32.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(color = colors.accentColor)
+        ) { innerPadding ->
+            LazyVerticalGrid(
+                state = gridState,
+                modifier = modifier
+                    .fillMaxSize()
+                    .background(colors.background)
+                    .padding(horizontal = 16.dp)
+                    .padding(innerPadding),
+                columns = GridCells.Fixed(2),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(bottom = 16.dp)
+            ) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    MealsCardRow(
+                        modifier = Modifier,
+                        mealsList = state.mealsList,
+                        onClick = { mealTimeType ->
+                            onAction(HomeAction.OpenMealTimeDetailed(mealTimeType))
                         }
-                    }
+                    )
+                }
 
-                    is UiState.Success -> {
-                        sessionsState.data?.let {
-                            ActiveSessionsRow(
-                                sessions = it,
-                                onCancelClick = { sessionId ->
-                                    onAction(HomeAction.CancelActiveSession(sessionId))
-                                },
-                                onOpenClick = { recipeId ->
-                                    onAction(HomeAction.OpenRecipe(recipeId))
-                                }
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    when (val sessionsState = state.activeCookingSessions) {
+                        UiState.Idle, UiState.Loading -> {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 32.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(color = colors.accentColor)
+                            }
+                        }
+                        is UiState.Success -> {
+                            sessionsState.data?.let {
+                                ActiveSessionsRow(
+                                    sessions = it,
+                                    onCancelClick = { sessionId ->
+                                        onAction(HomeAction.CancelActiveSession(sessionId))
+                                    },
+                                    onOpenClick = { recipeId ->
+                                        onAction(HomeAction.OpenRecipe(recipeId))
+                                    }
+                                )
+                            }
+                        }
+                        else -> Unit
+                    }
+                }
+
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    RecommendedDish(
+                        modifier = Modifier,
+                        title = "Блюдо от Шефа",
+                        aiAvatar = R.drawable.cheif_ai_avatar,
+                        recommendationCard = {
+                            RecommendationBanner(
+                                modifier = Modifier,
+                                cardTitle = "Fried Shrimp",
+                                recipeImageUrl = "",
+                                rating = 4.8,
+                                ratingAmount = 163,
+                                minutes = 20,
+                                kcal = 150,
+                                isFlameIconRed = false,
+                                border = false,
+                                backgroundHexColor = "#B9480D",
+                                isLeftCard = false,
+                                onOpenClick = {}
                             )
                         }
-                    }
-
-                    else -> Unit
+                    )
                 }
-            }
 
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                RecommendedDish(
-                    modifier = Modifier,
-                    title = "Блюдо от Шефа",
-                    aiAvatar = R.drawable.cheif_ai_avatar,
-                    recommendationCard = {
-                        RecommendationBanner(
-                            modifier = Modifier,
-                            cardTitle = "Fried Shrimp",
-                            recipeImageUrl = "",
-                            rating = 4.8,
-                            ratingAmount = 163,
-                            minutes = 20,
-                            kcal = 150,
-                            isFlameIconRed = false,
-                            border = false,
-                            backgroundHexColor = "#B9480D",
-                            isLeftCard = false,
-                            onOpenClick = {}
-                        )
-                    }
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    Text(
+                        text = "Рецепты",
+                        color = colors.text,
+                        style = typography.madeInfinity.headlineSmall,
+                        textAlign = TextAlign.Start,
+                        fontWeight = FontWeight.Normal
+                    )
+                }
+
+                paginatedItems(
+                    state = state.feedPagination,
+                    onRetry = { onAction(HomeAction.RefreshFeed) },
+                    onClick = { recipeId ->
+                        onAction(HomeAction.OpenRecipe(recipeId))
+                    },
+                    accentColor = colors.accentColor,
+                    textColor = colors.text,
+                    invertedTextColor = colors.invertedText,
+                    secondaryTextColor = colors.secondaryText,
+                    titleMedium = typography.inter.titleMedium,
+                    bodyMedium = typography.inter.bodyMedium
                 )
             }
+        }
 
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                Text(
-                    text = "Рецепты",
-                    color = colors.text,
-                    style = typography.madeInfinity.headlineSmall,
-                    textAlign = TextAlign.Start,
-                    fontWeight = FontWeight.Normal
-                )
-            }
-
-            paginatedItems(
-                state = state.feedPagination,
-                onRetry = { onAction(HomeAction.RefreshFeed) },
-                onClick = { recipeId ->
-                    onAction(HomeAction.OpenRecipe(recipeId))
+        if (state.isFiltersSheetVisible) {
+            SearchFiltersBottomSheet(
+                filters = state.draftSearchFilters,
+                ingredientGroupsState = state.ingredientGroupsState,
+                onFiltersChange = {
+                    onAction(HomeAction.ChangeDraftSearchFilters(it))
                 },
-                accentColor = colors.accentColor,
-                textColor = colors.text,
-                invertedTextColor = colors.invertedText,
-                secondaryTextColor = colors.secondaryText,
-                titleMedium = typography.inter.titleMedium,
-                bodyMedium = typography.inter.bodyMedium
+                onApplyClick = {
+                    onAction(HomeAction.ApplyDraftSearchFilters)
+                },
+                onResetClick = {
+                    onAction(HomeAction.ResetDraftSearchFilters)
+                },
+                onDismissRequest = {
+                    onAction(HomeAction.CloseFiltersSheet)
+                }
             )
         }
     }

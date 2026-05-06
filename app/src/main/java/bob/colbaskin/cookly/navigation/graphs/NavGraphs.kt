@@ -24,6 +24,7 @@ import bob.colbaskin.cookly.navigation.Screens
 import bob.colbaskin.cookly.onboarding_preferences.presentation.OnboardingScreenRoot
 import bob.colbaskin.cookly.profile.presentation.cooking_history.CookingHistoryScreenRoot
 import bob.colbaskin.cookly.profile.presentation.profile.ProfileScreenRoot
+import bob.colbaskin.cookly.search_result.presentation.SearchResultScreenRoot
 import bob.colbaskin.cookly.shopping_cart.presentation.ShoppingCartScreenRoot
 
 fun NavGraphBuilder.agreementGraph(
@@ -96,6 +97,9 @@ fun NavGraphBuilder.detailedGraph(
     navigation<Graphs.Detailed>(
         startDestination = Screens.MealTimeDetailed("unknown")
     ) {
+        composable<Screens.SearchResult> {
+            SearchResultScreenRoot(navController = navController)
+        }
         composable<Screens.MealTimeDetailed> {
             MealTimeDetailedScreenRoot(navController = navController)
         }

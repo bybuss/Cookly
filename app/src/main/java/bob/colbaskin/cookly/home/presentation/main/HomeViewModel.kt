@@ -9,6 +9,8 @@ import bob.colbaskin.cookly.common.UiState
 import bob.colbaskin.cookly.common.components.feed_pagination.FeedPaginator
 import bob.colbaskin.cookly.common.toUiState
 import bob.colbaskin.cookly.home.domain.HomeRecipeRepository
+import bob.colbaskin.cookly.onboarding_preferences.domain.OnboardingPreferencesRepository
+import bob.colbaskin.cookly.search_result.domain.models.RecipeSearchFilters
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -17,7 +19,8 @@ private const val FEED_LIMIT = 20
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val repository: HomeRecipeRepository
+    private val homeRepository: HomeRecipeRepository,
+    private val onboardingPreferencesRepository: OnboardingPreferencesRepository
 ) : ViewModel() {
 
     var state by mutableStateOf(HomeState())
@@ -36,13 +39,42 @@ class HomeViewModel @Inject constructor(
             HomeAction.RefreshFeed -> loadInitialFeed()
             HomeAction.LoadNextFeedPage -> loadNextFeedPage()
             is HomeAction.CancelActiveSession -> cancelSession(action.sessionId)
+            is HomeAction.ChangeSearchText -> { state = state.copy(searchText = action.value) }
+            HomeAction.OpenFiltersSheet -> {
+                loadIngredientGroups()
+                state = state.copy(
+                    isFiltersSheetVisible = true,
+                    draftSearchFilters = state.draftSearchFilters.copy(
+                        query = state.searchText
+                    )
+                )
+            }
+            HomeAction.CloseFiltersSheet -> { state = state.copy(isFiltersSheetVisible = false) }
+            is HomeAction.ChangeDraftSearchFilters -> {
+                state = state.copy(draftSearchFilters = action.filters)
+            }
+            HomeAction.ResetDraftSearchFilters -> {
+                state = state.copy(
+                    draftSearchFilters = RecipeSearchFilters(
+                        query = state.searchText
+                    )
+                )
+            }
+            HomeAction.ApplyDraftSearchFilters -> {
+                state = state.copy(
+                    isFiltersSheetVisible = false,
+                    draftSearchFilters = state.draftSearchFilters.copy(
+                        query = state.searchText
+                    )
+                )
+            }
             else -> Unit
         }
     }
 
     private fun buildPaginator() {
         paginator = FeedPaginator { lastScore, lastId, key ->
-            repository.getUserFeed(
+            homeRepository.getUserFeed(
                 lastScore = lastScore,
                 lastId = lastId,
                 paginationKey = key,
@@ -80,8 +112,8 @@ class HomeViewModel @Inject constructor(
         state = state.copy(activeCookingSessions = UiState.Loading)
 
         viewModelScope.launch {
-            val result = repository.getActiveSessions()
-            state = state.copy(activeCookingSessions = result.toUiState())
+            val result = homeRepository.getActiveSessions().toUiState()
+            state = state.copy(activeCookingSessions = result)
         }
     }
 
@@ -108,7 +140,19 @@ class HomeViewModel @Inject constructor(
             )
         )
         viewModelScope.launch {
-            repository.cancelCookingSession(sessionId)
+            homeRepository.cancelCookingSession(sessionId)
+        }
+    }
+
+    private fun loadIngredientGroups() {
+        if (state.ingredientGroupsState is UiState.Loading) return
+        if (state.ingredientGroupsState is UiState.Success) return
+
+        state = state.copy(ingredientGroupsState = UiState.Loading)
+
+        viewModelScope.launch {
+            val result = onboardingPreferencesRepository.getIngredientGroups().toUiState()
+            state = state.copy(ingredientGroupsState = result)
         }
     }
 }

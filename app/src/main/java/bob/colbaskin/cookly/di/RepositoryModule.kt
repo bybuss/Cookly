@@ -23,6 +23,9 @@ import bob.colbaskin.cookly.onboarding_preferences.domain.OnboardingPreferencesR
 import bob.colbaskin.cookly.profile.data.ProfileApiService
 import bob.colbaskin.cookly.profile.data.ProfileRepositoryImpl
 import bob.colbaskin.cookly.profile.domain.ProfileRepository
+import bob.colbaskin.cookly.search_result.data.SearchRecipeApiService
+import bob.colbaskin.cookly.search_result.data.SearchRecipeRepositoryImpl
+import bob.colbaskin.cookly.search_result.domain.SearchRecipeRepository
 import bob.colbaskin.cookly.shopping_cart.data.CartDao
 import bob.colbaskin.cookly.shopping_cart.data.ShoppingCartRepositoryImpl
 import bob.colbaskin.cookly.shopping_cart.domain.ShoppingCartRepository
@@ -129,6 +132,18 @@ object RepositoryModule {
         apiService: FavouritesApiService
     ): FavouritesRepository {
         return FavouritesRepositoryImpl(
+            context = context,
+            apiService = apiService
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideSearchRecipeRepository(
+        @ApplicationContext context: Context,
+        apiService: SearchRecipeApiService
+    ): SearchRecipeRepository {
+        return SearchRecipeRepositoryImpl(
             context = context,
             apiService = apiService
         )

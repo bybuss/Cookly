@@ -14,6 +14,18 @@ sealed interface Screens {
     data object Home: Screens
 
     @Serializable
+    data class SearchResult(
+        val query: String = "",
+        val includeIngredientGroupIds: List<Int> = emptyList(),
+        val maxSpicy: Int? = null,
+        val maxDifficulty: Int? = null,
+        val maxCaloriesBy100Grams: Double? = null,
+        val mealTimeType: String? = null,
+        val minAvgRating: Double? = null,
+        val maxEstimatedCookingTime: Int? = null
+    ): Screens
+
+    @Serializable
     data object ShoppingCart: Screens
 
     @Serializable

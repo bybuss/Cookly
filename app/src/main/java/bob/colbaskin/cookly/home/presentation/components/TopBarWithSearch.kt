@@ -11,15 +11,20 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -33,8 +38,12 @@ import compose.icons.tablericons.Filter
 fun TopBarWithSearch(
     modifier: Modifier = Modifier,
     value: String,
-    onValueChange: (String) -> Unit
+    onValueChange: (String) -> Unit,
+    onSearchClick: () -> Unit = {},
+    onFiltersClick: () -> Unit = {}
 ) {
+    val focusManager = LocalFocusManager.current
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -42,6 +51,7 @@ fun TopBarWithSearch(
         contentAlignment = Alignment.Center
     ) {
         Row(
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
@@ -59,6 +69,13 @@ fun TopBarWithSearch(
                     .weight(1f)
                     .fillMaxHeight(),
                 interactionSource = interactionSource,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                keyboardActions = KeyboardActions(
+                    onSearch = {
+                        focusManager.clearFocus()
+                        onSearchClick()
+                    }
+                ),
                 decorationBox = { innerTextField ->
                     OutlinedTextFieldDefaults.DecorationBox(
                         value = value,
@@ -76,12 +93,20 @@ fun TopBarWithSearch(
                             )
                         },
                         trailingIcon = {
-                            Icon(
-                                painter = painterResource(R.drawable.search_ic),
-                                contentDescription = null,
-                                tint = CustomTheme.colors.text,
-                                modifier = Modifier.size(18.dp)
-                            )
+                            IconButton(
+                                modifier = Modifier.size(36.dp),
+                                onClick = {
+                                    focusManager.clearFocus()
+                                    onSearchClick()
+                                }
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.search_ic),
+                                    contentDescription = "Поиск",
+                                    tint = CustomTheme.colors.text,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
                         },
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedContainerColor = CustomTheme.colors.background,
@@ -113,14 +138,20 @@ fun TopBarWithSearch(
                     )
                 }
             )
-
-            Icon(
-                modifier = Modifier
-                    .size(26.dp),
-                imageVector = TablerIcons.Filter,
-                contentDescription = null,
-                tint = CustomTheme.colors.text
-            )
+            IconButton(
+                modifier = Modifier.size(40.dp),
+                onClick = {
+                    focusManager.clearFocus()
+                    onFiltersClick()
+                }
+            ) {
+                Icon(
+                    modifier = Modifier.size(26.dp),
+                    imageVector = TablerIcons.Filter,
+                    contentDescription = "Фильтры",
+                    tint = CustomTheme.colors.text
+                )
+            }
         }
     }
 }

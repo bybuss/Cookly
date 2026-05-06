@@ -6,6 +6,7 @@ import bob.colbaskin.cookly.favourite.data.FavouritesApiService
 import bob.colbaskin.cookly.home.data.HomeRecipeApiService
 import bob.colbaskin.cookly.onboarding_preferences.data.OnboardingPreferencesApiService
 import bob.colbaskin.cookly.profile.data.ProfileApiService
+import bob.colbaskin.cookly.search_result.data.SearchRecipeApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -74,5 +75,13 @@ object ServiceModule {
         @Named("RecipeServiceRetrofit") recipeServiceRetrofit: Retrofit
     ): FavouritesApiService {
         return recipeServiceRetrofit.create(FavouritesApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideFSearchRecipeApiService(
+        @Named("RecipeServiceRetrofit") recipeServiceRetrofit: Retrofit
+    ): SearchRecipeApiService {
+        return recipeServiceRetrofit.create(SearchRecipeApiService::class.java)
     }
 }
