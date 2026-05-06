@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bob.colbaskin.cookly.common.UiState
 import bob.colbaskin.cookly.common.toUiState
+import bob.colbaskin.cookly.favourite.domain.FavoritesChangeNotifier
 import bob.colbaskin.cookly.home.domain.HomeRecipeRepository
 import bob.colbaskin.cookly.home.data.models.recipe_detailed.recalculateByPortions
 import bob.colbaskin.cookly.home.data.models.recipe_detailed.toCartIngredientUiItems
@@ -22,7 +23,8 @@ import javax.inject.Inject
 class RecipeDetailedViewModel @Inject constructor(
     private val homeRecipeRepository: HomeRecipeRepository,
     private val shoppingCartRepository: ShoppingCartRepository,
-    private val profileRepository: ProfileRepository
+    private val profileRepository: ProfileRepository,
+    private val favoritesChangeNotifier: FavoritesChangeNotifier
 ) : ViewModel() {
 
     var state by mutableStateOf(RecipeDetailedState())
@@ -232,9 +234,19 @@ class RecipeDetailedViewModel @Inject constructor(
     }
 
     private fun toggleLike() {
-        state = state.copy(isFavorite = !state.isFavorite)
         viewModelScope.launch {
-            homeRecipeRepository.addToFavorites(recipeId = state.id)
+            val result = homeRecipeRepository.favorite(
+                recipeId = state.id,
+                isFavorite = !state.isFavorite
+            ).toUiState()
+
+            when (result) {
+                is UiState.Success -> {
+                    state = state.copy(isFavorite = !state.isFavorite)
+                    favoritesChangeNotifier.notifyChanged()
+                }
+                else -> Unit
+            }
         }
     }
 

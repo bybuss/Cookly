@@ -132,11 +132,11 @@ class HomeRecipeRepositoryImpl @Inject constructor(
         )
     }
 
-    override suspend fun addToFavorites(recipeId: Int): ApiResult<Unit> {
-        Log.d(TAG, "Add recipe with id=$recipeId to favorites")
+    override suspend fun favorite(recipeId: Int, isFavorite: Boolean): ApiResult<Unit> {
+        Log.d(TAG, "Recipe with id=$recipeId $isFavorite to favorites")
 
         return safeApiCall<Unit, Unit>(
-            apiCall = { apiService.addToFavorites(recipeId) },
+            apiCall = { apiService.favorite(recipeId, isFavorite) },
             successHandler = { response -> response },
             context = context
         )

@@ -7,6 +7,7 @@ import bob.colbaskin.cookly.home.data.models.recipe_detailed.RecipeDetailedRespo
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -58,9 +59,10 @@ interface HomeRecipeApiService {
     @GET("/cooking-sessions/active")
     suspend fun getActiveSessions(): List<ActiveSessionDto>
 
-    @POST("/recipe/{recipe_id}/add-to-favorites")
-    suspend fun addToFavorites(
-        @Path("recipe_id") recipeId: Int
+    @PUT("/recipe/{recipe_id}/favorite")
+    suspend fun favorite(
+        @Path("recipe_id") recipeId: Int,
+        @Body isFavorite: Boolean
     )
 
     @POST("/recipe/{recipe_id}/set-rate")
