@@ -19,6 +19,7 @@ data class RecipeDetailed(
     val categories: List<RecipeCategory>,
 
     val isFavorite: Boolean,
+    val isAuthor: Boolean,
     val userRate: Int? = null,
 
     val cookingSessionId: Int? = null,

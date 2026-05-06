@@ -1202,24 +1202,25 @@ private fun RecipePublicationBlock(
     val colors = CustomTheme.colors
 
     when (recipe.status) {
-        // FIXME: проверка еще дополнительно потом по параметру is_author
         null -> {
-            Button(
-                onClick = onPublishRecipe,
-                modifier = modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(18.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = colors.accentColor,
-                    contentColor = colors.invertedText
-                )
-            ) {
-                Text(
-                    text = "Опубликовать рецепт",
-                    style = CustomTheme.typography.inter.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
+            if (recipe.isAuthor) {
+                Button(
+                    onClick = onPublishRecipe,
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = RoundedCornerShape(18.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colors.accentColor,
+                        contentColor = colors.invertedText
+                    )
+                ) {
+                    Text(
+                        text = "Опубликовать рецепт",
+                        style = CustomTheme.typography.inter.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
         PubRecipeRequestStatus.PENDING -> {

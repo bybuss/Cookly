@@ -42,6 +42,7 @@ fun RecipeDetailedResponseDto.toDomain(): RecipeDetailed {
         categories = recipe.recipeCategories.map { it.toDomain() },
 
         isFavorite = isFavorite,
+        isAuthor = isAuthor,
         userRate = userRate?.takeIf { it > 0 },
 
         pubRecipeRequestId = pubRecipeRequest?.id,
