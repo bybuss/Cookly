@@ -29,7 +29,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import bob.colbaskin.cookly.R
 import bob.colbaskin.cookly.common.UiState
+import bob.colbaskin.cookly.common.components.ClickableIconLevelBlock
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.common.recipe_preview.domain.models.MealTimeType
 import bob.colbaskin.cookly.onboarding_preferences.domain.models.IngredientGroup
@@ -129,7 +131,9 @@ fun SearchFiltersBottomSheet(
                         }
                     }
                 }
+
                 FilterSpacer()
+
                 FilterBlockTitle(text = "Прием пищи")
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
@@ -145,106 +149,60 @@ fun SearchFiltersBottomSheet(
                         )
                     }
                 }
+
                 FilterSpacer()
+
                 FilterBlockTitle(text = "Время приготовления")
                 CookingTimeSlider(filters = filters, onFiltersChange = onFiltersChange)
+
                 FilterSpacer()
+
                 FilterBlockTitle(text = "Калорийность на 100г.")
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    CaloriesChip(
-                        text = "До 200 ккал",
-                        value = 200.0,
-                        filters = filters,
-                        onFiltersChange = onFiltersChange
-                    )
-                    CaloriesChip(
-                        text = "До 400 ккал",
-                        value = 400.0,
-                        filters = filters,
-                        onFiltersChange = onFiltersChange
-                    )
-                    CaloriesChip(
-                        text = "До 600 ккал",
-                        value = 600.0,
-                        filters = filters,
-                        onFiltersChange = onFiltersChange
-                    )
-                    CaloriesChip(
-                        text = "До 800 ккал",
-                        value = 800.0,
-                        filters = filters,
-                        onFiltersChange = onFiltersChange
-                    )
-                }
+                CaloriesSlider(
+                    filters = filters,
+                    onFiltersChange = onFiltersChange
+                )
+
                 FilterSpacer()
-                FilterBlockTitle(text = "Сложность")
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+
+                Row(
+                    modifier = modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    IntToggleChip(
-                        text = "Легкие",
-                        value = 1,
-                        selectedValue = filters.maxDifficulty,
-                        onValueChange = {
-                            onFiltersChange(filters.copy(maxDifficulty = it))
+                    ClickableIconLevelBlock(
+                        title = "Сложность",
+                        currentLevel = filters.maxDifficulty ?: 0,
+                        minLevel = 0,
+                        maxLevel = 5,
+                        iconId = R.drawable.chef_hat_ai,
+                        activeColor = colors.accentColor,
+                        onLevelChange = { level ->
+                            onFiltersChange(
+                                filters.copy(
+                                    maxDifficulty = if (level == 0) null else level
+                                )
+                            )
                         }
                     )
-                    IntToggleChip(
-                        text = "Средние",
-                        value = 3,
-                        selectedValue = filters.maxDifficulty,
-                        onValueChange = {
-                            onFiltersChange(filters.copy(maxDifficulty = it))
-                        }
-                    )
-                    IntToggleChip(
-                        text = "Сложные",
-                        value = 5,
-                        selectedValue = filters.maxDifficulty,
-                        onValueChange = {
-                            onFiltersChange(filters.copy(maxDifficulty = it))
+                    ClickableIconLevelBlock(
+                        title = "Острота",
+                        currentLevel = filters.maxSpicy ?: 0,
+                        minLevel = 0,
+                        maxLevel = 5,
+                        iconId = R.drawable.hot_pepper_ic,
+                        activeColor = colors.likeColor,
+                        onLevelChange = { level ->
+                            onFiltersChange(
+                                filters.copy(
+                                    maxSpicy = if (level == 0) null else level
+                                )
+                            )
                         }
                     )
                 }
+
                 FilterSpacer()
-                FilterBlockTitle(text = "Острота")
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    IntToggleChip(
-                        text = "Немного",
-                        value = 1,
-                        selectedValue = filters.maxSpicy,
-                        onValueChange = {
-                            onFiltersChange(filters.copy(maxSpicy = it))
-                        }
-                    )
-                    IntToggleChip(
-                        text = "Среднее",
-                        value = 3,
-                        selectedValue = filters.maxSpicy,
-                        onValueChange = {
-                            onFiltersChange(filters.copy(maxSpicy = it))
-                        }
-                    )
-                    IntToggleChip(
-                        text = "Острое",
-                        value = 5,
-                        selectedValue = filters.maxSpicy,
-                        onValueChange = {
-                            onFiltersChange(filters.copy(maxSpicy = it))
-                        }
-                    )
-                }
-                FilterSpacer()
+
                 FilterBlockTitle(text = "Рейтинг")
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
@@ -344,6 +302,71 @@ private fun MealTimeChip(
 }
 
 @Composable
+private fun CaloriesSlider(
+    filters: RecipeSearchFilters,
+    onFiltersChange: (RecipeSearchFilters) -> Unit
+) {
+    val colors = CustomTheme.colors
+    val typography = CustomTheme.typography
+
+    val minCalories = 100
+    val maxCalories = 1000
+    val step = 50
+
+    val caloriesValue = filters.maxCaloriesBy100Grams?.toInt() ?: maxCalories
+
+    Slider(
+        value = caloriesValue.toFloat(),
+        onValueChange = { value ->
+            val roundedValue = ((value / step).roundToInt() * step)
+                .coerceIn(minCalories, maxCalories)
+
+            onFiltersChange(
+                filters.copy(
+                    maxCaloriesBy100Grams =
+                        if (roundedValue >= maxCalories) null else roundedValue.toDouble()
+                )
+            )
+        },
+        valueRange = minCalories.toFloat()..maxCalories.toFloat(),
+        steps = ((maxCalories - minCalories) / step) - 1,
+        colors = SliderDefaults.colors(
+            thumbColor = colors.accentColor,
+            activeTrackColor = colors.accentSecondSurface,
+            inactiveTrackColor = colors.secondaryCardBackground,
+            activeTickColor = colors.text,
+            inactiveTickColor = colors.mealCardBorder
+        )
+    )
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text =
+                if (filters.maxCaloriesBy100Grams == null) {
+                    "Не ограничивать"
+                } else {
+                    "до ${filters.maxCaloriesBy100Grams.toInt()} ккал"
+                },
+            color = colors.secondaryText,
+            style = typography.inter.bodyMedium
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        SearchFilterChip(
+            text = "Сбросить калории",
+            selected = false,
+            onClick = {
+                onFiltersChange(filters.copy(maxCaloriesBy100Grams = null))
+            }
+        )
+    }
+}
+
+@Composable
 private fun CookingTimeSlider(
     filters: RecipeSearchFilters,
     onFiltersChange: (RecipeSearchFilters) -> Unit
@@ -398,26 +421,6 @@ private fun CookingTimeSlider(
 }
 
 @Composable
-private fun CaloriesChip(
-    text: String,
-    value: Double,
-    filters: RecipeSearchFilters,
-    onFiltersChange: (RecipeSearchFilters) -> Unit
-) {
-    SearchFilterChip(
-        text = text,
-        selected = filters.maxCaloriesBy100Grams == value,
-        onClick = {
-            onFiltersChange(
-                filters.copy(maxCaloriesBy100Grams =
-                    if (filters.maxCaloriesBy100Grams == value) null else value
-                )
-            )
-        }
-    )
-}
-
-@Composable
 private fun RatingChip(
     text: String,
     value: Double,
@@ -434,19 +437,5 @@ private fun RatingChip(
                 )
             )
         }
-    )
-}
-
-@Composable
-private fun IntToggleChip(
-    text: String,
-    value: Int,
-    selectedValue: Int?,
-    onValueChange: (Int?) -> Unit
-) {
-    SearchFilterChip(
-        text = text,
-        selected = selectedValue == value,
-        onClick = { onValueChange(if (selectedValue == value) null else value) }
     )
 }

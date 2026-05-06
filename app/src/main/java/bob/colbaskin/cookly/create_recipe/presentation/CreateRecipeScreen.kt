@@ -85,6 +85,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import bob.colbaskin.cookly.R
 import bob.colbaskin.cookly.common.UiState
+import bob.colbaskin.cookly.common.components.ClickableIconLevelBlock
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
 import bob.colbaskin.cookly.create_recipe.domain.models.CreateRecipeCategory
@@ -1228,53 +1229,6 @@ private fun RecipeLevelsSelector(
             activeColor = colors.likeColor,
             onLevelChange = onSpicyLevelChange
         )
-    }
-}
-
-@Composable
-private fun ClickableIconLevelBlock(
-    modifier: Modifier = Modifier,
-    title: String,
-    currentLevel: Int,
-    minLevel: Int,
-    maxLevel: Int = 5,
-    @DrawableRes iconId: Int,
-    activeColor: Color,
-    onLevelChange: (Int) -> Unit
-) {
-    val colors = CustomTheme.colors
-
-    Column(modifier = modifier) {
-        Text(
-            text = title,
-            style = CustomTheme.typography.nunito.titleLarge,
-            color = colors.text
-        )
-        Spacer(modifier = Modifier.height(6.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            repeat(maxLevel) { index ->
-                val level = index + 1
-                val isActive = index < currentLevel
-                Icon(
-                    painter = painterResource(id = iconId),
-                    contentDescription = "$title $level",
-                    tint = if (isActive) {
-                        activeColor
-                    } else {
-                        colors.secondaryText
-                    },
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clickable {
-                            val newLevel = when {
-                                minLevel == 0 && currentLevel == level -> 0
-                                else -> level.coerceIn(minLevel, maxLevel)
-                            }
-                            onLevelChange(newLevel)
-                        }
-                )
-            }
-        }
     }
 }
 
