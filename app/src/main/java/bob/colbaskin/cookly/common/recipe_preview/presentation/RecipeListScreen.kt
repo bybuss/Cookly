@@ -64,7 +64,7 @@ fun RecipeListScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(
-                        color = CustomTheme.colors.secondAccentColor
+                        color = CustomTheme.colors.accentColor
                     )
                 }
             }
