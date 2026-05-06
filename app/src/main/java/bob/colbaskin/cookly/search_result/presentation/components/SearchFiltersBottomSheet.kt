@@ -181,7 +181,7 @@ fun SearchFiltersBottomSheet(
                     )
                 }
                 FilterSpacer()
-                FilterBlockTitle(text = "Острота")
+                FilterBlockTitle(text = "Сложность")
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -213,14 +213,14 @@ fun SearchFiltersBottomSheet(
                     )
                 }
                 FilterSpacer()
-                FilterBlockTitle(text = "Сложность")
+                FilterBlockTitle(text = "Острота")
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     IntToggleChip(
-                        text = "Не острое",
+                        text = "Немного",
                         value = 1,
                         selectedValue = filters.maxSpicy,
                         onValueChange = {
