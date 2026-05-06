@@ -126,13 +126,15 @@ private fun HomeScreen(
     val colors = CustomTheme.colors
     val typography = CustomTheme.typography
     val gridState = rememberLazyGridState()
+    val chefRecipe = state.feedPagination.items.firstOrNull()
+    val feedWithoutChef = state.feedPagination.copy(items = state.feedPagination.items.drop(1))
 
     PaginationEffect(
         gridState = gridState,
-        itemCount = state.feedPagination.items.size,
-        appendState = state.feedPagination.appendState,
-        isEndReached = state.feedPagination.isEndReached,
-        enabled = state.feedPagination.loadState is UiState.Success,
+        itemCount = feedWithoutChef.items.size,
+        appendState = feedWithoutChef.appendState,
+        isEndReached = feedWithoutChef.isEndReached,
+        enabled = feedWithoutChef.loadState is UiState.Success,
         onLoadNext = { onAction(HomeAction.LoadNextFeedPage) }
     )
 
@@ -205,28 +207,32 @@ private fun HomeScreen(
                     }
                 }
 
-                item(span = { GridItemSpan(maxLineSpan) }) {
-                    RecommendedDish(
-                        modifier = Modifier,
-                        title = "Блюдо от Шефа",
-                        aiAvatar = R.drawable.cheif_ai_avatar,
-                        recommendationCard = {
-                            RecommendationBanner(
-                                modifier = Modifier,
-                                cardTitle = "Fried Shrimp",
-                                recipeImageUrl = "",
-                                rating = 4.8,
-                                ratingAmount = 163,
-                                minutes = 20,
-                                kcal = 150,
-                                isFlameIconRed = false,
-                                border = false,
-                                backgroundHexColor = "#B9480D",
-                                isLeftCard = false,
-                                onOpenClick = {}
-                            )
-                        }
-                    )
+                chefRecipe?.let { recipe ->
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        RecommendedDish(
+                            modifier = Modifier,
+                            title = "Блюдо от Шефа",
+                            aiAvatar = R.drawable.cheif_ai_avatar,
+                            recommendationCard = {
+                                RecommendationBanner(
+                                    modifier = Modifier,
+                                    cardTitle = recipe.title,
+                                    recipeImageUrl = recipe.imageUrl,
+                                    rating = recipe.rating,
+                                    ratingAmount = recipe.ratingCount,
+                                    minutes = recipe.estimatedTime,
+                                    kcal = recipe.caloriesBy100Grams.toInt(),
+                                    spicyLevel = recipe.spicyLevel,
+                                    difficultyLevel = recipe.difficultyLevel,
+                                    isFlameIconRed = recipe.caloriesBy100Grams >= 300,
+                                    isLeftCard = false,
+                                    onOpenClick = {
+                                        onAction(HomeAction.OpenRecipe(recipe.id))
+                                    }
+                                )
+                            }
+                        )
+                    }
                 }
 
                 item(span = { GridItemSpan(maxLineSpan) }) {
@@ -240,7 +246,7 @@ private fun HomeScreen(
                 }
 
                 paginatedItems(
-                    state = state.feedPagination,
+                    state = feedWithoutChef,
                     onRetry = { onAction(HomeAction.RefreshFeed) },
                     onClick = { recipeId ->
                         onAction(HomeAction.OpenRecipe(recipeId))
