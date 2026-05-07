@@ -1,11 +1,6 @@
 package bob.colbaskin.cookly.navigation.graphs
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -14,6 +9,7 @@ import bob.colbaskin.cookly.agreement.presentation.AgreementScreenRoot
 import bob.colbaskin.cookly.agreement.presentation.policy.PolicyScreenRoot
 import bob.colbaskin.cookly.agreement.presentation.terms_of_use.TermsOfUseScreenRoot
 import bob.colbaskin.cookly.auth.presentation.AuthScreenRoot
+import bob.colbaskin.cookly.chat.presentation.ChatScreenRoot
 import bob.colbaskin.cookly.create_recipe.presentation.CreateRecipeScreenRoot
 import bob.colbaskin.cookly.favourite.presentation.FavoriteRecipesScreenRoot
 import bob.colbaskin.cookly.home.presentation.cook_steps.CookStepsScreenRoot
@@ -23,7 +19,9 @@ import bob.colbaskin.cookly.home.presentation.meal_time_detailed.MealTimeDetaile
 import bob.colbaskin.cookly.navigation.Screens
 import bob.colbaskin.cookly.onboarding_preferences.presentation.OnboardingScreenRoot
 import bob.colbaskin.cookly.profile.presentation.cooking_history.CookingHistoryScreenRoot
+import bob.colbaskin.cookly.profile.presentation.on_moderation.ModeratorRecipesScreenRoot
 import bob.colbaskin.cookly.profile.presentation.profile.ProfileScreenRoot
+import bob.colbaskin.cookly.profile.presentation.recipe_statuses.RecipeStatusesScreenRoot
 import bob.colbaskin.cookly.search_result.presentation.SearchResultScreenRoot
 import bob.colbaskin.cookly.shopping_cart.presentation.ShoppingCartScreenRoot
 
@@ -73,14 +71,8 @@ fun NavGraphBuilder.mainGraph(
             )
         }
         composable<Screens.ShoppingCart> { ShoppingCartScreenRoot() }
-        composable<Screens.Chat> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = "Chat Screen")
-            }
-        }
-        composable<Screens.Favourites> {
-            FavoriteRecipesScreenRoot(navController = navController)
-        }
+        composable<Screens.Chat> { ChatScreenRoot(navController = navController) }
+        composable<Screens.Favourites> { FavoriteRecipesScreenRoot(navController = navController) }
         composable<Screens.Profile> {
             ProfileScreenRoot(
                 navController = navController,
@@ -89,7 +81,6 @@ fun NavGraphBuilder.mainGraph(
         }
     }
 }
-
 fun NavGraphBuilder.detailedGraph(
     navController: NavHostController,
     snackbarHostState: SnackbarHostState
@@ -119,18 +110,12 @@ fun NavGraphBuilder.detailedGraph(
                 onNavigateToSuccess = { navController.popBackStack() },
             )
         }
-        composable<Screens.ApplicationsReview> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = "Applications Review Screen")
-            }
-        }
+        composable<Screens.OnModeration> { ModeratorRecipesScreenRoot(navController = navController) }
         composable<Screens.CookingHistory> {
             CookingHistoryScreenRoot(navController = navController)
         }
         composable<Screens.RecipeStatuses> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = "Recipe Statuses Screen")
-            }
+            RecipeStatusesScreenRoot(navController = navController)
         }
     }
 }

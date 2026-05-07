@@ -11,4 +11,14 @@ interface ProfileRepository {
     suspend fun refreshUser(): ApiResult<Unit>
     suspend fun logout(): ApiResult<Unit>
     suspend fun getRecipeHistory(): ApiResult<List<RecipePreview>>
+
+    suspend fun getRecipesOnModeration(): ApiResult<List<RecipePreview>>
+
+    suspend fun getSavedRecipes(): ApiResult<List<RecipePreview>>
+
+    suspend fun getModeratingRecipes(): ApiResult<List<RecipePreview>>
+
+    suspend fun getRejectedRecipes(): ApiResult<List<RecipePreview>>
+
+    suspend fun getPublishedRecipes(): ApiResult<List<RecipePreview>>
 }

@@ -14,4 +14,7 @@ data class RecipePreview(
 ) {
     val averageRating: Double
         get() = if (ratingCount == 0) 0.0 else ratingSum / ratingCount.toDouble()
+
+    val isFlameIconRed: Boolean
+        get() = caloriesBy100Grams >= 300
 }

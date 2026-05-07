@@ -84,7 +84,7 @@ fun ProfileScreenRoot(
         onAction = { action ->
             when (action) {
                 ProfileAction.OpenApplicationsReview -> {
-                    navController.navigate(Screens.ApplicationsReview)
+                    navController.navigate(Screens.OnModeration)
                 }
                 ProfileAction.OpenCookingHistory -> {
                     navController.navigate(Screens.CookingHistory)

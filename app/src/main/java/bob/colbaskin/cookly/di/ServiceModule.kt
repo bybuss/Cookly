@@ -1,6 +1,7 @@
 package bob.colbaskin.cookly.di
 
 import bob.colbaskin.cookly.auth.data.AuthApiService
+import bob.colbaskin.cookly.chat.data.ChatApiService
 import bob.colbaskin.cookly.create_recipe.data.CreateRecipeApiService
 import bob.colbaskin.cookly.favourite.data.FavouritesApiService
 import bob.colbaskin.cookly.home.data.HomeRecipeApiService
@@ -83,5 +84,13 @@ object ServiceModule {
         @Named("RecipeServiceRetrofit") recipeServiceRetrofit: Retrofit
     ): SearchRecipeApiService {
         return recipeServiceRetrofit.create(SearchRecipeApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideChatApiService(
+        @Named("RecipeServiceRetrofit") recipeServiceRetrofit: Retrofit
+    ): ChatApiService {
+        return recipeServiceRetrofit.create(ChatApiService::class.java)
     }
 }

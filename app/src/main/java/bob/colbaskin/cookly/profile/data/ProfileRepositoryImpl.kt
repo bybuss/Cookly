@@ -65,4 +65,52 @@ class ProfileRepositoryImpl @Inject constructor(
             context = context
         )
     }
+
+    override suspend fun getRecipesOnModeration(): ApiResult<List<RecipePreview>> {
+        return safeApiCall<RecipesResponseDto, List<RecipePreview>>(
+            apiCall = { profileApiService.getRecipesOnModeration() },
+            successHandler = { response -> response.recipes.map { it.toDomain() } },
+            context = context
+        )
+    }
+
+    override suspend fun getSavedRecipes(): ApiResult<List<RecipePreview>> {
+        return safeApiCall<RecipesResponseDto, List<RecipePreview>>(
+            apiCall = { profileApiService.getSavedRecipes() },
+            successHandler = { response ->
+                response.recipes.map { it.toDomain() }
+            },
+            context = context
+        )
+    }
+
+    override suspend fun getModeratingRecipes(): ApiResult<List<RecipePreview>> {
+        return safeApiCall<RecipesResponseDto, List<RecipePreview>>(
+            apiCall = { profileApiService.getModeratingRecipes() },
+            successHandler = { response ->
+                response.recipes.map { it.toDomain() }
+            },
+            context = context
+        )
+    }
+
+    override suspend fun getRejectedRecipes(): ApiResult<List<RecipePreview>> {
+        return safeApiCall<RecipesResponseDto, List<RecipePreview>>(
+            apiCall = { profileApiService.getRejectedRecipes() },
+            successHandler = { response ->
+                response.recipes.map { it.toDomain() }
+            },
+            context = context
+        )
+    }
+
+    override suspend fun getPublishedRecipes(): ApiResult<List<RecipePreview>> {
+        return safeApiCall<RecipesResponseDto, List<RecipePreview>>(
+            apiCall = { profileApiService.getPublishedRecipes() },
+            successHandler = { response ->
+                response.recipes.map { it.toDomain() }
+            },
+            context = context
+        )
+    }
 }

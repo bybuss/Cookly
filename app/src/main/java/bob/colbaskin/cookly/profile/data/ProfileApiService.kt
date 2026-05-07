@@ -11,4 +11,19 @@ interface ProfileApiService {
 
     @GET("/user/recipe-history")
     suspend fun getRecipeHistory(): RecipesResponseDto
+
+    @GET("/recipes/on-moderation")
+    suspend fun getRecipesOnModeration(): RecipesResponseDto
+
+    @GET("/user/saved-recipes")
+    suspend fun getSavedRecipes(): RecipesResponseDto
+
+    @GET("/user/moderating-recipes")
+    suspend fun getModeratingRecipes(): RecipesResponseDto
+
+    @GET("/user/rejected-recipes")
+    suspend fun getRejectedRecipes(): RecipesResponseDto
+
+    @GET("/user/published-recipes")
+    suspend fun getPublishedRecipes(): RecipesResponseDto
 }

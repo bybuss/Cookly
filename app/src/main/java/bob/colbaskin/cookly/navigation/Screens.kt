@@ -56,7 +56,7 @@ sealed interface Screens {
     data object CookSteps
 
     @Serializable
-    data object ApplicationsReview
+    data object OnModeration
 
     @Serializable
     data object CookingHistory

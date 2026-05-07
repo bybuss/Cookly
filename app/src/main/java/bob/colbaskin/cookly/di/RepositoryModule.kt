@@ -4,6 +4,9 @@ import android.content.Context
 import bob.colbaskin.cookly.auth.data.AuthRepositoryImpl
 import bob.colbaskin.cookly.auth.data.AuthApiService
 import bob.colbaskin.cookly.auth.domain.network.AuthRepository
+import bob.colbaskin.cookly.chat.data.ChatApiService
+import bob.colbaskin.cookly.chat.data.ChatRepositoryImpl
+import bob.colbaskin.cookly.chat.domain.ChatRepository
 import bob.colbaskin.cookly.common.user_prefs.data.UserPreferencesRepositoryImpl
 import bob.colbaskin.cookly.common.user_prefs.data.data_store.UserDataStore
 import bob.colbaskin.cookly.common.user_prefs.domain.UserPreferencesRepository
@@ -144,6 +147,18 @@ object RepositoryModule {
         apiService: SearchRecipeApiService
     ): SearchRecipeRepository {
         return SearchRecipeRepositoryImpl(
+            context = context,
+            apiService = apiService
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideChatRepository(
+        @ApplicationContext context: Context,
+        apiService: ChatApiService
+    ): ChatRepository {
+        return ChatRepositoryImpl(
             context = context,
             apiService = apiService
         )
