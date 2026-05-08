@@ -3,8 +3,11 @@ package bob.colbaskin.cookly.home.data
 import bob.colbaskin.cookly.home.data.models.main.ActiveSessionDto
 import bob.colbaskin.cookly.home.data.models.main.FeedResponseDto
 import bob.colbaskin.cookly.home.data.models.recipe_detailed.CookingSessionDto
+import bob.colbaskin.cookly.home.data.models.recipe_detailed.PubRecipeRequestCreateResponseDto
 import bob.colbaskin.cookly.home.data.models.recipe_detailed.RecipeDetailedResponseDto
+import bob.colbaskin.cookly.home.data.models.recipe_detailed.RejectPubRecipeRequestBody
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -74,5 +77,26 @@ interface HomeRecipeApiService {
     @POST("/pub-recipe-request/{pub_recipe_request_id}/approve")
     suspend fun approveRecipeRequest(
         @Path("pub_recipe_request_id") pubRecipeRequestId: Int
+    )
+
+    @POST("/recipe/{recipe_id}/request-publish")
+    suspend fun requestPublishRecipe(
+        @Path("recipe_id") recipeId: Int
+    ): PubRecipeRequestCreateResponseDto
+
+    @POST("/pub-recipe-request/{pub_recipe_request_id}/reject")
+    suspend fun rejectRecipeRequest(
+        @Path("pub_recipe_request_id") pubRecipeRequestId: Int,
+        @Body body: RejectPubRecipeRequestBody
+    )
+
+    @DELETE("/{pub_recipe_request_id}")
+    suspend fun deletePubRecipeRequest(
+        @Path("pub_recipe_request_id") pubRecipeRequestId: Int
+    )
+
+    @DELETE("/recipe/{recipe_id}")
+    suspend fun deleteRecipe(
+        @Path("recipe_id") recipeId: Int
     )
 }

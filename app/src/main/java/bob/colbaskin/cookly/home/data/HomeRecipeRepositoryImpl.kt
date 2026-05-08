@@ -8,7 +8,9 @@ import bob.colbaskin.cookly.home.data.models.main.ActiveSessionDto
 import bob.colbaskin.cookly.home.data.models.main.FeedResponseDto
 import bob.colbaskin.cookly.home.data.models.main.toDomain
 import bob.colbaskin.cookly.home.data.models.recipe_detailed.CookingSessionDto
+import bob.colbaskin.cookly.home.data.models.recipe_detailed.PubRecipeRequestCreateResponseDto
 import bob.colbaskin.cookly.home.data.models.recipe_detailed.RecipeDetailedResponseDto
+import bob.colbaskin.cookly.home.data.models.recipe_detailed.RejectPubRecipeRequestBody
 import bob.colbaskin.cookly.home.domain.HomeRecipeRepository
 import bob.colbaskin.cookly.home.domain.models.main.FeedPage
 import bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeDetailed
@@ -160,6 +162,54 @@ class HomeRecipeRepositoryImpl @Inject constructor(
 
         return safeApiCall<Unit, Unit>(
             apiCall = { apiService.approveRecipeRequest(pubRecipeRequestId) },
+            successHandler = { response -> response },
+            context = context
+        )
+    }
+
+    override suspend fun requestPublishRecipe(recipeId: Int): ApiResult<Int> {
+        Log.d(TAG, "Create publish request for recipeId=$recipeId")
+
+        return safeApiCall<PubRecipeRequestCreateResponseDto, Int>(
+            apiCall = { apiService.requestPublishRecipe(recipeId) },
+            successHandler = { response -> response.pubRecipeRequestId },
+            context = context
+        )
+    }
+
+    override suspend fun rejectRecipeRequest(
+        pubRecipeRequestId: Int,
+        feedback: String
+    ): ApiResult<Unit> {
+        Log.d(TAG, "Reject recipe request with id=$pubRecipeRequestId")
+
+        return safeApiCall<Unit, Unit>(
+            apiCall = {
+                apiService.rejectRecipeRequest(
+                    pubRecipeRequestId = pubRecipeRequestId,
+                    body = RejectPubRecipeRequestBody(feedback = feedback)
+                )
+            },
+            successHandler = { response -> response },
+            context = context
+        )
+    }
+
+    override suspend fun deletePubRecipeRequest(pubRecipeRequestId: Int): ApiResult<Unit> {
+        Log.d(TAG, "Delete publish request with id=$pubRecipeRequestId")
+
+        return safeApiCall<Unit, Unit>(
+            apiCall = { apiService.deletePubRecipeRequest(pubRecipeRequestId) },
+            successHandler = { response -> response },
+            context = context
+        )
+    }
+
+    override suspend fun deleteRecipe(recipeId: Int): ApiResult<Unit> {
+        Log.d(TAG, "Delete recipe with id=$recipeId")
+
+        return safeApiCall<Unit, Unit>(
+            apiCall = { apiService.deleteRecipe(recipeId) },
             successHandler = { response -> response },
             context = context
         )

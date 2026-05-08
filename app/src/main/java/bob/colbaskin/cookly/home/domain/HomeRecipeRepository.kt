@@ -38,4 +38,12 @@ interface HomeRecipeRepository {
     suspend fun setRate(recipeId: Int, rating: Int): ApiResult<Unit>
 
     suspend fun approveRecipeRequest(pubRecipeRequestId: Int): ApiResult<Unit>
+
+    suspend fun requestPublishRecipe(recipeId: Int): ApiResult<Int>
+
+    suspend fun rejectRecipeRequest(pubRecipeRequestId: Int, feedback: String): ApiResult<Unit>
+
+    suspend fun deletePubRecipeRequest(pubRecipeRequestId: Int): ApiResult<Unit>
+
+    suspend fun deleteRecipe(recipeId: Int): ApiResult<Unit>
 }
