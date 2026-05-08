@@ -36,6 +36,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -45,9 +46,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -95,6 +98,7 @@ import bob.colbaskin.cookly.navigation.Screens
 import coil3.compose.AsyncImage
 import compose.icons.TablerIcons
 import compose.icons.tablericons.Edit
+import compose.icons.tablericons.Trash
 import kotlinx.coroutines.launch
 
 @Composable
@@ -106,6 +110,8 @@ fun RecipeDetailedScreenRoot(
 ) {
     val recipeId: Int =
         navController.currentBackStackEntry?.arguments?.getInt("recipeId") ?: -1
+    val isModerationReview: Boolean =
+        navController.currentBackStackEntry?.arguments?.getBoolean("isModerationReview") ?: false
     val state = viewModel.state
     val scope = rememberCoroutineScope()
 
@@ -144,12 +150,60 @@ fun RecipeDetailedScreenRoot(
         }
     }
 
-    LaunchedEffect(state.publicateRecipeState) {
-        if (state.publicateRecipeState is UiState.Error) {
+    LaunchedEffect(state.requestPublishState) {
+        if (state.requestPublishState is UiState.Error) {
             snackbarHostState.showSnackbar(
-                message = state.publicateRecipeState.title,
+                message = state.requestPublishState.title,
                 duration = SnackbarDuration.Short
             )
+        }
+    }
+
+    LaunchedEffect(state.approveRecipeState) {
+        when (val approveState = state.approveRecipeState) {
+            is UiState.Error -> {
+                snackbarHostState.showSnackbar(
+                    message = approveState.title,
+                    duration = SnackbarDuration.Short
+                )
+            }
+            is UiState.Success -> navController.popBackStack()
+            else -> Unit
+        }
+    }
+
+    LaunchedEffect(state.rejectRecipeState) {
+        when (val rejectState = state.rejectRecipeState) {
+            is UiState.Error -> {
+                snackbarHostState.showSnackbar(
+                    message = rejectState.title,
+                    duration = SnackbarDuration.Short
+                )
+            }
+            is UiState.Success -> navController.popBackStack()
+            else -> Unit
+        }
+    }
+
+    LaunchedEffect(state.withdrawPublishRequestState) {
+        if (state.withdrawPublishRequestState is UiState.Error) {
+            snackbarHostState.showSnackbar(
+                message = state.withdrawPublishRequestState.title,
+                duration = SnackbarDuration.Short
+            )
+        }
+    }
+
+    LaunchedEffect(state.deleteRecipeState) {
+        when (val deleteState = state.deleteRecipeState) {
+            is UiState.Error -> {
+                snackbarHostState.showSnackbar(
+                    message = deleteState.title,
+                    duration = SnackbarDuration.Short
+                )
+            }
+            is UiState.Success -> navController.popBackStack()
+            else -> Unit
         }
     }
 
@@ -177,6 +231,7 @@ fun RecipeDetailedScreenRoot(
                 viewModel.onAction(
                     RecipeDetailedAction.ChangeActiveStep(cookingSessionId = cookingSessionId)
                 )
+                viewModel.onAction(RecipeDetailedAction.ConsumeStartCookingResult)
             }
 
             else -> Unit
@@ -186,10 +241,14 @@ fun RecipeDetailedScreenRoot(
     RecipeDetailedScreen(
         modifier = modifier,
         state = state,
+        isModerationReview = isModerationReview,
         onAction = { action ->
             when (action) {
                 RecipeDetailedAction.NavigateBack -> navController.popBackStack()
                 RecipeDetailedAction.NavigateProfile -> navController.navigate(Screens.Profile)
+                RecipeDetailedAction.NavigateEditRecipe -> {
+                    navController.navigate(Screens.EditRecipe(recipeId))
+                }
                 else -> Unit
             }
             viewModel.onAction(action)
@@ -201,6 +260,7 @@ fun RecipeDetailedScreenRoot(
 private fun RecipeDetailedScreen(
     modifier: Modifier = Modifier,
     state: RecipeDetailedState,
+    isModerationReview: Boolean,
     onAction: (RecipeDetailedAction) -> Unit
 ) {
     when (state.recipeState) {
@@ -209,6 +269,7 @@ private fun RecipeDetailedScreen(
                 modifier = modifier,
                 recipe = state.recipeState.data,
                 state = state,
+                isModerationReview = isModerationReview,
                 onAction = onAction
             )
         }
@@ -238,6 +299,21 @@ private fun RecipeDetailedScreen(
             },
             onConfirm = {
                 onAction(RecipeDetailedAction.ConfirmAddSelectedIngredientsToCart)
+            }
+        )
+    }
+    if (state.isRejectRecipeSheetVisible) {
+        RejectRecipeBottomSheet(
+            feedback = state.rejectFeedback,
+            isLoading = state.rejectRecipeState is UiState.Loading,
+            onFeedbackChange = { feedback ->
+                onAction(RecipeDetailedAction.ChangeRejectFeedback(feedback))
+            },
+            onDismiss = {
+                onAction(RecipeDetailedAction.HideRejectRecipeSheet)
+            },
+            onSubmit = {
+                onAction(RecipeDetailedAction.RejectRecipe)
             }
         )
     }
@@ -293,6 +369,7 @@ private fun RecipeDetailedContent(
     modifier: Modifier = Modifier,
     recipe: RecipeDetailed,
     state: RecipeDetailedState,
+    isModerationReview: Boolean,
     onAction: (RecipeDetailedAction) -> Unit
 ) {
     BoxWithConstraints(
@@ -349,6 +426,7 @@ private fun RecipeDetailedContent(
             modifier = Modifier.zIndex(3f),
             onAction = onAction,
             state = state,
+            isModerationReview = isModerationReview,
             recipe = recipe,
             anchoredState = sheetState,
             flingBehavior = flingBehavior,
@@ -378,6 +456,20 @@ private fun RecipeDetailedContent(
                 isLiked = state.isFavorite,
                 onClick = { onAction(RecipeDetailedAction.ToggleLike) }
             )
+            if (recipe.isAuthor) {
+                Spacer(modifier = Modifier.height(12.dp))
+
+                EditRecipeBubble(
+                    onClick = { onAction(RecipeDetailedAction.NavigateEditRecipe) }
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                DeleteRecipeBubble(
+                    isLoading = state.deleteRecipeState is UiState.Loading,
+                    onClick = { onAction(RecipeDetailedAction.ShowDeleteRecipeDialog) }
+                )
+            }
         }
         if (state.isModeratorReviewSheetVisible) {
             val recipe = (state.recipeState as? UiState.Success)?.data
@@ -398,6 +490,17 @@ private fun RecipeDetailedContent(
                 onRatingClick = { rating -> onAction(RecipeDetailedAction.ChangeRating(rating)) },
                 onSubmit = { onAction(RecipeDetailedAction.SubmitRating) },
                 onDismiss = { onAction(RecipeDetailedAction.HideRatingSheet) }
+            )
+        }
+        if (state.isDeleteRecipeDialogVisible) {
+            DeleteRecipeConfirmDialog(
+                isLoading = state.deleteRecipeState is UiState.Loading,
+                onDismiss = {
+                    onAction(RecipeDetailedAction.HideDeleteRecipeDialog)
+                },
+                onConfirm = {
+                    onAction(RecipeDetailedAction.DeleteRecipe)
+                }
             )
         }
     }
@@ -479,6 +582,64 @@ private fun HeartBubble(
             contentDescription = null,
             tint = if (isLiked) colors.likeColor else colors.outlinedStatsSurface
         )
+    }
+}
+
+@Composable
+private fun EditRecipeBubble(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    val colors = CustomTheme.colors
+
+    Box(
+        modifier = modifier
+            .size(40.dp)
+            .clip(CircleShape)
+            .background(colors.background)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = TablerIcons.Edit,
+            contentDescription = null,
+            tint = colors.text
+        )
+    }
+}
+
+@Composable
+private fun DeleteRecipeBubble(
+    modifier: Modifier = Modifier,
+    isLoading: Boolean,
+    onClick: () -> Unit
+) {
+    val colors = CustomTheme.colors
+
+    Box(
+        modifier = modifier
+            .size(40.dp)
+            .clip(CircleShape)
+            .background(colors.background)
+            .clickable(
+                enabled = !isLoading,
+                onClick = onClick
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(18.dp),
+                color = colors.likeColor,
+                strokeWidth = 2.dp
+            )
+        } else {
+            Icon(
+                imageVector = TablerIcons.Trash,
+                contentDescription = null,
+                tint = colors.likeColor
+            )
+        }
     }
 }
 
@@ -634,6 +795,7 @@ private fun StartCookSwipeButton(
 private fun RecipeSheet(
     modifier: Modifier = Modifier,
     state: RecipeDetailedState,
+    isModerationReview: Boolean,
     recipe: RecipeDetailed,
     onAction: (RecipeDetailedAction) -> Unit,
     anchoredState: AnchoredDraggableState<RecipeDetailedSheetValue>,
@@ -707,10 +869,26 @@ private fun RecipeSheet(
                         Spacer(modifier = Modifier.height(14.dp))
                         RecipePublicationBlock(
                             recipe = recipe,
+                            isModerationReview = isModerationReview,
+                            isRequestPublishLoading = state.requestPublishState is UiState.Loading,
+                            isWithdrawPublishRequestLoading = state.withdrawPublishRequestState is UiState.Loading,
+                            isApproveLoading = state.approveRecipeState is UiState.Loading,
+                            isRejectLoading = state.rejectRecipeState is UiState.Loading,
                             onShowModeratorReview = {
                                 onAction(RecipeDetailedAction.ShowModeratorReviewSheet)
                             },
-                            onPublishRecipe = { onAction(RecipeDetailedAction.PublishRecipe) }
+                            onRequestPublish = {
+                                onAction(RecipeDetailedAction.RequestPublishRecipe)
+                            },
+                            onWithdrawPublishRequest = {
+                                onAction(RecipeDetailedAction.WithdrawPublishRequest)
+                            },
+                            onApprove = {
+                                onAction(RecipeDetailedAction.ApproveRecipe)
+                            },
+                            onReject = {
+                                onAction(RecipeDetailedAction.ShowRejectRecipeSheet)
+                            }
                         )
                         RecipeRatingBlock(
                             modifier = Modifier.padding(top = 12.dp),
@@ -1122,6 +1300,8 @@ private fun ModeratorReviewBottomSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .heightIn(max = 620.dp)
+                .verticalScroll(scrollState)
                 .imePadding()
                 .padding(horizontal = 20.dp)
                 .padding(bottom = 28.dp)
@@ -1137,7 +1317,9 @@ private fun ModeratorReviewBottomSheet(
                 fontWeight = FontWeight.Bold,
                 color = colors.text
             )
+
             Spacer(modifier = Modifier.height(8.dp))
+
             recipe.reviewedAt?.let {
                 Text(
                     text = "Дата ревью: ${it.toReviewDateText()}",
@@ -1147,17 +1329,20 @@ private fun ModeratorReviewBottomSheet(
 
                 Spacer(modifier = Modifier.height(18.dp))
             }
+
             Text(
                 text = "Фидбэк",
                 style = typography.inter.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = colors.text
             )
+
             Spacer(modifier = Modifier.height(8.dp))
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 120.dp, max = 320.dp)
+                    .heightIn(min = 120.dp)
                     .clip(RoundedCornerShape(20.dp))
                     .background(colors.secondaryCardBackground)
                     .padding(16.dp)
@@ -1166,11 +1351,12 @@ private fun ModeratorReviewBottomSheet(
                     text = recipe.feedback?.takeIf { it.isNotBlank() }
                         ?: "Модератор не оставил дополнительный комментарий.",
                     style = typography.nunito.bodyLarge,
-                    color = colors.text,
-                    modifier = Modifier.verticalScroll(scrollState)
+                    color = colors.text
                 )
             }
+
             Spacer(modifier = Modifier.height(20.dp))
+
             Button(
                 onClick = onDismiss,
                 modifier = Modifier
@@ -1196,68 +1382,323 @@ private fun ModeratorReviewBottomSheet(
 private fun RecipePublicationBlock(
     modifier: Modifier = Modifier,
     recipe: RecipeDetailed,
+    isModerationReview: Boolean,
+    isRequestPublishLoading: Boolean,
+    isWithdrawPublishRequestLoading: Boolean,
+    isApproveLoading: Boolean,
+    isRejectLoading: Boolean,
     onShowModeratorReview: () -> Unit,
-    onPublishRecipe: () -> Unit
+    onRequestPublish: () -> Unit,
+    onWithdrawPublishRequest: () -> Unit,
+    onApprove: () -> Unit,
+    onReject: () -> Unit
 ) {
     val colors = CustomTheme.colors
+    val typography = CustomTheme.typography
 
-    when (recipe.status) {
-        null -> {
-            if (recipe.isAuthor) {
+    val hasModeratorFeedback = !recipe.feedback.isNullOrBlank()
+    val isRejected = recipe.status == PubRecipeRequestStatus.REJECTED
+    val isPending = recipe.status == PubRecipeRequestStatus.PENDING
+
+    val canShowRequestPublishButton =
+        recipe.isAuthor &&
+                                recipe.pubRecipeRequestId == null &&
+                recipe.status == null &&
+                !isModerationReview
+
+    val canWithdrawRequest =
+        recipe.isAuthor &&
+                recipe.pubRecipeRequestId != null &&
+                isPending &&
+                !isModerationReview
+
+    Column(modifier = modifier.fillMaxWidth()) {
+        when {
+            isModerationReview -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(18.dp))
+                        .background(colors.statsCardBackground)
+                        .padding(horizontal = 16.dp, vertical = 14.dp)
+                ) {
+                    Text(
+                        text = "Рецепт находится на модерации",
+                        style = typography.inter.titleMedium,
+                        color = colors.text
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Button(
+                        onClick = onApprove,
+                        enabled = !isApproveLoading && !isRejectLoading,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(54.dp),
+                        shape = RoundedCornerShape(18.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = colors.accentColor,
+                            contentColor = colors.invertedText,
+                            disabledContainerColor = colors.accentColor.copy(alpha = 0.45f),
+                            disabledContentColor = colors.invertedText.copy(alpha = 0.7f)
+                        )
+                    ) {
+                        if (isApproveLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(18.dp),
+                                color = colors.invertedText,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text(
+                                text = "Одобрить",
+                                style = typography.inter.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+
+                    Button(
+                        onClick = onReject,
+                        enabled = !isApproveLoading && !isRejectLoading,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(54.dp),
+                        shape = RoundedCornerShape(18.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = colors.likeColor,
+                            contentColor = colors.invertedText,
+                            disabledContainerColor = colors.likeColor.copy(alpha = 0.45f),
+                            disabledContentColor = colors.invertedText.copy(alpha = 0.7f)
+                        )
+                    ) {
+                        if (isRejectLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(18.dp),
+                                color = colors.invertedText,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text(
+                                text = "Отклонить",
+                                style = typography.inter.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+            }
+
+            isPending -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(18.dp))
+                        .background(colors.statsCardBackground)
+                        .padding(horizontal = 16.dp, vertical = 14.dp)
+                ) {
+                    Text(
+                        text = "Рецепт находится на модерации",
+                        style = typography.inter.titleMedium,
+                        color = colors.text
+                    )
+                }
+
+                if (canWithdrawRequest) {
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        TextButton(
+                            onClick = onWithdrawPublishRequest,
+                            enabled = !isWithdrawPublishRequestLoading
+                        ) {
+                            if (isWithdrawPublishRequestLoading) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(16.dp),
+                                    color = colors.likeColor,
+                                    strokeWidth = 2.dp
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                            }
+
+                            Text(
+                                text = "Отозвать заявку",
+                                style = typography.inter.bodyMedium,
+                                color = colors.likeColor
+                            )
+                        }
+                    }
+                }
+            }
+
+            isRejected -> {
+                if (hasModeratorFeedback) {
+                    Button(
+                        onClick = onShowModeratorReview,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        shape = RoundedCornerShape(18.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = colors.statsCardBackground,
+                            contentColor = colors.text
+                        )
+                    ) {
+                        Text(
+                            text = "Посмотреть ответ модератора",
+                            style = typography.inter.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+
+            canShowRequestPublishButton -> {
                 Button(
-                    onClick = onPublishRecipe,
-                    modifier = modifier
+                    onClick = onRequestPublish,
+                    enabled = !isRequestPublishLoading,
+                    modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
                     shape = RoundedCornerShape(18.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = colors.accentColor,
-                        contentColor = colors.invertedText
+                        contentColor = colors.invertedText,
+                        disabledContainerColor = colors.accentColor.copy(alpha = 0.45f),
+                        disabledContentColor = colors.invertedText.copy(alpha = 0.7f)
                     )
                 ) {
+                    if (isRequestPublishLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = colors.invertedText,
+                            strokeWidth = 2.dp
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+
                     Text(
-                        text = "Опубликовать рецепт",
-                        style = CustomTheme.typography.inter.titleMedium,
+                        text = "Отправить на публикацию",
+                        style = typography.inter.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
                 }
             }
+
+            else -> Unit
         }
-        PubRecipeRequestStatus.PENDING -> {
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun RejectRecipeBottomSheet(
+    feedback: String,
+    isLoading: Boolean,
+    onFeedbackChange: (String) -> Unit,
+    onDismiss: () -> Unit,
+    onSubmit: () -> Unit
+) {
+    val colors = CustomTheme.colors
+    val typography = CustomTheme.typography
+    val scrollState = rememberScrollState()
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = colors.background,
+        dragHandle = {
             Box(
-                modifier = modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(18.dp))
-                    .background(colors.statsCardBackground)
-                    .padding(horizontal = 16.dp, vertical = 14.dp)
-            ) {
-                Text(
-                    text = "Рецепт находится на модерации",
-                    style = CustomTheme.typography.inter.titleMedium,
-                    color = colors.text
-                )
-            }
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .width(60.dp)
+                    .height(5.dp)
+                    .clip(RoundedCornerShape(999.dp))
+                    .background(colors.tertiaryText.copy(alpha = 0.35f))
+            )
         }
-        PubRecipeRequestStatus.REJECTED -> {
-            Button(
-                onClick = onShowModeratorReview,
-                modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.9f)
+                .imePadding()
+                .verticalScroll(scrollState)
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 28.dp)
+        ) {
+            Text(
+                text = "Причина отклонения",
+                style = typography.inter.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = colors.text
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Напишите комментарий, который увидит автор рецепта.",
+                style = typography.nunito.bodyLarge,
+                color = colors.tertiaryText
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = feedback,
+                onValueChange = onFeedbackChange,
+                modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
+                    .heightIn(min = 140.dp),
+                placeholder = {
+                    Text("Например: не хватает фото шагов приготовления")
+                },
+                enabled = !isLoading,
+                minLines = 5,
+                shape = RoundedCornerShape(18.dp)
+            )
+
+            Spacer(modifier = Modifier.height(18.dp))
+
+            Button(
+                onClick = onSubmit,
+                enabled = !isLoading && feedback.isNotBlank(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(58.dp),
                 shape = RoundedCornerShape(18.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = colors.statsCardBackground,
-                    contentColor = colors.text
+                    containerColor = colors.likeColor,
+                    contentColor = colors.invertedText,
+                    disabledContainerColor = colors.likeColor.copy(alpha = 0.45f),
+                    disabledContentColor = colors.invertedText.copy(alpha = 0.7f)
                 )
             ) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = colors.invertedText,
+                        strokeWidth = 2.dp
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
+
                 Text(
-                    text = "Посмотреть ответ модератора",
-                    style = CustomTheme.typography.inter.titleMedium,
+                    text = "Отправить ответ",
+                    style = typography.inter.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
             }
         }
-        else -> Unit
     }
 }
 
@@ -1327,12 +1768,76 @@ private fun RecipeRatingBlock(
     }
 }
 
+@Composable
+private fun DeleteRecipeConfirmDialog(
+    isLoading: Boolean,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    val colors = CustomTheme.colors
+    val typography = CustomTheme.typography
+
+    AlertDialog(
+        onDismissRequest = { if (!isLoading) onDismiss() },
+        containerColor = colors.background,
+        title = {
+            Text(
+                text = "Удалить рецепт?",
+                style = typography.inter.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = colors.text
+            )
+        },
+        text = {
+            Text(
+                text = "Это действие нельзя будет отменить. Рецепт будет полностью удалён.",
+                style = typography.nunito.bodyLarge,
+                color = colors.tertiaryText
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = onConfirm,
+                enabled = !isLoading
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        color = colors.likeColor,
+                        strokeWidth = 2.dp
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                }
+                Text(
+                    text = "Удалить",
+                    color = colors.likeColor,
+                    style = typography.inter.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                enabled = !isLoading
+            ) {
+                Text(
+                    text = "Отмена",
+                    color = colors.text,
+                    style = typography.inter.titleMedium
+                )
+            }
+        }
+    )
+}
+
 @Preview
 @Composable
 private fun RecipeDetailedScreenPreview() {
     UfoodTheme {
         RecipeDetailedScreen(
             state = RecipeDetailedState(),
+            isModerationReview = false,
             onAction = {}
         )
     }

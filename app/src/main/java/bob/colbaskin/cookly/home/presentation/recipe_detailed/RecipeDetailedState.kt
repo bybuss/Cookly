@@ -3,6 +3,7 @@ package bob.colbaskin.cookly.home.presentation.recipe_detailed
 import androidx.annotation.DrawableRes
 import bob.colbaskin.cookly.R
 import bob.colbaskin.cookly.common.UiState
+import bob.colbaskin.cookly.common.user_prefs.domain.models.proto_configs.RoleConfig
 import bob.colbaskin.cookly.common.utils.getFirstLetter
 import bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeDetailed
 
@@ -12,6 +13,7 @@ data class RecipeDetailedState(
     val id: Int = -1,
     val email: String = "",
     val avatarUrl: String = "",
+    val role: RoleConfig = RoleConfig.USER,
     val isFavorite: Boolean = false,
 
     val userRate: Int? = null,
@@ -29,10 +31,18 @@ data class RecipeDetailedState(
 
     val isModeratorReviewSheetVisible: Boolean = false,
 
+    val requestPublishState: UiState<Int> = UiState.Idle,
+    val withdrawPublishRequestState: UiState<Unit> = UiState.Idle,
+    val approveRecipeState: UiState<Unit> = UiState.Idle,
+    val rejectRecipeState: UiState<Unit> = UiState.Idle,
+    val isRejectRecipeSheetVisible: Boolean = false,
+    val rejectFeedback: String = "",
+    val deleteRecipeState: UiState<Unit> = UiState.Idle,
+    val isDeleteRecipeDialogVisible: Boolean = false,
+
     val isRatingSheetVisible: Boolean = false,
     val selectedRating: Int = userRate ?: 0,
     val setRateState: UiState<Unit> = UiState.Idle,
-    val publicateRecipeState: UiState<Unit> = UiState.Idle,
 ) {
     val avatarLetter: String
         get() = email.getFirstLetter()

@@ -11,6 +11,7 @@ import bob.colbaskin.cookly.favourite.domain.FavoritesChangeNotifier
 import bob.colbaskin.cookly.home.domain.HomeRecipeRepository
 import bob.colbaskin.cookly.home.data.models.recipe_detailed.recalculateByPortions
 import bob.colbaskin.cookly.home.data.models.recipe_detailed.toCartIngredientUiItems
+import bob.colbaskin.cookly.home.domain.models.recipe_detailed.PubRecipeRequestStatus
 import bob.colbaskin.cookly.profile.domain.ProfileRepository
 import bob.colbaskin.cookly.shopping_cart.domain.ShoppingCartRepository
 import bob.colbaskin.cookly.shopping_cart.domain.models.CartIngredient
@@ -79,13 +80,31 @@ class RecipeDetailedViewModel @Inject constructor(
             }
             RecipeDetailedAction.StartCook -> startCook()
             is RecipeDetailedAction.ChangeActiveStep -> changeActiveStep(action.cookingSessionId)
+            RecipeDetailedAction.ConsumeStartCookingResult -> {
+                state = state.copy(startCookingState = UiState.Idle)
+            }
             RecipeDetailedAction.ShowModeratorReviewSheet -> {
                 state = state.copy(isModeratorReviewSheetVisible = true)
             }
             RecipeDetailedAction.HideModeratorReviewSheet -> {
                 state = state.copy(isModeratorReviewSheetVisible = false)
             }
-            RecipeDetailedAction.PublishRecipe -> publishRecipe()
+            RecipeDetailedAction.RequestPublishRecipe -> requestPublishRecipe()
+            RecipeDetailedAction.ApproveRecipe -> approveRecipe()
+            RecipeDetailedAction.ShowRejectRecipeSheet -> {
+                state = state.copy(
+                    isRejectRecipeSheetVisible = true,
+                    rejectFeedback = "",
+                    rejectRecipeState = UiState.Idle
+                )
+            }
+            RecipeDetailedAction.HideRejectRecipeSheet -> {
+                state = state.copy(isRejectRecipeSheetVisible = false)
+            }
+            is RecipeDetailedAction.ChangeRejectFeedback -> {
+                state = state.copy(rejectFeedback = action.feedback)
+            }
+            RecipeDetailedAction.RejectRecipe -> rejectRecipe()
             RecipeDetailedAction.ShowRatingSheet -> {
                 state = state.copy(
                     isRatingSheetVisible = true,
@@ -102,6 +121,14 @@ class RecipeDetailedViewModel @Inject constructor(
             RecipeDetailedAction.SubmitRating -> submitRating()
             RecipeDetailedAction.ConsumeRatingResult -> {
                 state = state.copy(setRateState = UiState.Idle)
+            }
+            RecipeDetailedAction.WithdrawPublishRequest -> withdrawPublishRequest()
+            RecipeDetailedAction.DeleteRecipe -> deleteRecipe()
+            RecipeDetailedAction.ShowDeleteRecipeDialog -> {
+                state = state.copy(isDeleteRecipeDialogVisible = true)
+            }
+            RecipeDetailedAction.HideDeleteRecipeDialog -> {
+                state = state.copy(isDeleteRecipeDialogVisible = false)
             }
             else -> Unit
         }
@@ -148,7 +175,8 @@ class RecipeDetailedViewModel @Inject constructor(
             profileRepository.observeUserPreferences().collectLatest { prefs ->
                 state = state.copy(
                     email = prefs.email,
-                    avatarUrl = prefs.avatarUrl
+                    avatarUrl = prefs.avatarUrl,
+                    role = prefs.role
                 )
             }
         }
@@ -278,15 +306,188 @@ class RecipeDetailedViewModel @Inject constructor(
         }
     }
 
-    private fun publishRecipe() {
+    private fun requestPublishRecipe() {
+        if (state.requestPublishState is UiState.Loading) return
+
+        val recipe = (state.recipeState as? UiState.Success)?.data ?: return
+
+        if (!recipe.isAuthor) {
+            state = state.copy(
+                requestPublishState = UiState.Error(
+                    title = "Недоступно",
+                    text = "Только автор рецепта может отправить его на публикацию."
+                )
+            )
+            return
+        }
+
+        state = state.copy(requestPublishState = UiState.Loading)
+
         viewModelScope.launch {
-            val pubRecipeRequestId
-                = (state.recipeState as? UiState.Success)?.data?.pubRecipeRequestId ?: return@launch
-            state = state.copy(publicateRecipeState = UiState.Loading)
-            val result = homeRecipeRepository.approveRecipeRequest(
-                pubRecipeRequestId = pubRecipeRequestId
-            ).toUiState()
-            state = state.copy(publicateRecipeState = result)
+            val result = homeRecipeRepository
+                .requestPublishRecipe(recipeId = recipe.id)
+                .toUiState()
+
+            state = when (result) {
+                is UiState.Success -> {
+                    val currentRecipe = (state.recipeState as? UiState.Success)?.data
+
+                    state.copy(
+                        requestPublishState = result,
+                        recipeState = if (currentRecipe != null) {
+                            UiState.Success(
+                                currentRecipe.copy(
+                                    pubRecipeRequestId = result.data,
+                                    status = PubRecipeRequestStatus.PENDING
+                                )
+                            )
+                        } else {
+                            state.recipeState
+                        }
+                    )
+                }
+
+                else -> state.copy(requestPublishState = result)
+            }
+        }
+    }
+
+    private fun withdrawPublishRequest() {
+        if (state.withdrawPublishRequestState is UiState.Loading) return
+
+        val recipe = (state.recipeState as? UiState.Success)?.data ?: return
+
+        val pubRecipeRequestId = recipe.pubRecipeRequestId ?: run {
+            state = state.copy(
+                withdrawPublishRequestState = UiState.Error(
+                    title = "Не удалось отозвать заявку",
+                    text = "ID заявки на публикацию не найден."
+                )
+            )
+            return
+        }
+
+        state = state.copy(withdrawPublishRequestState = UiState.Loading)
+
+        viewModelScope.launch {
+            val result = homeRecipeRepository
+                .deletePubRecipeRequest(pubRecipeRequestId)
+                .toUiState()
+
+            state = when (result) {
+                is UiState.Success -> {
+                    val currentRecipe = (state.recipeState as? UiState.Success)?.data
+                    state.copy(
+                        withdrawPublishRequestState = result,
+                        recipeState = if (currentRecipe != null) {
+                            UiState.Success(
+                                currentRecipe.copy(
+                                    pubRecipeRequestId = null,
+                                    status = null,
+                                    feedback = null,
+                                    reviewedAt = null
+                                )
+                            )
+                        } else {
+                            state.recipeState
+                        }
+                    )
+                }
+                else -> state.copy(withdrawPublishRequestState = result)
+            }
+        }
+    }
+
+    private fun approveRecipe() {
+        if (state.approveRecipeState is UiState.Loading) return
+
+        val pubRecipeRequestId =
+            (state.recipeState as? UiState.Success)?.data?.pubRecipeRequestId ?: run {
+                state = state.copy(
+                    approveRecipeState = UiState.Error(
+                        title = "Не удалось одобрить рецепт",
+                        text = "ID заявки на публикацию не найден."
+                    )
+                )
+                return
+            }
+
+        state = state.copy(approveRecipeState = UiState.Loading)
+
+        viewModelScope.launch {
+            val result = homeRecipeRepository
+                .approveRecipeRequest(pubRecipeRequestId = pubRecipeRequestId)
+                .toUiState()
+
+            state = state.copy(approveRecipeState = result)
+        }
+    }
+
+    private fun rejectRecipe() {
+        if (state.rejectRecipeState is UiState.Loading) return
+
+        val feedback = state.rejectFeedback.trim()
+
+        if (feedback.isBlank()) {
+            state = state.copy(
+                rejectRecipeState = UiState.Error(
+                    title = "Комментарий обязателен",
+                    text = "Укажите причину отказа в публикации."
+                )
+            )
+            return
+        }
+
+        val pubRecipeRequestId =
+            (state.recipeState as? UiState.Success)?.data?.pubRecipeRequestId ?: run {
+                state = state.copy(
+                    rejectRecipeState = UiState.Error(
+                        title = "Не удалось отклонить рецепт",
+                        text = "ID заявки на публикацию не найден."
+                    )
+                )
+                return
+            }
+
+        state = state.copy(rejectRecipeState = UiState.Loading)
+
+        viewModelScope.launch {
+            val result = homeRecipeRepository
+                .rejectRecipeRequest(
+                    pubRecipeRequestId = pubRecipeRequestId,
+                    feedback = feedback
+                )
+                .toUiState()
+
+            state = state.copy(
+                rejectRecipeState = result,
+                isRejectRecipeSheetVisible = result !is UiState.Success
+            )
+        }
+    }
+
+    private fun deleteRecipe() {
+        if (state.deleteRecipeState is UiState.Loading) return
+
+        val recipeId = (state.recipeState as? UiState.Success)?.data?.id ?: state.id
+                .takeIf { it > 0 } ?: run {
+                state = state.copy(
+                    deleteRecipeState = UiState.Error(
+                        title = "Не удалось удалить рецепт",
+                        text = "ID рецепта не найден."
+                    )
+                )
+                return
+            }
+
+        state = state.copy(deleteRecipeState = UiState.Loading, isDeleteRecipeDialogVisible = false)
+
+        viewModelScope.launch {
+            val result = homeRecipeRepository
+                .deleteRecipe(recipeId)
+                .toUiState()
+
+            state = state.copy(deleteRecipeState = result)
         }
     }
 }
