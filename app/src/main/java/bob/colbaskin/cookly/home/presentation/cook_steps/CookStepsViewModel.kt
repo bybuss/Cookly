@@ -49,7 +49,7 @@ class CookStepsViewModel @Inject constructor(
             CookStepsAction.SubmitRating -> sendRating()
             CookStepsAction.DismissRating -> {
                 state = state.copy(isRatingSheetVisible = false)
-                eventChannel.trySend(CookStepsEvent.NavigateHome)
+                eventChannel.trySend(CookStepsEvent.NavigateBack)
             }
         }
     }
@@ -88,7 +88,7 @@ class CookStepsViewModel @Inject constructor(
                 rating = state.rating
             ).toUiState()
             state = state.copy(setRateState = result, isRatingSheetVisible = false)
-            eventChannel.trySend(CookStepsEvent.NavigateHome)
+            eventChannel.trySend(CookStepsEvent.NavigateBack)
         }
     }
 }
