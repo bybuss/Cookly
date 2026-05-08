@@ -4,25 +4,19 @@ import bob.colbaskin.cookly.common.recipe_preview.domain.models.RecipesDisplayMo
 
 sealed interface RecipeStatusesAction {
 
-    data class SelectTab(
-        val tab: RecipeStatusesTab
-    ) : RecipeStatusesAction
+    data class SelectTab(val tab: RecipeStatusesTab): RecipeStatusesAction
 
     data class LoadTab(
         val tab: RecipeStatusesTab,
         val forceRefresh: Boolean = false
-    ) : RecipeStatusesAction
+    ): RecipeStatusesAction
 
-    data class RefreshTab(
-        val tab: RecipeStatusesTab
-    ) : RecipeStatusesAction
+    data class RefreshTab(val tab: RecipeStatusesTab): RecipeStatusesAction
 
     data class ChangeDisplayMode(
         val tab: RecipeStatusesTab,
         val mode: RecipesDisplayMode
-    ) : RecipeStatusesAction
+    ): RecipeStatusesAction
 
-    data class OpenRecipe(
-        val recipeId: Int
-    ) : RecipeStatusesAction
+    data class OpenRecipe(val recipeId: Int): RecipeStatusesAction
 }

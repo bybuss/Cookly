@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,8 +24,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
@@ -37,6 +39,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import bob.colbaskin.cookly.R
 import bob.colbaskin.cookly.common.UiState
+import bob.colbaskin.cookly.common.components.CooklyPullToRefreshBox
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.common.recipe_preview.domain.models.RecipePreview
 import bob.colbaskin.cookly.common.recipe_preview.presentation.RecipeListState
@@ -103,16 +106,21 @@ private fun RecipeStatusesScreen(
             Column(
                 modifier = Modifier.background(colors.background)
             ) {
-                ProfileRecipesHeader(
-                    title = "Мои рецепты",
-                    onBackClick = onBackClick
-                )
+                ProfileRecipesHeader(onBackClick = onBackClick)
 
                 ScrollableTabRow(
                     selectedTabIndex = tabs.indexOf(state.selectedTab),
                     containerColor = colors.background,
                     contentColor = colors.accentColor,
-                    edgePadding = 16.dp
+                    edgePadding = 16.dp,
+                    indicator = { tabPositions ->
+                        TabRowDefaults.SecondaryIndicator(
+                            modifier = Modifier.tabIndicatorOffset(
+                                tabPositions[tabs.indexOf(state.selectedTab)]
+                            ),
+                            color = colors.accentColor
+                        )
+                    }
                 ) {
                     tabs.forEachIndexed { index, tab ->
                         Tab(
@@ -167,10 +175,7 @@ private fun RecipeStatusesScreen(
 }
 
 @Composable
-private fun ProfileRecipesHeader(
-    title: String,
-    onBackClick: () -> Unit
-) {
+private fun ProfileRecipesHeader(onBackClick: () -> Unit) {
     Row(
         modifier = Modifier.padding(
             start = 8.dp,
@@ -193,7 +198,7 @@ private fun ProfileRecipesHeader(
 
         Text(
             modifier = Modifier.padding(start = 8.dp),
-            text = title,
+            text = "Мои рецепты",
             color = CustomTheme.colors.text,
             style = CustomTheme.typography.helvetica.headlineSmall,
             fontWeight = FontWeight.Bold
@@ -209,11 +214,10 @@ private fun ProfileRecipesTabPage(
     onAction: (RecipeStatusesAction) -> Unit
 ) {
     val colors = CustomTheme.colors
-    val typography = CustomTheme.typography
 
     val isRefreshing = state.recipesState is UiState.Loading
 
-    PullToRefreshBox(
+    CooklyPullToRefreshBox(
         modifier = Modifier
             .fillMaxSize()
             .background(colors.background),
@@ -244,46 +248,48 @@ private fun ProfileRecipesTabPage(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            when (val recipesState = state.recipesState) {
-                UiState.Idle, UiState.Loading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            color = colors.secondAccentColor
-                        )
-                    }
-                }
-
-                is UiState.Error -> {
-                    ProfileRecipesErrorContent(
-                        title = recipesState.title,
-                        onRetryClick = {
-                            onAction(
-                                RecipeStatusesAction.LoadTab(
-                                    tab = tab,
-                                    forceRefresh = true
-                                )
-                            )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f)
+            ) {
+                when (val recipesState = state.recipesState) {
+                    UiState.Idle, UiState.Loading -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(color = colors.accentColor)
                         }
-                    )
-                }
-
-                is UiState.Success<List<RecipePreview>> -> {
-                    if (recipesState.data.isEmpty()) {
-                        ProfileRecipesEmptyContent()
-                    } else {
-                        RecipePreviewList(
-                            recipes = recipesState.data,
-                            displayMode = state.displayMode,
-                            innerPadding = PaddingValues(),
-                            onRecipeClick = { recipe ->
+                    }
+                    is UiState.Error -> {
+                        ProfileRecipesErrorContent(
+                            title = recipesState.title,
+                            onRetryClick = {
                                 onAction(
-                                    RecipeStatusesAction.OpenRecipe(recipe.id)
+                                    RecipeStatusesAction.LoadTab(
+                                        tab = tab,
+                                        forceRefresh = true
+                                    )
                                 )
                             }
                         )
+                    }
+                    is UiState.Success<List<RecipePreview>> -> {
+                        if (recipesState.data.isEmpty()) {
+                            ProfileRecipesEmptyContent()
+                        } else {
+                            RecipePreviewList(
+                                recipes = recipesState.data,
+                                displayMode = state.displayMode,
+                                innerPadding = PaddingValues(),
+                                onRecipeClick = { recipe ->
+                                    onAction(
+                                        RecipeStatusesAction.OpenRecipe(recipe.id)
+                                    )
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -314,8 +320,8 @@ private fun ProfileRecipesErrorContent(
         Button(
             onClick = onRetryClick,
             colors = ButtonDefaults.buttonColors(
-                containerColor = CustomTheme.colors.secondAccentColor,
-                contentColor = CustomTheme.colors.text
+                containerColor = CustomTheme.colors.accentColor,
+                contentColor = CustomTheme.colors.invertedText
             ),
             shape = RoundedCornerShape(50)
         ) {
@@ -326,16 +332,21 @@ private fun ProfileRecipesErrorContent(
 
 @Composable
 private fun ProfileRecipesEmptyContent() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        contentAlignment = Alignment.Center
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(24.dp)
     ) {
-        Text(
-            text = "Пока здесь ничего нет",
-            style = CustomTheme.typography.inter.bodyMedium,
-            color = CustomTheme.colors.secondaryText
-        )
+        item {
+            Box(
+                modifier = Modifier.fillParentMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Пока здесь ничего нет",
+                    style = CustomTheme.typography.inter.bodyMedium,
+                    color = CustomTheme.colors.secondaryText
+                )
+            }
+        }
     }
 }
