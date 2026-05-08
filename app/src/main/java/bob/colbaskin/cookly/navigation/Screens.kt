@@ -50,7 +50,7 @@ sealed interface Screens {
     data class MealTimeDetailed(val mealTimeType: String)
 
     @Serializable
-    data class RecipeDetailed(val recipeId: Int)
+    data class RecipeDetailed(val recipeId: Int, val isModerationReview: Boolean = false)
 
     @Serializable
     data object CookSteps
@@ -66,4 +66,7 @@ sealed interface Screens {
 
     @Serializable
     data object CreateRecipe
+
+    @Serializable
+    data class EditRecipe(val recipeId: Int)
 }
