@@ -5,6 +5,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import androidx.navigation.toRoute
 import bob.colbaskin.cookly.agreement.presentation.AgreementScreenRoot
 import bob.colbaskin.cookly.agreement.presentation.policy.PolicyScreenRoot
 import bob.colbaskin.cookly.agreement.presentation.terms_of_use.TermsOfUseScreenRoot
@@ -106,8 +107,16 @@ fun NavGraphBuilder.detailedGraph(
         composable<Screens.CreateRecipe> {
             CreateRecipeScreenRoot(
                 navController = navController,
+                snackbarHostState = snackbarHostState
+            )
+        }
+        composable<Screens.EditRecipe> { backStackEntry ->
+            val args = backStackEntry.toRoute<Screens.EditRecipe>()
+
+            CreateRecipeScreenRoot(
+                navController = navController,
                 snackbarHostState = snackbarHostState,
-                onNavigateToSuccess = { navController.popBackStack() },
+                recipeIdForEdit = args.recipeId
             )
         }
         composable<Screens.OnModeration> { ModeratorRecipesScreenRoot(navController = navController) }

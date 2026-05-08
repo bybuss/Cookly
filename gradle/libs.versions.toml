@@ -59,6 +59,10 @@ roomRuntime = "2.7.1"
 roomCompiler = "2.7.1"
 roomPaging = "2.7.1"
 
+# Markdown
+multiplatformMarkdownRendererAndroid = "0.40.2"
+multiplatformMarkdownRendererM3 = "0.40.2"
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -119,6 +123,10 @@ androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref =
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "roomPaging" }
+
+# Markdown
+multiplatform-markdown-renderer-android = { module = "com.mikepenz:multiplatform-markdown-renderer-android", version.ref = "multiplatformMarkdownRendererAndroid" }
+multiplatform-markdown-renderer-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "multiplatformMarkdownRendererM3" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

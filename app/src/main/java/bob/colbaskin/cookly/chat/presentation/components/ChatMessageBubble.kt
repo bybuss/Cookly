@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -23,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import bob.colbaskin.cookly.R
 import bob.colbaskin.cookly.chat.domain.models.ChatMessage
 import bob.colbaskin.cookly.chat.domain.models.ChatSender
+import bob.colbaskin.cookly.common.components.MarkdownText
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 
 @Composable
@@ -36,7 +38,12 @@ fun ChatMessageBubble(
 
     Row(
         modifier = modifier
-            .padding(vertical = 6.dp),
+            .fillMaxWidth()
+            .padding(vertical = 6.dp)
+            .padding(
+                start = if (isUser) 24.dp else 0.dp,
+                end = if (!isUser) 24.dp else 0.dp
+            ),
         horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start,
         verticalAlignment = Alignment.Bottom
     ) {
@@ -72,20 +79,24 @@ fun ChatMessageBubble(
                     )
                     .padding(horizontal = 14.dp, vertical = 10.dp)
             ) {
-                Text(
-                    text = message.text,
-                    color = if (isUser) {
-                        CustomTheme.colors.background
-                    } else {
-                        CustomTheme.colors.text
-                    },
-                    style = CustomTheme.typography.inter.bodyMedium,
-                    fontStyle = if (message.isTyping) FontStyle.Italic else FontStyle.Normal
-                )
+                if (isUser || message.isTyping) {
+                    Text(
+                        text = message.text,
+                        color = if (isUser) CustomTheme.colors.background else CustomTheme.colors.text,
+                        style = CustomTheme.typography.inter.bodyMedium,
+                        fontStyle = if (message.isTyping) FontStyle.Italic else FontStyle.Normal
+                    )
+                } else {
+                    MarkdownText(
+                        text = message.text,
+                        color = CustomTheme.colors.text,
+                        style = CustomTheme.typography.inter.bodyMedium
+                    )
+                }
             }
 
             if (!isUser && message.recipes.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 ChefRecipeRowMessage(
                     recipes = message.recipes,
