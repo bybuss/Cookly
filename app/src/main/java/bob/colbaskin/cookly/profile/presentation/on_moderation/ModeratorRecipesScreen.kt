@@ -19,7 +19,9 @@ fun ModeratorRecipesScreenRoot(
             navController.popBackStack()
         },
         onRecipeClick = { recipeId ->
-            navController.navigate(Screens.RecipeDetailed(recipeId))
+            navController.navigate(
+                Screens.RecipeDetailed(recipeId = recipeId, isModerationReview = true)
+            )
         }
     )
 }
