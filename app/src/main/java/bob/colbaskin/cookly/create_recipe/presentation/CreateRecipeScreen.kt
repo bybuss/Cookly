@@ -6,7 +6,6 @@ import android.provider.OpenableColumns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -94,6 +93,7 @@ import bob.colbaskin.cookly.create_recipe.domain.models.CreateRecipeStep
 import bob.colbaskin.cookly.create_recipe.domain.models.LocalImage
 import bob.colbaskin.cookly.create_recipe.domain.models.PhotoTarget
 import bob.colbaskin.cookly.common.recipe_preview.domain.models.MealTimeType
+import bob.colbaskin.cookly.create_recipe.domain.models.RecipeSubmitMode
 import coil3.compose.rememberAsyncImagePainter
 import compose.icons.TablerIcons
 import compose.icons.tablericons.ChevronDown
@@ -109,12 +109,18 @@ fun CreateRecipeScreenRoot(
     navController: NavHostController,
     snackbarHostState: SnackbarHostState,
     viewModel: CreateRecipeViewModel = hiltViewModel(),
-    onNavigateToSuccess: (Int) -> Unit = {}
+    recipeIdForEdit: Int? = null,
 ) {
     val state = viewModel.state
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var photoTarget by remember { mutableStateOf<PhotoTarget?>(null) }
+
+    LaunchedEffect(recipeIdForEdit) {
+        recipeIdForEdit?.let { recipeId ->
+            viewModel.onAction(CreateRecipeAction.LoadRecipeForEdit(recipeId))
+        }
+    }
 
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
@@ -151,12 +157,32 @@ fun CreateRecipeScreenRoot(
                     )
                 }
             }
-
             is UiState.Success -> {
-                onNavigateToSuccess(submitState.data)
+                if (state.submitMode == RecipeSubmitMode.SAVE_ONLY) {
+                    navController.popBackStack()
+                    viewModel.onAction(CreateRecipeAction.ConsumeSuccess)
+                }
+            }
+            else -> Unit
+        }
+    }
+
+    LaunchedEffect(state.requestPublishState) {
+        when (val requestPublishState = state.requestPublishState) {
+            is UiState.Error -> {
+                scope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = requestPublishState.title,
+                        duration = SnackbarDuration.Short
+                    )
+                }
+            }
+            is UiState.Success -> {
+                val recipeId = state.recipeId ?: (state.submitState as? UiState.Success<Int>)?.data
+                if (recipeId != null) navController.popBackStack()
+                else navController.popBackStack()
                 viewModel.onAction(CreateRecipeAction.ConsumeSuccess)
             }
-
             else -> Unit
         }
     }
@@ -199,7 +225,7 @@ private fun CreateRecipeScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Оформление рецепта",
+                        text = state.screenTitle,
                         style = CustomTheme.typography.nunito.headlineSmall
                     )
                 },
@@ -238,6 +264,7 @@ private fun CreateRecipeScreen(
                     RequiredFieldLabel(text = "Фотография готового блюда")
                     PhotoBlock(
                         image = state.mainPhoto,
+                        existingImageUrl = state.existingMainPhotoUrl,
                         onUpload = onPickMainPhoto,
                         onRemove = { onAction(CreateRecipeAction.RemoveMainPhoto) }
                     )
@@ -493,32 +520,77 @@ private fun CreateRecipeScreen(
             }
 
             item {
-                Button(
-                    onClick = { onAction(CreateRecipeAction.Submit) },
-                    enabled = !state.isSubmitting,
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = CustomTheme.colors.accentColor,
-                        contentColor = Color.White,
-                        disabledContainerColor = CustomTheme.colors.accentColor.copy(alpha = 0.5f),
-                        disabledContentColor = CustomTheme.colors.strokeColor
-                    )
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    if (state.isSubmitting) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(18.dp),
-                            color = Color.White,
-                            strokeWidth = 2.dp
-                        )
-                        Spacer(Modifier.width(8.dp))
+                    OutlinedButton(
+                        onClick = { onAction(CreateRecipeAction.SaveRecipe) },
+                        enabled = !state.isSubmitting,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp),
+                        shape = RoundedCornerShape(18.dp)
+                    ) {
+                        if (
+                            state.submitMode == RecipeSubmitMode.SAVE_ONLY &&
+                            state.submitState is UiState.Loading
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(18.dp),
+                                strokeWidth = 2.dp
+                            )
+                            Spacer(Modifier.width(8.dp))
+                        }
+
+                        Text(state.saveButtonText)
                     }
 
-                    Text("Отправить рецепт")
+                    Button(
+                        onClick = { onAction(CreateRecipeAction.SubmitForPublication) },
+                        enabled = !state.isSubmitting,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        shape = RoundedCornerShape(18.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = CustomTheme.colors.accentColor,
+                            contentColor = Color.White,
+                            disabledContainerColor = CustomTheme.colors.accentColor.copy(alpha = 0.5f),
+                            disabledContentColor = CustomTheme.colors.strokeColor
+                        )
+                    ) {
+                        if (
+                            state.submitMode == RecipeSubmitMode.SAVE_AND_REQUEST_PUBLICATION &&
+                            state.isSubmitting
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(18.dp),
+                                color = Color.White,
+                                strokeWidth = 2.dp
+                            )
+                            Spacer(Modifier.width(8.dp))
+                        }
+
+                        Text("Отправить на публикацию")
+                    }
                 }
             }
         }
+    }
+
+    if (state.isInitialLoading) {
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .background(CustomTheme.colors.background),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(color = CustomTheme.colors.accentColor)
+        }
+        return
     }
 
     if (state.isTimePickerVisible) {
@@ -980,9 +1052,12 @@ private fun FormTextField(
 @Composable
 private fun PhotoBlock(
     image: LocalImage?,
+    existingImageUrl: String? = null,
     onUpload: () -> Unit,
     onRemove: () -> Unit
 ) {
+    val displayModel: Any? = image?.uri ?: existingImageUrl
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -994,7 +1069,7 @@ private fun PhotoBlock(
         verticalArrangement = Arrangement.spacedBy(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        if (image == null) {
+        if (displayModel == null) {
             Icon(
                 imageVector = TablerIcons.Photo,
                 contentDescription = null,
@@ -1003,7 +1078,7 @@ private fun PhotoBlock(
             )
         } else {
             Image(
-                painter = rememberAsyncImagePainter(model = image.uri),
+                painter = rememberAsyncImagePainter(model = displayModel),
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -1018,7 +1093,7 @@ private fun PhotoBlock(
                 contentColor = CustomTheme.colors.invertedText
             )
         ) {
-            Text(if (image == null) "Загрузить фото" else "Заменить фото")
+            Text(if (displayModel == null) "Загрузить фото" else "Заменить фото")
         }
 
         if (image != null) {
@@ -1248,6 +1323,7 @@ private fun StepCard(
 ) {
     val colors = CustomTheme.colors
     val typography = CustomTheme.typography
+    val displayImageModel: Any? = step.image?.uri ?: step.existingImageUrl
 
     Column(
         modifier = modifier
@@ -1323,9 +1399,9 @@ private fun StepCard(
             style = typography.nunito.bodyMedium,
             color = colors.text
         )
-        step.image?.let {
+        displayImageModel?.let {
             Image(
-                painter = rememberAsyncImagePainter(model = it.uri),
+                painter = rememberAsyncImagePainter(model = it),
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -1337,7 +1413,7 @@ private fun StepCard(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             OutlinedButton(onClick = onPickImage) {
-                Text(if (step.image == null) "Загрузить фото" else "Заменить фото")
+                Text(if (displayImageModel == null) "Загрузить фото" else "Заменить фото")
             }
             if (step.image != null) {
                 TextButton(

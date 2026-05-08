@@ -7,6 +7,10 @@ import bob.colbaskin.cookly.create_recipe.domain.models.CreateRecipeIngredient
 
 interface CreateRecipeRepository {
     suspend fun searchIngredients(query: String): ApiResult<List<CreateRecipeIngredient>>
+
     suspend fun getRecipeCategories(): ApiResult<List<CreateRecipeCategory>>
+
     suspend fun submitRecipe(command: CreateRecipeCommand): ApiResult<Int>
+
+    suspend fun updateRecipe(recipeId: Int, command: CreateRecipeCommand): ApiResult<Int>
 }

@@ -1,89 +1,71 @@
 package bob.colbaskin.cookly.create_recipe.domain.models
 
-import bob.colbaskin.cookly.create_recipe.data.models.CreateRecipeIngredientDto
-import bob.colbaskin.cookly.create_recipe.data.models.CreateRecipeRequestDto
-import bob.colbaskin.cookly.create_recipe.data.models.CreateRecipeStepDto
-import bob.colbaskin.cookly.create_recipe.data.models.IngredientSearchResponseDto
-import bob.colbaskin.cookly.create_recipe.data.models.RecipeCategoryDto
+import bob.colbaskin.cookly.common.UiState
+import bob.colbaskin.cookly.common.recipe_preview.domain.models.MealTimeType
 import bob.colbaskin.cookly.create_recipe.presentation.CreateRecipeState
+import bob.colbaskin.cookly.home.domain.models.recipe_detailed.RecipeDetailed
 
-fun LocalImage.toDomain(): UploadImage {
-    return UploadImage(
-        uri = uri,
-        fileName = displayName,
-        mimeType = mimeType
-    )
-}
+fun RecipeDetailed.toEditRecipeState(
+    currentState: CreateRecipeState
+): CreateRecipeState {
+    val hours = estimatedTime / 60
+    val minutes = estimatedTime % 60
 
-fun IngredientSearchResponseDto.toDomain(): CreateRecipeIngredient {
-    return CreateRecipeIngredient(
-        ingredientId = id,
-        title = title,
-        unitMeasurement = defaultUnitMeasurement
-    )
-}
+    return currentState.copy(
+        mode = RecipeFormMode.EDIT,
+        recipeId = id,
+        isInitialLoading = false,
+        initialLoadState = UiState.Success(Unit),
 
-fun RecipeCategoryDto.toDomain(): CreateRecipeCategory {
-    return CreateRecipeCategory(
-        categoryId = id,
-        title = title
-    )
-}
-
-fun CreateRecipeCommand.toDto(): CreateRecipeRequestDto {
-    return CreateRecipeRequestDto(
         title = title,
         description = description,
-        estimatedTime = estimatedTime,
-        caloriesBy100Grams = caloriesBy100Grams,
-        mealTime = mealTime,
+        estimatedHour = hours,
+        estimatedMinute = minutes,
+        caloriesBy100Grams = caloriesBy100Grams.toString(),
+        mealTimeType = mealTime.toCreateRecipeMealTimeTypeOrNull(),
+
+        categories = categories.map {
+            CreateRecipeCategory(
+                categoryId = it.id,
+                title = it.title
+            )
+        },
+
+        ingredients = ingredients.map {
+            CreateRecipeIngredient(
+                ingredientId = it.id ?: 0,
+                title = it.name,
+                quantity = it.count.toString(),
+                unitMeasurement = it.unitOfMeasurement
+            )
+        }.filter { it.ingredientId > 0 },
+
         spicyLevel = spicyLevel,
         difficultyLevel = difficultyLevel,
-        steps = steps.map {
-            CreateRecipeStepDto(
-                title = it.title,
-                description = it.description,
-                number = it.number
-            )
-        },
-        recipeIngredients = ingredients.map {
-            CreateRecipeIngredientDto(
-                ingredientId = it.ingredientId,
-                unitMeasurement = it.unitMeasurement,
-                quantity = it.quantity
-            )
-        },
-        recipeCategoriesIds = categories.map { it.categoryId }
+
+        steps = steps
+            .sortedBy { it.number }
+            .mapIndexed { index, step ->
+                CreateRecipeStep(
+                    localId = index + 1L,
+                    number = step.number,
+                    title = step.title,
+                    description = step.description,
+                    image = null,
+                    existingImageUrl = step.imageUrl
+                )
+            }
+            .ifEmpty {
+                listOf(CreateRecipeStep(localId = 1L, number = 1))
+            },
+
+        mainPhoto = null,
+        existingMainPhotoUrl = imageUrl
     )
 }
 
-fun CreateRecipeState.toCommand(): CreateRecipeCommand {
-    return CreateRecipeCommand(
-        title = title.trim(),
-        description = description.trim(),
-        estimatedTime = (estimatedHour * 60) + estimatedMinute,
-        caloriesBy100Grams = caloriesBy100Grams.toInt(),
-        mealTime = mealTimeType!!.apiValue,
-        categories = categories.map {
-            CreateRecipeCategoryCommand(categoryId = it.categoryId)
-        },
-        ingredients = ingredients.map {
-            CreateRecipeIngredientCommand(
-                ingredientId = it.ingredientId,
-                quantity = it.quantity.replace(",", ".").toDouble(),
-                unitMeasurement = it.unitMeasurement.trim()
-            )
-        },
-        spicyLevel = spicyLevel,
-        difficultyLevel = difficultyLevel,
-        steps = steps.map {
-            CreateRecipeStepCommand(
-                number = it.number,
-                title = it.title.trim(),
-                description = it.description.trim(),
-                image = it.image?.toDomain()
-            )
-        },
-        mainPhoto = mainPhoto?.toDomain()
-    )
+private fun MealTimeType?.safeApiValue(): String? = this?.apiValue
+
+private fun String.toCreateRecipeMealTimeTypeOrNull(): MealTimeType? {
+    return MealTimeType.entries.firstOrNull { it.apiValue == this }
 }

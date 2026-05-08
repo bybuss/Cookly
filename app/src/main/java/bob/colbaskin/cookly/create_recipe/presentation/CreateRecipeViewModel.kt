@@ -10,7 +10,11 @@ import bob.colbaskin.cookly.common.UiState
 import bob.colbaskin.cookly.common.toUiState
 import bob.colbaskin.cookly.create_recipe.domain.CreateRecipeRepository
 import bob.colbaskin.cookly.create_recipe.domain.models.CreateRecipeStep
-import bob.colbaskin.cookly.create_recipe.domain.models.toCommand
+import bob.colbaskin.cookly.create_recipe.data.models.toCommand
+import bob.colbaskin.cookly.create_recipe.domain.models.RecipeFormMode
+import bob.colbaskin.cookly.create_recipe.domain.models.RecipeSubmitMode
+import bob.colbaskin.cookly.create_recipe.domain.models.toEditRecipeState
+import bob.colbaskin.cookly.home.domain.HomeRecipeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -19,7 +23,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CreateRecipeViewModel @Inject constructor(
-    private val repository: CreateRecipeRepository
+    private val repository: CreateRecipeRepository,
+    private val homeRecipeRepository: HomeRecipeRepository
 ) : ViewModel() {
 
     var state by mutableStateOf(CreateRecipeState())
@@ -27,39 +32,31 @@ class CreateRecipeViewModel @Inject constructor(
 
     private var nextStepLocalId: Long = 2L
     private var ingredientSearchJob: Job? = null
+    private var loadedEditRecipeId: Int? = null
 
     fun onAction(action: CreateRecipeAction) {
         when (action) {
             CreateRecipeAction.Back -> Unit
-
             is CreateRecipeAction.UpdateTitle -> { state = state.copy(title = action.value) }
-
             is CreateRecipeAction.UpdateDescription -> {
                 state = state.copy(description = action.value)
             }
-
             is CreateRecipeAction.UpdateCaloriesBy100Grams -> {
                 state = state.copy(
                     caloriesBy100Grams = action.value.filter { it.isDigit() }
                 )
             }
-
             is CreateRecipeAction.UpdateSpicyLevel -> {
                 state = state.copy(spicyLevel = action.value.coerceIn(0, 5))
             }
-
             is CreateRecipeAction.UpdateDifficultyLevel -> {
                 state = state.copy(difficultyLevel = action.value.coerceIn(1, 5))
             }
-
             is CreateRecipeAction.SelectMealTime -> {
                 state = state.copy(mealTimeType = action.mealTimeType)
             }
-
             CreateRecipeAction.OpenTimePicker -> { state = state.copy(isTimePickerVisible = true) }
-
             CreateRecipeAction.DismissTimePicker -> { state = state.copy(isTimePickerVisible = false) }
-
             is CreateRecipeAction.ConfirmTime -> {
                 state = state.copy(
                     estimatedHour = action.hour,
@@ -67,23 +64,19 @@ class CreateRecipeViewModel @Inject constructor(
                     isTimePickerVisible = false
                 )
             }
-
             CreateRecipeAction.ShowCategorySheet -> {
                 state = state.copy(isCategorySheetVisible = true)
                 loadCategoriesIfNeeded()
             }
-
             CreateRecipeAction.HideCategorySheet -> {
                 state = state.copy(isCategorySheetVisible = false)
             }
-
             is CreateRecipeAction.SetCategories -> {
                 state = state.copy(
                     categories = action.categories,
                     isCategorySheetVisible = false
                 )
             }
-
             is CreateRecipeAction.RemoveCategory -> {
                 state = state.copy(
                     categories = state.categories.filterNot {
@@ -91,7 +84,6 @@ class CreateRecipeViewModel @Inject constructor(
                     }
                 )
             }
-
             CreateRecipeAction.ShowIngredientSheet -> {
                 ingredientSearchJob?.cancel()
                 state = state.copy(
@@ -103,7 +95,6 @@ class CreateRecipeViewModel @Inject constructor(
                     ingredientSearchError = null
                 )
             }
-
             is CreateRecipeAction.ShowEditIngredientSheet -> {
                 ingredientSearchJob?.cancel()
                 state = state.copy(
@@ -115,7 +106,6 @@ class CreateRecipeViewModel @Inject constructor(
                     ingredientSearchError = null
                 )
             }
-
             CreateRecipeAction.HideIngredientSheet -> {
                 ingredientSearchJob?.cancel()
                 state = state.copy(
@@ -127,9 +117,7 @@ class CreateRecipeViewModel @Inject constructor(
                     ingredientSearchError = null
                 )
             }
-
             is CreateRecipeAction.SearchIngredients -> { searchIngredients(action.query) }
-
             is CreateRecipeAction.SaveIngredient -> {
                 val currentIndex = state.ingredients.indexOfFirst {
                     it.ingredientId == action.ingredient.ingredientId
@@ -155,7 +143,6 @@ class CreateRecipeViewModel @Inject constructor(
                     ingredientSearchError = null
                 )
             }
-
             is CreateRecipeAction.RemoveIngredient -> {
                 state = state.copy(
                     ingredients = state.ingredients.filterNot {
@@ -163,13 +150,11 @@ class CreateRecipeViewModel @Inject constructor(
                     }
                 )
             }
-
             is CreateRecipeAction.MoveIngredient -> {
                 state = state.copy(
                     ingredients = state.ingredients.move(action.fromIndex, action.toIndex)
                 )
             }
-
             CreateRecipeAction.AddStep -> {
                 state = state.copy(
                     steps = state.steps + CreateRecipeStep(
@@ -178,7 +163,6 @@ class CreateRecipeViewModel @Inject constructor(
                     )
                 )
             }
-
             is CreateRecipeAction.UpdateStepTitle -> {
                 state = state.copy(
                     steps = state.steps.map { step ->
@@ -190,7 +174,6 @@ class CreateRecipeViewModel @Inject constructor(
                     }
                 )
             }
-
             is CreateRecipeAction.UpdateStepDescription -> {
                 state = state.copy(
                     steps = state.steps.map { step ->
@@ -202,7 +185,6 @@ class CreateRecipeViewModel @Inject constructor(
                     }
                 )
             }
-
             is CreateRecipeAction.SetStepPhoto -> {
                 state = state.copy(
                     steps = state.steps.map { step ->
@@ -214,7 +196,6 @@ class CreateRecipeViewModel @Inject constructor(
                     }
                 )
             }
-
             is CreateRecipeAction.RemoveStep -> {
                 if (state.steps.size == 1) return
                 state = state.copy(
@@ -223,7 +204,6 @@ class CreateRecipeViewModel @Inject constructor(
                         .reNumber()
                 )
             }
-
             is CreateRecipeAction.MoveStep -> {
                 state = state.copy(
                     steps = state.steps
@@ -231,19 +211,26 @@ class CreateRecipeViewModel @Inject constructor(
                         .reNumber()
                 )
             }
-
             is CreateRecipeAction.SetMainPhoto -> { state = state.copy(mainPhoto = action.image) }
-
             CreateRecipeAction.RemoveMainPhoto -> { state = state.copy(mainPhoto = null) }
-
-            CreateRecipeAction.Submit -> submit()
-
-            CreateRecipeAction.ConsumeSuccess -> { state = state.copy(submitState = null) }
-
+            CreateRecipeAction.SaveRecipe -> submit(RecipeSubmitMode.SAVE_ONLY)
+            CreateRecipeAction.SubmitForPublication -> {
+                submit(RecipeSubmitMode.SAVE_AND_REQUEST_PUBLICATION)
+            }
+            CreateRecipeAction.ConsumeSuccess -> {
+                state = state.copy(
+                    submitMode = null,
+                    submitState = null,
+                    requestPublishState = null
+                )
+            }
             CreateRecipeAction.DismissError -> {
                 if (state.submitState is UiState.Error) {
                     state = state.copy(submitState = null)
                 }
+            }
+            is CreateRecipeAction.LoadRecipeForEdit -> {
+                loadRecipeForEdit(action.recipeId)
             }
         }
     }
@@ -316,12 +303,13 @@ class CreateRecipeViewModel @Inject constructor(
         }
     }
 
-    private fun submit() {
+    private fun submit(submitMode: RecipeSubmitMode) {
         if (state.isSubmitting) return
 
         val validationError = validateBeforeSubmit()
         if (validationError != null) {
             state = state.copy(
+                submitMode = submitMode,
                 submitState = UiState.Error(
                     title = validationError,
                     text = validationError
@@ -330,11 +318,58 @@ class CreateRecipeViewModel @Inject constructor(
             return
         }
 
-        state = state.copy(submitState = UiState.Loading)
+        state = state.copy(
+            submitMode = submitMode,
+            submitState = UiState.Loading,
+            requestPublishState = null
+        )
 
         viewModelScope.launch {
-            val result = repository.submitRecipe(state.toCommand()).toUiState()
-            state = state.copy(submitState = result)
+            val command = state.toCommand()
+
+            val saveResult = when (state.mode) {
+                RecipeFormMode.CREATE -> {
+                    repository.submitRecipe(command)
+                }
+
+                RecipeFormMode.EDIT -> {
+                    val recipeId = state.recipeId
+                    if (recipeId == null) {
+                        ApiResult.Error(
+                            title = "Не удалось обновить рецепт",
+                            text = "ID рецепта не найден."
+                        )
+                    } else {
+                        repository.updateRecipe(
+                            recipeId = recipeId,
+                            command = command
+                        )
+                    }
+                }
+            }
+
+            when (saveResult) {
+                is ApiResult.Error -> {
+                    state = state.copy(
+                        submitState = saveResult.toUiState()
+                    )
+                }
+                is ApiResult.Success -> {
+                    val savedRecipeId = saveResult.data
+                    state = state.copy(
+                        recipeId = savedRecipeId,
+                        submitState = UiState.Success(savedRecipeId)
+                    )
+                    if (submitMode == RecipeSubmitMode.SAVE_AND_REQUEST_PUBLICATION) {
+                        state = state.copy(requestPublishState = UiState.Loading)
+                        val requestPublishResult = homeRecipeRepository
+                            .requestPublishRecipe(recipeId = savedRecipeId)
+                        state = state.copy(
+                            requestPublishState = requestPublishResult.toUiState()
+                        )
+                    }
+                }
+            }
         }
     }
 
@@ -342,7 +377,14 @@ class CreateRecipeViewModel @Inject constructor(
         val calories = state.caloriesBy100Grams.toIntOrNull()
 
         return when {
-            state.mainPhoto == null -> "Добавьте изображение к вашему рецепту"
+            state.mode == RecipeFormMode.CREATE && state.mainPhoto == null -> {
+                "Добавьте изображение к вашему рецепту"
+            }
+            state.mode == RecipeFormMode.EDIT &&
+                    state.mainPhoto == null &&
+                    state.existingMainPhotoUrl.isNullOrBlank() -> {
+                "Добавьте изображение к вашему рецепту"
+            }
             state.title.isBlank() -> "Укажите название рецепта"
             state.description.isBlank() -> "Укажите описание рецепта"
             state.estimatedHour == 0 && state.estimatedMinute == 0 -> "Укажите время приготовления"
@@ -364,6 +406,39 @@ class CreateRecipeViewModel @Inject constructor(
                 "Заполните заголовок и описание каждого шага"
             }
             else -> null
+        }
+    }
+
+    private fun loadRecipeForEdit(recipeId: Int) {
+        if (recipeId <= 0) return
+        if (loadedEditRecipeId == recipeId && state.mode == RecipeFormMode.EDIT) return
+
+        loadedEditRecipeId = recipeId
+
+        state = state.copy(
+            mode = RecipeFormMode.EDIT,
+            recipeId = recipeId,
+            isInitialLoading = true,
+            initialLoadState = UiState.Loading
+        )
+
+        viewModelScope.launch {
+            when (val result = homeRecipeRepository.getRecipeById(recipeId)) {
+                is ApiResult.Success -> {
+                    state = result.data.toEditRecipeState(currentState = state)
+                    nextStepLocalId = (state.steps.maxOfOrNull { it.localId } ?: 0L) + 1L
+                }
+
+                is ApiResult.Error -> {
+                    state = state.copy(
+                        isInitialLoading = false,
+                        initialLoadState = UiState.Error(
+                            title = result.title,
+                            text = result.text
+                        )
+                    )
+                }
+            }
         }
     }
 }

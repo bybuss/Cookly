@@ -8,8 +8,8 @@ import bob.colbaskin.cookly.create_recipe.domain.models.CreateRecipeCommand
 import bob.colbaskin.cookly.create_recipe.domain.CreateRecipeRepository
 import bob.colbaskin.cookly.create_recipe.domain.models.CreateRecipeCategory
 import bob.colbaskin.cookly.create_recipe.domain.models.CreateRecipeIngredient
-import bob.colbaskin.cookly.create_recipe.domain.models.toDomain
-import bob.colbaskin.cookly.create_recipe.domain.models.toDto
+import bob.colbaskin.cookly.create_recipe.data.models.toDomain
+import bob.colbaskin.cookly.create_recipe.data.models.toDto
 import javax.inject.Inject
 
 private const val TAG = "CreateRecipeRepositoryImpl"
@@ -99,5 +99,59 @@ class CreateRecipeRepositoryImpl @Inject constructor(
             }
             else -> result
         }
+    }
+
+    override suspend fun updateRecipe(
+        recipeId: Int,
+        command: CreateRecipeCommand
+    ): ApiResult<Int> {
+        Log.d(TAG, "Update recipe with id=$recipeId")
+
+        val result = safeApiCall(
+            apiCall = {
+                val updatedRecipe = apiService.updateRecipe(
+                    recipeId = recipeId,
+                    request = command.toDto()
+                )
+
+                command.mainPhoto?.let { image ->
+                    apiService.uploadRecipeAvatar(
+                        recipeId = updatedRecipe.id,
+                        file = createMultipartBodyPart(
+                            context = context,
+                            uri = image.uri,
+                            fileName = image.fileName,
+                            mimeType = image.mimeType
+                        )
+                    )
+                }
+
+                val serverStepsByNumber = updatedRecipe.steps.associateBy { it.number }
+
+                command.steps.forEach { step ->
+                    val image = step.image ?: return@forEach
+
+                    val serverStep = serverStepsByNumber[step.number]
+                        ?: error("Сервер не вернул шаг с number=${step.number}")
+
+                    apiService.uploadRecipeStepAvatar(
+                        recipeId = updatedRecipe.id,
+                        recipeStepNumber = serverStep.number,
+                        file = createMultipartBodyPart(
+                            context = context,
+                            uri = image.uri,
+                            fileName = image.fileName,
+                            mimeType = image.mimeType
+                        )
+                    )
+                }
+
+                updatedRecipe.id
+            },
+            successHandler = { response -> response },
+            context = context
+        )
+
+        return result
     }
 }

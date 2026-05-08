@@ -5,5 +5,6 @@ data class CreateRecipeStep(
     val number: Int,
     val title: String = "",
     val description: String = "",
-    val image: LocalImage? = null
+    val image: LocalImage? = null,
+    val existingImageUrl: String? = null
 )

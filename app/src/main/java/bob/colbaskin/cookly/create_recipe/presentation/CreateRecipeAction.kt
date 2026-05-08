@@ -25,9 +25,7 @@ sealed interface CreateRecipeAction {
     data class RemoveCategory(val categoryId: Int): CreateRecipeAction
 
     data object ShowIngredientSheet: CreateRecipeAction
-    data class ShowEditIngredientSheet(
-        val ingredient: CreateRecipeIngredient
-    ) : CreateRecipeAction
+    data class ShowEditIngredientSheet(val ingredient: CreateRecipeIngredient): CreateRecipeAction
     data object HideIngredientSheet: CreateRecipeAction
     data class SearchIngredients(val query: String): CreateRecipeAction
     data class SaveIngredient(val ingredient: CreateRecipeIngredient) : CreateRecipeAction
@@ -44,7 +42,10 @@ sealed interface CreateRecipeAction {
     data class SetMainPhoto(val image: LocalImage?): CreateRecipeAction
     data object RemoveMainPhoto: CreateRecipeAction
 
-    data object Submit: CreateRecipeAction
+    data object SaveRecipe : CreateRecipeAction
+    data object SubmitForPublication : CreateRecipeAction
     data object ConsumeSuccess: CreateRecipeAction
     data object DismissError: CreateRecipeAction
+
+    data class LoadRecipeForEdit(val recipeId: Int) : CreateRecipeAction
 }
