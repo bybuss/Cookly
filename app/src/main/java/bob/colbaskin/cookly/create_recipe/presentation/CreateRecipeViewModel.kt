@@ -402,8 +402,8 @@ class CreateRecipeViewModel @Inject constructor(
             } -> {
                 "Калорийность ингредиента должна быть больше не больше 100000 и неменьше 0"
             }
-            state.steps.any { it.title.isBlank() || it.description.isBlank() } -> {
-                "Заполните заголовок и описание каждого шага"
+            state.steps.any { it.title.isBlank() } -> {
+                "Заполните заголовок каждого шага"
             }
             else -> null
         }

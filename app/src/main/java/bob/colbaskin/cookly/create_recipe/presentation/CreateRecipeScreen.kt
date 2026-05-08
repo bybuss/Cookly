@@ -298,7 +298,6 @@ private fun CreateRecipeScreen(
                     value = state.description,
                     placeholder = "Краткое описание блюда",
                     singleLine = false,
-                    isRequired = true,
                     minLines = 4,
                     onValueChange = {
                         onAction(CreateRecipeAction.UpdateDescription(it))
