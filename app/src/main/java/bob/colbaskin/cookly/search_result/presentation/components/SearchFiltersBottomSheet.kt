@@ -28,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import bob.colbaskin.cookly.R
 import bob.colbaskin.cookly.common.UiState
@@ -309,7 +310,7 @@ private fun CaloriesSlider(
     val colors = CustomTheme.colors
     val typography = CustomTheme.typography
 
-    val minCalories = 100
+    val minCalories = 50
     val maxCalories = 1000
     val step = 50
 
@@ -338,7 +339,13 @@ private fun CaloriesSlider(
             inactiveTickColor = colors.mealCardBorder
         )
     )
-
+    SliderMarksRow(
+        modifier = Modifier.padding(horizontal = 4.dp),
+        start = "$minCalories",
+        middle = "${((minCalories + maxCalories) / 2 / step) * step}",
+        end = "${maxCalories - step}"
+    )
+    Spacer(modifier = Modifier.height(4.dp))
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
@@ -353,9 +360,7 @@ private fun CaloriesSlider(
             color = colors.secondaryText,
             style = typography.inter.bodyMedium
         )
-
         Spacer(modifier = Modifier.weight(1f))
-
         SearchFilterChip(
             text = "Сбросить калории",
             selected = false,
@@ -374,24 +379,34 @@ private fun CookingTimeSlider(
     val colors = CustomTheme.colors
     val typography = CustomTheme.typography
 
-    val minTime = 10
-    val maxTime = 120
+    val timeStep = 10
+    val timeValues = listOf(5, 10) + (20..120 step timeStep).toList()
+    val maxTime = timeValues.last()
+    val middleTime = timeValues[timeValues.lastIndex / 2]
+    val currentTime = filters.maxEstimatedCookingTime ?: maxTime
 
-    val timeValue = filters.maxEstimatedCookingTime ?: maxTime
+    val currentIndex = timeValues
+        .indexOf(currentTime)
+        .takeIf { it >= 0 }
+        ?: timeValues.lastIndex
 
     Slider(
-        value = timeValue.toFloat(),
+        value = currentIndex.toFloat(),
         onValueChange = { value ->
-            val roundedValue = value.roundToInt()
+            val index = value
+                .roundToInt()
+                .coerceIn(0, timeValues.lastIndex)
+            val selectedTime = timeValues[index]
 
             onFiltersChange(
                 filters.copy(
-                    maxEstimatedCookingTime = if (roundedValue >= maxTime) null else roundedValue
+                    maxEstimatedCookingTime =
+                        if (selectedTime >= maxTime) null else selectedTime
                 )
             )
         },
-        valueRange = minTime.toFloat()..maxTime.toFloat(),
-        steps = 10,
+        valueRange = 0f..timeValues.lastIndex.toFloat(),
+        steps = timeValues.size - 2,
         colors = SliderDefaults.colors(
             thumbColor = colors.accentColor,
             activeTrackColor = colors.accentSecondSurface,
@@ -400,14 +415,24 @@ private fun CookingTimeSlider(
             inactiveTickColor = colors.mealCardBorder
         )
     )
+    SliderMarksRow(
+        modifier = Modifier.padding(horizontal = 4.dp),
+        start = "${timeValues.first()} мин",
+        middle = "$middleTime мин",
+        end = "${timeValues.last() - timeStep} мин"
+    )
+    Spacer(modifier = Modifier.height(4.dp))
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text =
-                if (filters.maxEstimatedCookingTime == null) "Не ограничивать"
-                else "до ${filters.maxEstimatedCookingTime} мин",
+                if (filters.maxEstimatedCookingTime == null) {
+                    "Не ограничивать"
+                } else {
+                    "до ${filters.maxEstimatedCookingTime} мин"
+                },
             color = colors.secondaryText,
             style = typography.inter.bodyMedium
         )
@@ -415,7 +440,43 @@ private fun CookingTimeSlider(
         SearchFilterChip(
             text = "Сбросить время",
             selected = false,
-            onClick = { onFiltersChange(filters.copy(maxEstimatedCookingTime = null)) }
+            onClick = {
+                onFiltersChange(filters.copy(maxEstimatedCookingTime = null))
+            }
+        )
+    }
+}
+
+@Composable
+private fun SliderMarksRow(
+    start: String,
+    middle: String,
+    end: String,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            modifier = Modifier.weight(1f),
+            text = start,
+            color = CustomTheme.colors.secondaryText,
+            style = CustomTheme.typography.inter.bodySmall
+        )
+        Text(
+            modifier = Modifier.weight(1f),
+            text = middle,
+            color = CustomTheme.colors.secondaryText,
+            style = CustomTheme.typography.inter.bodySmall,
+            textAlign = TextAlign.Center
+        )
+        Text(
+            modifier = Modifier.weight(1f),
+            text = end,
+            color = CustomTheme.colors.secondaryText,
+            style = CustomTheme.typography.inter.bodySmall,
+            textAlign = TextAlign.End
         )
     }
 }
