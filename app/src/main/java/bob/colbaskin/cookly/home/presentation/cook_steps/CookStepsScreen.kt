@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import bob.colbaskin.cookly.common.UiState
+import bob.colbaskin.cookly.common.components.MarkdownText
 import bob.colbaskin.cookly.common.components.SheetTopBar
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.common.design_system.theme.UfoodTheme
@@ -163,7 +164,7 @@ private fun CookStepsScreen(
                     color = colors.text
                 )
                 Spacer(modifier = Modifier.height(12.dp))
-                Text(
+                MarkdownText(
                     text = step?.description.orEmpty(),
                     style = CustomTheme.typography.inter.bodyLarge,
                     color = colors.tertiaryText
