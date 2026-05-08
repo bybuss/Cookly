@@ -6,5 +6,6 @@ import bob.colbaskin.cookly.common.recipe_preview.domain.models.RecipesDisplayMo
 
 data class RecipeListState(
     val recipesState: UiState<List<RecipePreview>> = UiState.Idle,
-    val displayMode: RecipesDisplayMode = RecipesDisplayMode.Banners
+    val displayMode: RecipesDisplayMode = RecipesDisplayMode.Cards,
+    val isRefreshing: Boolean = false
 )

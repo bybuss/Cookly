@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -27,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import bob.colbaskin.cookly.R
 import bob.colbaskin.cookly.common.UiState
+import bob.colbaskin.cookly.common.components.CooklyPullToRefreshBox
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.common.recipe_preview.domain.models.RecipePreview
 
@@ -39,54 +41,66 @@ fun RecipeListScreen(
     onBackClick: (() -> Unit)? = null,
     onRecipeClick: (Int) -> Unit
 ) {
-    Column(
+    CooklyPullToRefreshBox(
+        isRefreshing = state.isRefreshing,
+        onRefresh = { onAction(RecipeListAction.Refresh) },
         modifier = modifier
             .fillMaxSize()
             .background(CustomTheme.colors.background)
     ) {
-        title?.let {
-            RecipeListHeader(
-                title = it,
-                onBackClick = onBackClick
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-        }
-        RecipesDisplayModeSwitcher(
-            modifier = Modifier.padding(horizontal = 24.dp),
-            selectedMode = state.displayMode,
-            onModeClick = { onAction(RecipeListAction.ChangeDisplayMode(it)) }
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        when (val recipesState = state.recipesState) {
-            UiState.Idle, UiState.Loading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(
-                        color = CustomTheme.colors.accentColor
-                    )
-                }
-            }
-            is UiState.Error -> {
-                RecipeListErrorContent(
-                    title = recipesState.title,
-                    onRetryClick = { onAction(RecipeListAction.LoadRecipes) }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(CustomTheme.colors.background)
+        ) {
+            title?.let {
+                RecipeListHeader(
+                    title = it,
+                    onBackClick = onBackClick
                 )
+                Spacer(modifier = Modifier.height(24.dp))
             }
-            is UiState.Success<List<RecipePreview>> -> {
-                if (recipesState.data.isEmpty()) {
-                    EmptyRecipeListContent()
-                } else {
-                    RecipePreviewList(
-                        recipes = recipesState.data,
-                        displayMode = state.displayMode,
-                        innerPadding = PaddingValues(),
-                        onRecipeClick = { recipe ->
-                            onAction(RecipeListAction.OpenRecipe(recipe.id))
-                            onRecipeClick(recipe.id)
+            RecipesDisplayModeSwitcher(
+                modifier = Modifier.padding(horizontal = 24.dp),
+                selectedMode = state.displayMode,
+                onModeClick = { onAction(RecipeListAction.ChangeDisplayMode(it)) }
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f)
+            ) {
+                when (val recipesState = state.recipesState) {
+                    UiState.Idle, UiState.Loading -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(color = CustomTheme.colors.accentColor)
                         }
-                    )
+                    }
+                    is UiState.Error -> {
+                        RecipeListErrorContent(
+                            title = recipesState.title,
+                            onRetryClick = { onAction(RecipeListAction.LoadRecipes) }
+                        )
+                    }
+                    is UiState.Success<List<RecipePreview>> -> {
+                        if (recipesState.data.isEmpty()) {
+                            EmptyRecipeListContent()
+                        } else {
+                            RecipePreviewList(
+                                recipes = recipesState.data,
+                                displayMode = state.displayMode,
+                                innerPadding = PaddingValues(),
+                                onRecipeClick = { recipe ->
+                                    onAction(RecipeListAction.OpenRecipe(recipe.id))
+                                    onRecipeClick(recipe.id)
+                                }
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -150,8 +164,8 @@ private fun RecipeListErrorContent(
         Button(
             onClick = onRetryClick,
             colors = ButtonDefaults.buttonColors(
-                containerColor = CustomTheme.colors.secondAccentColor,
-                contentColor = CustomTheme.colors.text
+                containerColor = CustomTheme.colors.accentColor,
+                contentColor = CustomTheme.colors.invertedText
             ),
             shape = RoundedCornerShape(50)
         ) {
@@ -162,16 +176,21 @@ private fun RecipeListErrorContent(
 
 @Composable
 private fun EmptyRecipeListContent() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        contentAlignment = Alignment.Center
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(24.dp)
     ) {
-        Text(
-            text = "Пока здесь ничего нет",
-            style = CustomTheme.typography.inter.bodyMedium,
-            color = CustomTheme.colors.secondaryText
-        )
+        item {
+            Box(
+                modifier = Modifier.fillParentMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Пока здесь ничего нет",
+                    style = CustomTheme.typography.inter.bodyMedium,
+                    color = CustomTheme.colors.secondaryText
+                )
+            }
+        }
     }
 }

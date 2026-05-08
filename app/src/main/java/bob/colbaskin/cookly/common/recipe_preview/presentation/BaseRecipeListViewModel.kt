@@ -9,40 +9,50 @@ import bob.colbaskin.cookly.common.ApiResult
 import bob.colbaskin.cookly.common.UiState
 import bob.colbaskin.cookly.common.recipe_preview.domain.models.RecipePreview
 import bob.colbaskin.cookly.common.recipe_preview.domain.models.RecipesDisplayMode
+import bob.colbaskin.cookly.common.toUiState
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 abstract class BaseRecipeListViewModel: ViewModel() {
 
     var state by mutableStateOf(RecipeListState())
         private set
+    private var loadJob: Job? = null
 
     fun onAction(action: RecipeListAction) {
         when (action) {
             RecipeListAction.LoadRecipes -> loadRecipes()
+            RecipeListAction.Refresh -> refreshRecipes()
             is RecipeListAction.ChangeDisplayMode -> changeDisplayMode(mode = action.mode)
             is RecipeListAction.OpenRecipe -> onOpenRecipe(action.id)
         }
     }
 
     protected fun loadRecipes() {
-        viewModelScope.launch {
-            state = state.copy(recipesState = UiState.Loading)
+        loadJob?.cancel()
 
-            state = when (val result = getRecipes()) {
-                is ApiResult.Success -> {
-                    state.copy(
-                        recipesState = UiState.Success(result.data)
-                    )
-                }
-                is ApiResult.Error -> {
-                    state.copy(
-                        recipesState = UiState.Error(
-                            title = result.title,
-                            text = result.text
-                        )
-                    )
-                }
-            }
+        loadJob = viewModelScope.launch {
+            state = state.copy(recipesState = UiState.Loading)
+            val result = getRecipes().toUiState()
+            state = state.copy(
+                recipesState = result,
+                isRefreshing = false
+            )
+        }
+    }
+
+    private fun refreshRecipes() {
+        if (state.isRefreshing) return
+
+        loadJob?.cancel()
+
+        loadJob = viewModelScope.launch {
+            state = state.copy(isRefreshing = true)
+            val result = getRecipes().toUiState()
+            state = state.copy(
+                recipesState = result,
+                isRefreshing = false
+            )
         }
     }
 
