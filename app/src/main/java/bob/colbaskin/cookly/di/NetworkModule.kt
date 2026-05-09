@@ -26,6 +26,7 @@ import javax.inject.Singleton
 import dagger.Lazy
 import okhttp3.Interceptor
 import java.util.TimeZone
+import java.util.concurrent.TimeUnit
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -91,8 +92,8 @@ object NetworkModule {
             SetCookieCache(),
             SharedPrefsCookiePersistor(context)
         )
-
         return OkHttpClient.Builder()
+            .callTimeout(60, TimeUnit.SECONDS)
             .cookieJar(cookieJar)
             .addInterceptor(timezoneInterceptor)
             .addInterceptor(httpLogger)
