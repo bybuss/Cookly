@@ -2,6 +2,7 @@ package bob.colbaskin.cookly.auth.data
 
 import bob.colbaskin.cookly.auth.data.models.CodeToTokenBody
 import bob.colbaskin.cookly.auth.data.models.CodeToTokenDTO
+import bob.colbaskin.cookly.auth.data.models.RefreshResponse
 import bob.colbaskin.cookly.auth.data.models.RefreshTokenBody
 import bob.colbaskin.cookly.auth.data.models.UserDTO
 import okhttp3.ResponseBody
@@ -21,7 +22,7 @@ interface AuthApiService {
     suspend fun me(): UserDTO
 
     @POST("/client/refresh")
-    suspend fun refresh(@Body request: RefreshTokenBody): String
+    suspend fun refresh(@Body request: RefreshTokenBody): RefreshResponse
 
     @POST("/client/revoke")
     suspend fun revokeToken(@Body request: RefreshTokenBody): ResponseBody
