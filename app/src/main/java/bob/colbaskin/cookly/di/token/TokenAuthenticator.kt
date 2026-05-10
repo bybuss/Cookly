@@ -49,15 +49,15 @@ class TokenAuthenticator @Inject constructor(
             runBlocking {
                 try {
                     Log.i(TAG, "Refreshing access token")
-
-                    val newAccessToken = authApiService.refresh(
+                    val result = authApiService.refresh(
                         RefreshTokenBody(refreshToken = refreshToken)
                     )
 
-                    tokenDataStore.saveAccessToken(newAccessToken)
+                    tokenDataStore.saveAccessToken(result.accessToken)
+                    tokenDataStore.saveRefreshToken(result.refreshToken)
 
                     Log.i(TAG, "Access token refreshed successfully")
-                    newAccessToken
+                    result.accessToken
                 } catch (e: Exception) {
                     Log.e(TAG, "Token refresh failed", e)
                     null
