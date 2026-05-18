@@ -27,12 +27,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import bob.colbaskin.cookly.R
+import bob.colbaskin.cookly.agreement.domain.models.AgreementTestTags
 import bob.colbaskin.cookly.common.design_system.theme.CustomTheme
 import bob.colbaskin.cookly.navigation.Screens
 
@@ -50,7 +52,9 @@ fun AgreementScreenRoot(
         onAction = { action ->
             when (action) {
                 AgreementAction.Back -> navController.popBackStack()
-                AgreementAction.NavigateToPolicy -> navController.navigate(Screens.Policy)
+                AgreementAction.NavigateToPolicy -> {
+                    navController.navigate(Screens.Policy)
+                }
                 AgreementAction.NavigateToTermsOfUse -> {
                     navController.navigate(Screens.TermsOfUse)
                 }
@@ -63,7 +67,7 @@ fun AgreementScreenRoot(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AgreementScreen(
+fun AgreementScreen(
     modifier: Modifier = Modifier,
     state: AgreementState,
     onAction: (AgreementAction) -> Unit
@@ -71,7 +75,6 @@ private fun AgreementScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                modifier = Modifier,
                 title = {
                     Text(
                         text = "Соглашение",
@@ -81,7 +84,7 @@ private fun AgreementScreen(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = CustomTheme.colors.background,
                     navigationIconContentColor = CustomTheme.colors.text,
-                    titleContentColor = CustomTheme.colors.text,
+                    titleContentColor = CustomTheme.colors.text
                 )
             )
         },
@@ -99,40 +102,46 @@ private fun AgreementScreen(
             Spacer(modifier = Modifier.height(32.dp))
             Text(
                 text = "Для обеспечения процессов удаленного взаимодействия с ФНС России, в соответствии с Федеральным законом от 27.07.2006 №152-ФЗ «О персональных данных», требуется получение Вашего согласия на обработку персональных данных и согласие с правилами пользования приложением",
-                modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 style = CustomTheme.typography.inter.bodyMedium,
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(32.dp))
             Column {
                 AgreementItem(
+                    modifier = Modifier.testTag(AgreementTestTags.PolicyItem),
                     title = "СОГЛАШЕНИЕ НА ОБРАБОТКУ",
                     text = "персональных данных",
                     onClick = { onAction(AgreementAction.NavigateToPolicy) }
                 )
                 AgreementItem(
+                    modifier = Modifier.testTag(AgreementTestTags.TermsItem),
                     title = "ПРАВИЛА",
                     text = "пользования приложением",
                     onClick = { onAction(AgreementAction.NavigateToTermsOfUse) }
                 )
             }
-            Spacer(Modifier.weight(1f))
+            Spacer(modifier = Modifier.weight(1f))
             CheckboxRow(
+                modifier = Modifier.testTag(AgreementTestTags.AcceptCheckbox),
                 checked = state.isRulesAccepted,
-                onCheckedChange = { onAction(AgreementAction.UpdateAccept(state.isRulesAccepted)) },
+                onCheckedChange = { isChecked ->
+                    onAction(AgreementAction.UpdateAccept(isChecked))
+                },
                 text = "Я прочитал(а) всю информацию и согласен(на) с условиями"
             )
             Button(
                 onClick = { onAction(AgreementAction.IAgree) },
                 enabled = state.isRulesAccepted,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(AgreementTestTags.AgreeButton),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = CustomTheme.colors.accentColor,
                     contentColor = Color.White,
                     disabledContainerColor = CustomTheme.colors.accentColor.copy(alpha = 0.5f),
                     disabledContentColor = CustomTheme.colors.strokeColor
                 )
-
             ) {
                 Text(text = "СОГЛАСЕН")
             }
@@ -145,9 +154,12 @@ private fun AgreementScreen(
 private fun AgreementItem(
     title: String,
     text: String,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    Box {
+    Box(
+        modifier = modifier
+    ) {
         HorizontalDivider(
             modifier = Modifier
                 .align(Alignment.TopCenter)
@@ -163,11 +175,17 @@ private fun AgreementItem(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Column (
+            Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Text(text = title, style = CustomTheme.typography.inter.titleSmall)
-                Text(text = text, style = CustomTheme.typography.inter.bodyMedium)
+                Text(
+                    text = title,
+                    style = CustomTheme.typography.inter.titleSmall
+                )
+                Text(
+                    text = text,
+                    style = CustomTheme.typography.inter.bodyMedium
+                )
             }
             Icon(
                 painter = painterResource(R.drawable.carret_right),
@@ -189,10 +207,11 @@ private fun AgreementItem(
 private fun CheckboxRow(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    text: String
+    text: String,
+    modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable { onCheckedChange(!checked) },
         verticalAlignment = Alignment.CenterVertically
@@ -203,10 +222,13 @@ private fun CheckboxRow(
             colors = CheckboxDefaults.colors(
                 checkedColor = CustomTheme.colors.accentColor,
                 uncheckedColor = CustomTheme.colors.accentColor.copy(alpha = 0.5f),
-                checkmarkColor = Color.White,
+                checkmarkColor = Color.White
             )
         )
         Spacer(modifier = Modifier.width(8.dp))
-        Text(text = text, style = CustomTheme.typography.inter.bodyMedium)
+        Text(
+            text = text,
+            style = CustomTheme.typography.inter.bodyMedium
+        )
     }
 }

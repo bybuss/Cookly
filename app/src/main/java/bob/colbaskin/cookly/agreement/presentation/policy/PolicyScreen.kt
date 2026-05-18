@@ -26,6 +26,18 @@ fun PolicyScreenRoot(
     modifier: Modifier = Modifier,
     navController: NavHostController
 ) {
+    PolicyScreen(
+        modifier = modifier,
+        onBackClick = { navController.popBackStack() }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PolicyScreen(
+    modifier: Modifier = Modifier,
+    onBackClick: () -> Unit
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -36,11 +48,11 @@ fun PolicyScreenRoot(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = onBackClick) {
                         Icon(
                             painter = painterResource(R.drawable.carret_left),
                             modifier = Modifier.scale(2f),
-                            contentDescription = null
+                            contentDescription = "Назад"
                         )
                     }
                 },
@@ -61,7 +73,7 @@ fun PolicyScreenRoot(
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(1) {
+            item {
                 Text(
                     text = """
                         1. Приложение собирает персональные данные только для работы функционала.

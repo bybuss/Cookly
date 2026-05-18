@@ -1,6 +1,5 @@
 package bob.colbaskin.cookly.agreement.presentation.terms_of_use
 
-
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -27,6 +26,18 @@ fun TermsOfUseScreenRoot(
     modifier: Modifier = Modifier,
     navController: NavHostController
 ) {
+    TermsOfUseScreen(
+        modifier = modifier,
+        onBackClick = { navController.popBackStack() }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TermsOfUseScreen(
+    modifier: Modifier = Modifier,
+    onBackClick: () -> Unit
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -37,11 +48,11 @@ fun TermsOfUseScreenRoot(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = onBackClick) {
                         Icon(
                             painter = painterResource(R.drawable.carret_left),
                             modifier = Modifier.scale(2f),
-                            contentDescription = null
+                            contentDescription = "Назад"
                         )
                     }
                 },
@@ -62,13 +73,13 @@ fun TermsOfUseScreenRoot(
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(1) {
+            item {
                 Text(
                     text = """
                         1. Я подтверждаю, что все права на материалы размещаемого мной рецепта принадлежат мне.
                         2. В случае нарушения я готов(а) понести наказание со стороны администрации.
                         3. Я несу ответственность за соблюдение авторского права.
-                        4. Передаю исключительные права на использование рецепта приложению Coockly.
+                        4. Передаю исключительные права на использование рецепта приложению Cookly.
                         5. После публикации рецепт может быть модифицирован или удален администрацией.
                         6. Приложение обеспечивает защиту моих авторских прав.
                         7. Ознакомлен(а) с правилами удаления постов рецептов.

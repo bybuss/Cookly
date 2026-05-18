@@ -21,13 +21,13 @@ class AgreementViewModel @Inject constructor(
     fun onAction(action: AgreementAction) {
         when (action) {
             is AgreementAction.UpdateAccept -> updateAccept(action.isRulesAccepted)
-            is AgreementAction.IAgree -> iAgree()
+            AgreementAction.IAgree -> iAgree()
             else -> Unit
         }
     }
 
     private fun updateAccept(isRulesAccepted: Boolean) {
-        state = state.copy(isRulesAccepted = !isRulesAccepted)
+        state = state.copy(isRulesAccepted = isRulesAccepted)
     }
 
     private fun iAgree() {
