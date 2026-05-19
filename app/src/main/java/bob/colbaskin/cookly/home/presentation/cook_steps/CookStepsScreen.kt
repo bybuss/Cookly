@@ -98,7 +98,7 @@ private fun CookStepsScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(0.54f)
-                        .background(colors.text)
+                        .background(colors.statsCardBackground)
                 ) {
                     AsyncImage(
                         model = step?.imageUrl,
