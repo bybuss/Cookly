@@ -432,30 +432,7 @@ private fun DraggableSheet(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(bottom = 16.dp)
         ) {
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                RecommendedDish(
-                    modifier = Modifier,
-                    title = "Блюдо от Шефа",
-                    aiAvatar = R.drawable.cheif_ai_avatar,
-                    recommendationCard = {
-                        RecommendationBanner(
-                            modifier = Modifier,
-                            cardTitle = "Fried Shrimp",
-                            recipeImageUrl = "",
-                            rating = 4.8,
-                            ratingAmount = 163,
-                            minutes = 20,
-                            kcal = 150,
-                            isFlameIconRed = false,
-                            border = false,
-                            backgroundHexColor = "#B9480D",
-                            isLeftCard = false,
-                            onOpenClick = {}
-                        )
-                    }
-                )
-            }
-            item(span = { GridItemSpan(maxLineSpan) }) {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
                 Text(
                     text = "Рецепты",
                     color = colors.text,
