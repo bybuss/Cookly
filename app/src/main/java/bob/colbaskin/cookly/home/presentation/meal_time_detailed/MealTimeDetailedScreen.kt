@@ -55,6 +55,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
@@ -285,7 +286,7 @@ private fun MealPagerOverlay(
             ) {
                 Text(
                     text = currentMeal.title,
-                    color = colors.invertedText,
+                    color = Color.White,
                     style = typography.inter.headlineMedium,
                     fontWeight = FontWeight.Medium,
                     maxLines = 2,
@@ -296,7 +297,7 @@ private fun MealPagerOverlay(
 
                 Text(
                     text = currentMeal.description,
-                    color = colors.invertedText,
+                    color = Color.White,
                     style = typography.inter.bodyMedium,
                     fontWeight = FontWeight.Normal,
                     maxLines = 2,
@@ -309,7 +310,7 @@ private fun MealPagerOverlay(
                     currentPage = pagerState.currentPage % carouselItems.size,
                     pageCount = carouselItems.size,
                     selectedColor = CustomTheme.colors.accentColor,
-                    unselectedColor = CustomTheme.colors.invertedText,
+                    unselectedColor = Color.White,
                     spacedByDp = 12.dp
                 )
             }

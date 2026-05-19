@@ -35,7 +35,7 @@ fun DishDataIcon(
     val iconColor = tint?.let {
         if (isFlameIconRed) CustomTheme.colors.flameColor
         else it
-    } ?: if (isFlameIconRed) CustomTheme.colors.flameColor else Color.Black
+    } ?: if (isFlameIconRed) CustomTheme.colors.flameColor else CustomTheme.colors.text
 
     Row(
         modifier = modifier
@@ -62,7 +62,7 @@ fun DishDataIcon(
                 overflow = TextOverflow.Ellipsis,
                 style = CustomTheme.typography.gilroy.labelMedium,
                 fontWeight = FontWeight.SemiBold,
-                color = Color.Black
+                color = CustomTheme.colors.text
             )
         }
     }
