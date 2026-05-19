@@ -32,9 +32,9 @@ class AuthViewModel @Inject constructor(
     private var codeVerifier: String? = null
     private var codeChallenge: String? = null
 
-    private val redirectUrl = "cookly://return_app/"
-    private val codeChallengeMethod = "S256"
-    private val refId = "1"
+    private val redirectUrl = BuildConfig.REDIRECT_URL
+    private val codeChallengeMethod = BuildConfig.CODE_CHALLENGE_METHOD
+    private val refId = BuildConfig.REF_ID
 
     init {
         initialize()
