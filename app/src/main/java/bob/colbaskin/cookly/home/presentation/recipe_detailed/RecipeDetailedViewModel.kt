@@ -135,15 +135,6 @@ class RecipeDetailedViewModel @Inject constructor(
     }
 
     fun loadRecipe(recipeId: Int) {
-        if (recipeId <= 0) {
-            state = state.copy(
-                recipeState = UiState.Error(
-                    title = "Некорректный ID рецепта",
-                    text = "Не удалось открыть рецепт."
-                )
-            )
-            return
-        }
         state = state.copy(id = recipeId)
         if (loadedRecipeId == recipeId && state.recipeState is UiState.Success) return
         loadedRecipeId = recipeId
